@@ -673,43 +673,73 @@ function submitAll(){
 // ── ADMIN ──
 function renderAdmin(){
   const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
-  const list=Object.values(all).filter(s=>s.status==='pending');
-  if(!list.length){
-    document.getElementById('adminContent').innerHTML='<div class="empty-state"><div class="icon">📬</div>Keine offenen Einreichungen.</div>';
-    return;
+  const pending=Object.values(all).filter(s=>s.status==='pending');
+  const approved=Object.values(all).filter(s=>s.status==='approved'||s.status==='paid');
+  let h='';
+
+  // Offene Einreichungen
+  if(pending.length){
+    h+='<div class="admin-section-title">'+pending.length+' offene Einreichung(en)</div>';
+    pending.forEach(sub=>{
+      const tkm=sub.entries.reduce((s,e)=>s+e.km,0);
+      const tko=sub.entries.reduce((s,e)=>s+e.kosten,0);
+      const earliest=sub.entries.reduce((a,b)=>a.datum<b.datum?a:b).datum;
+      const latest=sub.entries.reduce((a,b)=>a.datum>b.datum?a:b).datum;
+      h+='<div class="approval-card">'
+        +'<div class="approval-top"><div class="approval-name">'+sub.mitarbeiterName+'</div>'
+        +'<span class="status-badge pending">⏳ Offen</span></div>'
+        +'<div class="approval-stats">'+sub.entries.length+' Fahrten · '+tkm+' km · <b>'+tko.toFixed(2)+' €</b><br>'
+        +'<span style="font-size:11px;color:var(--muted)">'+fmtDate(earliest)+' – '+fmtDate(latest)+'</span></div>'
+        +sub.entries.map(e=>'<div style="font-size:12px;padding:5px 0;border-bottom:1px solid var(--border)">'+fmtDate(e.datum)+' · '+e.von+' → '+e.nach+' · <b>'+e.km+' km</b> · '+e.kosten.toFixed(2)+' €'+(e.zweck?' · <i>'+e.zweck+'</i>':'')+'</div>').join('')
+        +'<textarea class="comment-input" id="comment_'+sub.mitarbeiter+'" placeholder="Kommentar (optional)"></textarea>'
+        +'<div class="approval-actions">'
+        +'<button class="approve-btn" onclick="approveEntry(\''+sub.mitarbeiter+'\')">Genehmigen ✓</button>'
+        +'<button class="reject-btn" onclick="rejectEntry(\''+sub.mitarbeiter+'\')">Zurücksenden</button>'
+        +'</div></div>';
+    });
+  } else {
+    h+='<div class="empty-state"><div class="icon">📬</div>Keine offenen Einreichungen.</div>';
   }
-  let h='<div class="admin-section-title">'+list.length+' offene Einreichung(en)</div>';
-  list.forEach(sub=>{
-    const tkm=sub.entries.reduce((s,e)=>s+e.km,0);
-    const tko=sub.entries.reduce((s,e)=>s+e.kosten,0);
-    const earliest=sub.entries.reduce((a,b)=>a.datum<b.datum?a:b).datum;
-    const latest=sub.entries.reduce((a,b)=>a.datum>b.datum?a:b).datum;
-    h+='<div class="approval-card">'
-      +'<div class="approval-top"><div class="approval-name">'+sub.mitarbeiterName+'</div>'
-      +'<span class="status-badge pending">⏳ Offen</span></div>'
-      +'<div class="approval-stats">'+sub.entries.length+' Fahrten · '+tkm+' km · '+tko.toFixed(2)+' €<br>'
-      +'<span style="font-size:11px">'+fmtDate(earliest)+' – '+fmtDate(latest)+'</span></div>'
-      // Detailliste
-      +sub.entries.map(e=>'<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border)">'+fmtDate(e.datum)+' · '+e.von+' → '+e.nach+' · <b>'+e.km+' km</b>'+(e.zweck?' · '+e.zweck:'')+'</div>').join('')
-      +'<textarea class="comment-input" id="comment_'+sub.mitarbeiter+'" placeholder="Kommentar (optional)"></textarea>'
-      +'<div class="approval-actions">'
-      +'<button class="approve-btn" onclick="approveEntry(\''+sub.mitarbeiter+'\')">Genehmigen ✓</button>'
-      +'<button class="reject-btn" onclick="rejectEntry(\''+sub.mitarbeiter+'\')">Zurücksenden</button>'
-      +'</div></div>';
-  });
-  document.getElementById('adminContent').innerHTML=h;
+
+  // Genehmigte / Ausgezahlte
+  if(approved.length){
+    h+='<div class="admin-section-title" style="margin-top:24px">Genehmigte Abrechnungen</div>';
+    approved.forEach(sub=>{
+      const tkm=sub.entries.reduce((s,e)=>s+e.km,0);
+      const tko=sub.entries.reduce((s,e)=>s+e.kosten,0);
+      const isPaid=sub.status==='paid';
+      h+='<div class="approval-card approved">'
+        +'<div class="approval-top"><div class="approval-name">'+sub.mitarbeiterName+'</div>'
+        +(isPaid
+          ?'<span class="status-badge approved">💶 Ausgezahlt '+fmtDate(sub.paidAt?.substring(0,10)||sub.submittedAt.substring(0,10))+'</span>'
+          :'<span class="status-badge" style="background:#e8f0ea;color:var(--green2)">✓ Genehmigt</span>')
+        +'</div>'
+        +'<div class="approval-stats">'+sub.entries.length+' Fahrten · '+tkm+' km · <b>'+tko.toFixed(2)+' €</b></div>'
+        +(sub.comment?'<div style="font-size:12px;color:var(--muted);margin-bottom:8px">💬 '+sub.comment+'</div>':'')
+        +'<div class="export-row">'
+        +'<button class="export-btn" onclick='belegPDF('+JSON.stringify(sub).replace(/'/g,"&#39;")+')'>📄 Beleg PDF</button>'
+        +(!isPaid?'<button class="export-btn" style="border-color:var(--green);color:var(--green)" onclick="markPaid(\''+sub.mitarbeiter+'_'+(sub.approvedAt||sub.submittedAt).substring(0,10)+'\')">💶 Als ausgezahlt markieren</button>':'<span style="font-size:12px;color:var(--muted);padding:10px">Ausgezahlt am '+fmtDate(sub.paidAt?.substring(0,10)||'')+'</span>')
+        +'</div></div>';
+    });
+  }
+
+  document.getElementById('adminContent').innerHTML=h||'<div class="empty-state"><div class="icon">📋</div>Noch keine Abrechnungen.</div>';
 }
 
 function approveEntry(id){
   const comment=document.getElementById('comment_'+id)?.value||'';
   const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
   const sub=all[id]; if(!sub)return;
-  sub.status='approved'; sub.comment=comment;
+  const approvedAt=new Date().toISOString();
+  sub.status='approved'; sub.comment=comment; sub.approvedAt=approvedAt;
+  // Key zu id+datum damit mehrere Einreichungen pro MA möglich
+  const newKey=id+'_'+approvedAt.substring(0,10);
+  delete all[id];
+  all[newKey]=sub;
   localStorage.setItem('fb_all_submissions',JSON.stringify(all));
-  // Beim Mitarbeiter: pending löschen, zu approved hinzufügen
-  const approved=JSON.parse(localStorage.getItem('fb_approved_'+id)||'[]');
-  approved.unshift({...sub, comment});
-  localStorage.setItem('fb_approved_'+id,JSON.stringify(approved));
+  const empApproved=JSON.parse(localStorage.getItem('fb_approved_'+id)||'[]');
+  empApproved.unshift({...sub});
+  localStorage.setItem('fb_approved_'+id,JSON.stringify(empApproved));
   localStorage.removeItem('fb_pending_'+id);
   showToast('Genehmigt ✓','success'); renderAdmin();
 }
@@ -720,10 +750,76 @@ function rejectEntry(id){
   const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
   if(all[id]){all[id].status='rejected';all[id].comment=comment;}
   localStorage.setItem('fb_all_submissions',JSON.stringify(all));
-  // Pending mit Kommentar zurücksetzen
   const pending=JSON.parse(localStorage.getItem('fb_pending_'+id)||'null');
   if(pending){pending.status='rejected';pending.comment=comment;localStorage.setItem('fb_pending_'+id,JSON.stringify(pending));}
-  showToast('Zurückgesendet',''); renderAdmin();
+  showToast('Zurückgesendet'); renderAdmin();
+}
+
+function markPaid(key){
+  const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
+  if(all[key]){all[key].status='paid';all[key].paidAt=new Date().toISOString();}
+  localStorage.setItem('fb_all_submissions',JSON.stringify(all));
+  showToast('Als ausgezahlt markiert 💶','success'); renderAdmin();
+}
+
+function belegPDF(sub){
+  const tkm=sub.entries.reduce((s,e)=>s+e.km,0);
+  const tko=sub.entries.reduce((s,e)=>s+e.kosten,0);
+  const isPaid=sub.status==='paid';
+  const rows=sub.entries.map(e=>
+    '<tr><td>'+fmtDate(e.datum)+'</td><td>'+e.von+'</td><td>'+e.nach+'</td>'
+    +'<td style="text-align:center">'+e.km+'</td>'
+    +'<td style="text-align:right">'+e.kosten.toFixed(2)+' €</td>'
+    +'<td>'+(e.zweck||'–')+'</td></tr>'
+  ).join('');
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <style>
+    body{font-family:Arial,sans-serif;font-size:12px;padding:32px;color:#2c2825;max-width:800px;margin:0 auto}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;border-bottom:2px solid #2c2825;padding-bottom:16px}
+    .logo{font-size:22px;font-weight:bold;color:#2c2825}
+    .logo span{color:#55725e}
+    .meta{text-align:right;font-size:11px;color:#666}
+    h2{font-size:16px;margin:0 0 4px}
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;background:#f5f5f0;padding:14px;border-radius:6px}
+    .info-item label{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#888;display:block;margin-bottom:2px}
+    .info-item span{font-weight:600;font-size:13px}
+    table{width:100%;border-collapse:collapse;margin-bottom:16px}
+    th{background:#2c2825;color:#faf8f4;padding:7px 10px;text-align:left;font-size:11px}
+    th.num{text-align:center} th.amt{text-align:right}
+    td{border-bottom:1px solid #e5e5e0;padding:6px 10px;font-size:12px}
+    .total-row{background:#e8f0ea;font-weight:700}
+    .total-row td{border:none;padding:8px 10px}
+    .paid-stamp{display:inline-block;border:3px solid #0a5c36;color:#0a5c36;font-size:18px;font-weight:900;padding:6px 18px;border-radius:4px;transform:rotate(-8deg);letter-spacing:.1em;margin-top:8px}
+    .sig-section{margin-top:40px;display:grid;grid-template-columns:1fr 1fr;gap:40px}
+    .sig-box{border-top:1px solid #ccc;padding-top:8px;font-size:11px;color:#888}
+    .footer{margin-top:30px;font-size:10px;color:#aaa;text-align:center;border-top:1px solid #eee;padding-top:10px}
+    @media print{body{padding:16px}}
+  </style></head><body>
+  <div class="header">
+    <div><div class="logo">Physio<span>Pro</span> Lübeck</div><div style="font-size:11px;color:#888;margin-top:4px">Segeberger Str. 1 · 23617 Stockelsdorf</div></div>
+    <div class="meta"><b>FAHRTKOSTENBELEG</b><br>Erstellt: ${new Date().toLocaleDateString('de-DE')}<br>${isPaid?'<span style="color:#0a5c36;font-weight:bold">AUSGEZAHLT</span>':''}</div>
+  </div>
+  <div class="info-grid">
+    <div class="info-item"><label>Mitarbeiter:in</label><span>${sub.mitarbeiterName}</span></div>
+    <div class="info-item"><label>Eingereicht am</label><span>${new Date(sub.submittedAt).toLocaleDateString('de-DE')}</span></div>
+    <div class="info-item"><label>Genehmigt am</label><span>${sub.approvedAt?new Date(sub.approvedAt).toLocaleDateString('de-DE'):'–'}</span></div>
+    <div class="info-item"><label>Km-Pauschale</label><span>0,30 € / km</span></div>
+  </div>
+  <table>
+    <thead><tr><th>Datum</th><th>Abfahrt</th><th>Ziel</th><th class="num">km</th><th class="amt">Betrag</th><th>Zweck</th></tr></thead>
+    <tbody>${rows}
+    <tr class="total-row"><td colspan="3"><b>Gesamt (${sub.entries.length} Fahrten)</b></td><td style="text-align:center"><b>${tkm} km</b></td><td style="text-align:right"><b>${tko.toFixed(2)} €</b></td><td></td></tr>
+    </tbody>
+  </table>
+  ${isPaid?'<div class="paid-stamp">AUSGEZAHLT '+new Date(sub.paidAt).toLocaleDateString('de-DE')+'</div>':''}
+  <div class="sig-section">
+    <div class="sig-box">Unterschrift Mitarbeiter:in<br><br><br>________________________</div>
+    <div class="sig-box">Unterschrift Leitung / Datum<br><br><br>________________________</div>
+  </div>
+  <div class="footer">PhysioPro Lübeck · Hanna Wrobel · Segeberger Str. 1 · 23617 Stockelsdorf</div>
+  </body></html>`);
+  w.document.close(); w.print();
 }
 
 // ── PIN ──
