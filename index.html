@@ -193,7 +193,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
   <div class="tab-bar">
     <div class="tab active" onclick="showTab('tabNeu')">+ Fahrt</div>
     <div class="tab" onclick="showTab('tabEintraege')">Einträge</div>
-    <div class="tab" onclick="showTab('tabAuswertung')">Monat</div>
+    <div class="tab" onclick="showTab('tabAuswertung')">Abrechnung</div>
     <div class="tab" onclick="showTab('tabPin')">PIN</div>
     <div class="tab" id="tabAdminLink" onclick="showTab('tabAdmin')" style="display:none">Admin</div>
   </div>
@@ -265,10 +265,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 
   <!-- AUSWERTUNG -->
   <div class="tab-content" id="tabAuswertung">
-    <div class="section-title">Auswertung</div>
-    <div class="month-selector">
-      <select id="monthSelect" onchange="renderAuswertung()"></select>
-    </div>
+    <div class="section-title">Abrechnung</div>
+    <div class="section-sub">Alle offenen Fahrten einreichen</div>
     <div id="summaryContent"></div>
   </div>
 
@@ -292,9 +290,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
   <!-- ADMIN -->
   <div class="tab-content" id="tabAdmin">
     <div class="section-title">Genehmigungen</div>
-    <div class="month-selector">
-      <select id="adminMonthSelect" onchange="renderAdmin()"></select>
-    </div>
+    <div class="section-sub">Offene Einreichungen der Mitarbeiter:innen</div>
     <div id="adminContent"></div>
   </div>
 </div>
@@ -326,7 +322,6 @@ let calcKm=0, calcDauer='';
 document.addEventListener('DOMContentLoaded',()=>{
   buildNameGrid();
   setToday();
-  fillMonthSelectors();
   loadMapsScript();
   showScreen('screenLogin');
 });
@@ -592,61 +587,84 @@ function editEntry(id){
 }
 
 // ── AUSWERTUNG ──
-function fillMonthSelectors(){
-  const now=new Date(), months=[];
-  for(let i=0;i<12;i++){
-    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
-    months.push({val:d.toISOString().substring(0,7),label:d.toLocaleDateString('de-DE',{month:'long',year:'numeric'})});
-  }
-  ['monthSelect','adminMonthSelect'].forEach(id=>{
-    const s=document.getElementById(id);
-    if(s)s.innerHTML=months.map(m=>'<option value="'+m.val+'">'+m.label+'</option>').join('');
-  });
-}
+function fillMonthSelectors(){ /* nicht mehr genutzt */ }
 
 function renderAuswertung(){
   if(!currentUser)return;
-  const monat=document.getElementById('monthSelect').value;
-  const arr=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]').filter(e=>e.monat===monat);
-  const subs=JSON.parse(localStorage.getItem('fb_submissions_'+currentUser.id)||'{}');
-  const sub=subs[monat]||null;
-  const tkm=arr.reduce((s,e)=>s+e.km,0);
-  const tko=arr.reduce((s,e)=>s+e.kosten,0);
-  const label=new Date(monat+'-01').toLocaleDateString('de-DE',{month:'long',year:'numeric'});
-  let badge='<span class="status-badge draft">Offen</span>';
-  if(sub?.status==='pending')badge='<span class="status-badge pending">⏳ Eingereicht</span>';
-  if(sub?.status==='approved')badge='<span class="status-badge approved">✓ Genehmigt</span>';
-  let h='<div class="summary-card"><div class="summary-title">'+label+' '+badge+'</div>'
-    +'<div class="summary-stats">'
-    +'<div class="stat-box"><div class="stat-value">'+arr.length+'</div><div class="stat-label">Fahrten</div></div>'
-    +'<div class="stat-box"><div class="stat-value">'+tkm+'</div><div class="stat-label">Kilometer</div></div>'
-    +'<div class="stat-box"><div class="stat-value green">'+tko.toFixed(0)+' €</div><div class="stat-label">Erstattung</div></div>'
-    +'</div></div>';
-  if(arr.length){
-    h+='<div class="send-section"><h3>Monatsabschluss</h3><p>'+arr.length+' Fahrten · '+tkm+' km · '+tko.toFixed(2)+' €</p>';
-    if(!sub||sub.status==='draft')h+='<button class="send-btn" onclick="submitMonth(\''+monat+'\')">Einreichen →</button>';
-    else if(sub.status==='pending')h+='<button class="send-btn" disabled>Wartet auf Genehmigung</button>';
-    else if(sub.status==='approved'&&sub.comment)h+='<p style="color:var(--green);margin-top:8px">💬 '+sub.comment+'</p>';
-    h+='<div class="export-row"><button class="export-btn" onclick="exportCSV(\''+monat+'\')">📊 CSV</button><button class="export-btn" onclick="exportPDF(\''+monat+'\')">📄 PDF</button></div></div>';
-    h+=arr.map(e=>'<div class="entry-card">'
+  const allEntries=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]');
+  const pending=JSON.parse(localStorage.getItem('fb_pending_'+currentUser.id)||'null');
+  // Offene Fahrten = alle die nicht in einer pending/approved Einreichung sind
+  const submittedIds=new Set((pending?.entries||[]).map(e=>e.id));
+  const approvedSubs=JSON.parse(localStorage.getItem('fb_approved_'+currentUser.id)||'[]');
+  const approvedIds=new Set(approvedSubs.flatMap(s=>s.entries.map(e=>e.id)));
+  const open=allEntries.filter(e=>!submittedIds.has(e.id)&&!approvedIds.has(e.id));
+  const tkm=open.reduce((s,e)=>s+e.km,0);
+  const tko=open.reduce((s,e)=>s+e.kosten,0);
+
+  let h='<div class="summary-card">';
+  if(pending){
+    h+='<div class="summary-title">Eingereicht <span class="status-badge pending" style="vertical-align:middle">⏳ Wartet auf Genehmigung</span></div>';
+    const pkm=pending.entries.reduce((s,e)=>s+e.km,0);
+    const pko=pending.entries.reduce((s,e)=>s+e.kosten,0);
+    h+='<div class="summary-stats">'
+      +'<div class="stat-box"><div class="stat-value">'+pending.entries.length+'</div><div class="stat-label">Fahrten</div></div>'
+      +'<div class="stat-box"><div class="stat-value">'+pkm+'</div><div class="stat-label">Kilometer</div></div>'
+      +'<div class="stat-box"><div class="stat-value green">'+pko.toFixed(0)+' €</div><div class="stat-label">Erstattung</div></div>'
+      +'</div></div>';
+    if(pending.comment) h+='<div style="background:#fff3cd;border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;color:#856404">💬 '+pending.comment+'</div>';
+  } else if(open.length){
+    h+='<div class="summary-title">Offene Fahrten</div>'
+      +'<div class="summary-stats">'
+      +'<div class="stat-box"><div class="stat-value">'+open.length+'</div><div class="stat-label">Fahrten</div></div>'
+      +'<div class="stat-box"><div class="stat-value">'+tkm+'</div><div class="stat-label">Kilometer</div></div>'
+      +'<div class="stat-box"><div class="stat-value green">'+tko.toFixed(0)+' €</div><div class="stat-label">Erstattung</div></div>'
+      +'</div></div>'
+      +'<div class="send-section"><h3>Abrechnung einreichen</h3>'
+      +'<p>'+open.length+' Fahrten · '+tkm+' km · '+tko.toFixed(2)+' € werden zur Genehmigung an Hanna gesendet.</p>'
+      +'<button class="send-btn" onclick="submitAll()">Jetzt einreichen →</button>'
+      +'<div class="export-row"><button class="export-btn" onclick="exportCSVOpen()">📊 CSV</button><button class="export-btn" onclick="exportPDFOpen()">📄 PDF</button></div>'
+      +'</div>';
+    h+=open.map(e=>'<div class="entry-card">'
       +'<div class="entry-top"><div class="entry-route">'+e.von+' → '+e.nach+'</div><div class="entry-date">'+fmtDate(e.datum)+'</div></div>'
       +'<div class="entry-meta"><span class="entry-badge km">'+e.km+' km</span><span class="entry-badge cost">'+e.kosten.toFixed(2)+' €</span>'+(e.dauer?'<span class="entry-badge">🕐 '+e.dauer+'</span>':'')+'</div>'
       +(e.zweck?'<div class="entry-zweck">'+e.zweck+'</div>':'')+'</div>').join('');
   } else {
-    h+='<div class="empty-state"><div class="icon">📋</div>Keine Fahrten in diesem Monat.</div>';
+    h+='<div class="summary-title">Keine offenen Fahrten</div></div>';
+    h+='<div class="empty-state"><div class="icon">✅</div>Alle Fahrten sind abgerechnet.</div>';
+  }
+
+  // Genehmigte Abrechnungen anzeigen
+  if(approvedSubs.length){
+    h+='<div style="margin-top:20px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Genehmigte Abrechnungen</div>';
+    approvedSubs.forEach(sub=>{
+      const akm=sub.entries.reduce((s,e)=>s+e.km,0);
+      const ako=sub.entries.reduce((s,e)=>s+e.kosten,0);
+      h+='<div class="entry-card" style="border-left-color:#0a5c36">'
+        +'<div class="entry-top"><div class="entry-route">'+sub.entries.length+' Fahrten · '+akm+' km · '+ako.toFixed(2)+' €</div>'
+        +'<div class="entry-date">'+fmtDate(sub.submittedAt.substring(0,10))+'</div></div>'
+        +(sub.comment?'<div class="entry-zweck">💬 '+sub.comment+'</div>':'')
+        +'</div>';
+    });
   }
   document.getElementById('summaryContent').innerHTML=h;
 }
 
-function submitMonth(monat){
-  const arr=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]').filter(e=>e.monat===monat);
-  if(!arr.length){showToast('Keine Einträge.','error');return;}
-  const subs=JSON.parse(localStorage.getItem('fb_submissions_'+currentUser.id)||'{}');
-  const data={status:'pending',submittedAt:new Date().toISOString(),mitarbeiter:currentUser.id,mitarbeiterName:currentUser.name,monat,entries:arr};
-  subs[monat]=data;
-  localStorage.setItem('fb_submissions_'+currentUser.id,JSON.stringify(subs));
+function submitAll(){
+  const allEntries=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]');
+  const approvedSubs=JSON.parse(localStorage.getItem('fb_approved_'+currentUser.id)||'[]');
+  const approvedIds=new Set(approvedSubs.flatMap(s=>s.entries.map(e=>e.id)));
+  const open=allEntries.filter(e=>!approvedIds.has(e.id));
+  if(!open.length){showToast('Keine offenen Fahrten.','error');return;}
+  const data={
+    status:'pending',
+    submittedAt:new Date().toISOString(),
+    mitarbeiter:currentUser.id,
+    mitarbeiterName:currentUser.name,
+    entries:open
+  };
+  localStorage.setItem('fb_pending_'+currentUser.id,JSON.stringify(data));
   const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
-  all[currentUser.id+'_'+monat]=data;
+  all[currentUser.id]=data;
   localStorage.setItem('fb_all_submissions',JSON.stringify(all));
   sendSubmissionToSheet(data);
   showToast('Eingereicht ✓','success'); renderAuswertung();
@@ -654,45 +672,58 @@ function submitMonth(monat){
 
 // ── ADMIN ──
 function renderAdmin(){
-  const monat=document.getElementById('adminMonthSelect').value;
   const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
-  const list=Object.values(all).filter(s=>s.monat===monat);
-  const label=new Date(monat+'-01').toLocaleDateString('de-DE',{month:'long',year:'numeric'});
-  if(!list.length){document.getElementById('adminContent').innerHTML='<div class="empty-state"><div class="icon">📬</div>Keine Einreichungen für '+label+'.</div>';return;}
-  let h='<div class="admin-section-title">'+label+' – '+list.length+' Einreichung(en)</div>';
+  const list=Object.values(all).filter(s=>s.status==='pending');
+  if(!list.length){
+    document.getElementById('adminContent').innerHTML='<div class="empty-state"><div class="icon">📬</div>Keine offenen Einreichungen.</div>';
+    return;
+  }
+  let h='<div class="admin-section-title">'+list.length+' offene Einreichung(en)</div>';
   list.forEach(sub=>{
     const tkm=sub.entries.reduce((s,e)=>s+e.km,0);
     const tko=sub.entries.reduce((s,e)=>s+e.kosten,0);
-    const ok=sub.status==='approved';
-    h+='<div class="approval-card'+(ok?' approved':'')+'"><div class="approval-top"><div class="approval-name">'+sub.mitarbeiterName+'</div>'
-      +(ok?'<span class="status-badge approved">✓ Genehmigt</span>':'<span class="status-badge pending">⏳ Offen</span>')+'</div>'
-      +'<div class="approval-stats">'+sub.entries.length+' Fahrten · '+tkm+' km · '+tko.toFixed(2)+' €</div>'
-      +(!ok?'<textarea class="comment-input" id="comment_'+sub.mitarbeiter+'_'+monat+'" placeholder="Kommentar (optional)"></textarea>'
-        +'<div class="approval-actions"><button class="approve-btn" onclick="approveMonth(\''+sub.mitarbeiter+'\',\''+monat+'\')">Genehmigen ✓</button>'
-        +'<button class="reject-btn" onclick="rejectMonth(\''+sub.mitarbeiter+'\',\''+monat+'\')">Zurücksenden</button></div>'
-        :(sub.comment?'<div style="font-size:12px;color:var(--muted);margin-top:6px">'+sub.comment+'</div>':''))
-      +'</div>';
+    const earliest=sub.entries.reduce((a,b)=>a.datum<b.datum?a:b).datum;
+    const latest=sub.entries.reduce((a,b)=>a.datum>b.datum?a:b).datum;
+    h+='<div class="approval-card">'
+      +'<div class="approval-top"><div class="approval-name">'+sub.mitarbeiterName+'</div>'
+      +'<span class="status-badge pending">⏳ Offen</span></div>'
+      +'<div class="approval-stats">'+sub.entries.length+' Fahrten · '+tkm+' km · '+tko.toFixed(2)+' €<br>'
+      +'<span style="font-size:11px">'+fmtDate(earliest)+' – '+fmtDate(latest)+'</span></div>'
+      // Detailliste
+      +sub.entries.map(e=>'<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border)">'+fmtDate(e.datum)+' · '+e.von+' → '+e.nach+' · <b>'+e.km+' km</b>'+(e.zweck?' · '+e.zweck:'')+'</div>').join('')
+      +'<textarea class="comment-input" id="comment_'+sub.mitarbeiter+'" placeholder="Kommentar (optional)"></textarea>'
+      +'<div class="approval-actions">'
+      +'<button class="approve-btn" onclick="approveEntry(\''+sub.mitarbeiter+'\')">Genehmigen ✓</button>'
+      +'<button class="reject-btn" onclick="rejectEntry(\''+sub.mitarbeiter+'\')">Zurücksenden</button>'
+      +'</div></div>';
   });
   document.getElementById('adminContent').innerHTML=h;
 }
 
-function approveMonth(id,monat){
-  const c=document.getElementById('comment_'+id+'_'+monat)?.value||'';
-  updateStatus(id,monat,'approved',c); showToast('Genehmigt ✓','success'); renderAdmin();
-}
-function rejectMonth(id,monat){
-  const c=document.getElementById('comment_'+id+'_'+monat)?.value||'';
-  if(!c){showToast('Kommentar eingeben.','error');return;}
-  updateStatus(id,monat,'draft',c); showToast('Zurückgesendet'); renderAdmin();
-}
-function updateStatus(id,monat,status,comment){
+function approveEntry(id){
+  const comment=document.getElementById('comment_'+id)?.value||'';
   const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
-  const k=id+'_'+monat;
-  if(all[k]){all[k].status=status;all[k].comment=comment;}
+  const sub=all[id]; if(!sub)return;
+  sub.status='approved'; sub.comment=comment;
   localStorage.setItem('fb_all_submissions',JSON.stringify(all));
-  const subs=JSON.parse(localStorage.getItem('fb_submissions_'+id)||'{}');
-  if(subs[monat]){subs[monat].status=status;subs[monat].comment=comment;}
-  localStorage.setItem('fb_submissions_'+id,JSON.stringify(subs));
+  // Beim Mitarbeiter: pending löschen, zu approved hinzufügen
+  const approved=JSON.parse(localStorage.getItem('fb_approved_'+id)||'[]');
+  approved.unshift({...sub, comment});
+  localStorage.setItem('fb_approved_'+id,JSON.stringify(approved));
+  localStorage.removeItem('fb_pending_'+id);
+  showToast('Genehmigt ✓','success'); renderAdmin();
+}
+
+function rejectEntry(id){
+  const comment=document.getElementById('comment_'+id)?.value||'';
+  if(!comment){showToast('Bitte Kommentar eingeben.','error');return;}
+  const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
+  if(all[id]){all[id].status='rejected';all[id].comment=comment;}
+  localStorage.setItem('fb_all_submissions',JSON.stringify(all));
+  // Pending mit Kommentar zurücksetzen
+  const pending=JSON.parse(localStorage.getItem('fb_pending_'+id)||'null');
+  if(pending){pending.status='rejected';pending.comment=comment;localStorage.setItem('fb_pending_'+id,JSON.stringify(pending));}
+  showToast('Zurückgesendet',''); renderAdmin();
 }
 
 // ── PIN ──
@@ -708,14 +739,21 @@ function changePin(){
 }
 
 // ── EXPORT ──
-function exportCSV(monat){
-  const arr=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]').filter(e=>e.monat===monat);
+function exportCSVOpen(){
+  const monat='offen';
+  const allE=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]');
+  const approvedSubs2=JSON.parse(localStorage.getItem('fb_approved_'+currentUser.id)||'[]');
+  const approvedIds2=new Set(approvedSubs2.flatMap(s=>s.entries.map(e=>e.id)));
+  const pending2=JSON.parse(localStorage.getItem('fb_pending_'+currentUser.id)||'null');
+  const pendingIds2=new Set((pending2?.entries||[]).map(e=>e.id));
+  const arr=allE.filter(e=>!approvedIds2.has(e.id)&&!pendingIds2.has(e.id));
   if(!arr.length){showToast('Keine Daten.','error');return;}
   const rows=arr.map(e=>[e.datum,e.von,e.nach,e.km,e.dauer||'',e.kosten.toFixed(2),e.zweck||''].join(';'));
   dlFile('\uFEFFDatum;Abfahrt;Ziel;km;Fahrzeit;Kosten€;Zweck\n'+rows.join('\n'),
     'Fahrtenbuch_'+currentUser.name.replace(' ','_')+'_'+monat+'.csv','text/csv');
 }
-function exportPDF(monat){
+function exportPDFOpen(){
+  const monat='offen';
   const arr=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]').filter(e=>e.monat===monat);
   if(!arr.length){showToast('Keine Daten.','error');return;}
   const tkm=arr.reduce((s,e)=>s+e.km,0);
