@@ -41,7 +41,7 @@
   .screen.active { display: block; }
 
   /* LOGIN */
-  #screenLogin { min-height: 100vh; background: var(--dark); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; }
+  #screenLogin { min-height: 100vh; background: var(--dark); flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; display: none; }
   #screenLogin.active { display: flex; }
   .login-logo { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: var(--cream); margin-bottom: 4px; }
   .login-sub { font-size: 12px; color: var(--green); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 40px; }
@@ -496,8 +496,9 @@ document.addEventListener('DOMContentLoaded', () => {
   setToday();
   fillMonthSelectors();
   loadMapsScript();
-  const saved = sessionStorage.getItem('fb_user');
-  if (saved) { currentUser = JSON.parse(saved); enterApp(); }
+  // Login-Screen sicherstellen
+  document.getElementById('screenLogin').classList.add('active');
+  document.getElementById('screenApp').classList.remove('active');
 });
 
 function buildNameGrid() {
@@ -542,14 +543,12 @@ function doLogin() {
     if (pin1 !== pin2) { document.getElementById('loginError').textContent = 'PINs stimmen nicht überein.'; return; }
     localStorage.setItem(`fb_pin_${emp.id}`, pin1);
     currentUser = emp;
-    sessionStorage.setItem('fb_user', JSON.stringify(emp));
     enterApp();
   } else {
     // Normaler Login: gespeicherten PIN prüfen, Admins Fallback 0000
     const validPin = savedPin || (emp.isAdmin ? '0000' : null);
     if (!validPin || pin1 !== validPin) { document.getElementById('loginError').textContent = 'Falsche PIN.'; return; }
     currentUser = emp;
-    sessionStorage.setItem('fb_user', JSON.stringify(emp));
     enterApp();
   }
 }
@@ -558,15 +557,16 @@ function enterApp() {
   document.getElementById('screenLogin').classList.remove('active');
   document.getElementById('screenApp').classList.add('active');
   document.getElementById('userBadge').textContent = currentUser.name.split(' ')[0];
-  if (currentUser.isAdmin) document.getElementById('tabAdminLink').style.display = 'flex';
-  const savedFz = localStorage.getItem(`fb_fahrzeug_${currentUser.id}`);
+  if (currentUser.isAdmin) {
+    document.getElementById('tabAdminLink').style.display = 'flex';
+  }
+  const savedFz = localStorage.getItem('fb_fahrzeug_' + currentUser.id);
   if (savedFz) document.getElementById('inputFahrzeug').value = savedFz;
   showTab('tabNeu');
   renderEntries();
 }
 
 function logout() {
-  sessionStorage.removeItem('fb_user');
   currentUser = null;
   document.getElementById('screenApp').classList.remove('active');
   document.getElementById('screenLogin').classList.add('active');
