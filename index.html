@@ -717,7 +717,7 @@ function renderAdmin(){
         +'<div class="approval-stats">'+sub.entries.length+' Fahrten · '+tkm+' km · <b>'+tko.toFixed(2)+' €</b></div>'
         +(sub.comment?'<div style="font-size:12px;color:var(--muted);margin-bottom:8px">💬 '+sub.comment+'</div>':'')
         +'<div class="export-row">'
-        +'<button class="export-btn" onclick='belegPDF('+JSON.stringify(sub).replace(/'/g,"&#39;")+')'>📄 Beleg PDF</button>'
+        +'<button class="export-btn" onclick="belegPDF(\''+sub.mitarbeiter+'\')">📄 Beleg PDF</button>'
         +(!isPaid?'<button class="export-btn" style="border-color:var(--green);color:var(--green)" onclick="markPaid(\''+sub.mitarbeiter+'_'+(sub.approvedAt||sub.submittedAt).substring(0,10)+'\')">💶 Als ausgezahlt markieren</button>':'<span style="font-size:12px;color:var(--muted);padding:10px">Ausgezahlt am '+fmtDate(sub.paidAt?.substring(0,10)||'')+'</span>')
         +'</div></div>';
     });
@@ -762,7 +762,11 @@ function markPaid(key){
   showToast('Als ausgezahlt markiert 💶','success'); renderAdmin();
 }
 
-function belegPDF(sub){
+function belegPDF(id){
+  const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
+  // Suche nach approved/paid entry für diesen Mitarbeiter
+  const sub=Object.values(all).find(s=>s.mitarbeiter===id&&(s.status==='approved'||s.status==='paid'));
+  if(!sub){showToast('Kein Beleg gefunden.','error');return;}
   const tkm=sub.entries.reduce((s,e)=>s+e.km,0);
   const tko=sub.entries.reduce((s,e)=>s+e.kosten,0);
   const isPaid=sub.status==='paid';
