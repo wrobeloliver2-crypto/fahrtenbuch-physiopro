@@ -13,14 +13,15 @@ function doGet(e) {
     var action = e.parameter.action || '';
     var ss = SpreadsheetApp.openById(SHEET_ID);
 
+    var callback = e.parameter.callback || '';
     if (action === 'getSubmissions') {
-      return jsonResponse(getSubmissions(ss));
+      return jsonResponse(getSubmissions(ss), callback);
     }
     if (action === 'getEntries') {
       var mitarbeiter = e.parameter.mitarbeiter || '';
-      return jsonResponse(getEntries(ss, mitarbeiter));
+      return jsonResponse(getEntries(ss, mitarbeiter), callback);
     }
-    return jsonResponse({status: 'Fahrtenbuch API v2 aktiv'});
+    return jsonResponse({status: 'Fahrtenbuch API v2 aktiv'}, callback);
   } catch(err) {
     return jsonResponse({ok: false, error: err.message});
   }
@@ -144,7 +145,12 @@ function updateSubmissionStatus(ss, data) {
 }
 
 // ── UTILS ─────────────────────────────────────────────────────
-function jsonResponse(obj) {
+function jsonResponse(obj, callback) {
+  if (callback) {
+    return ContentService
+      .createTextOutput(callback + '(' + JSON.stringify(obj) + ')')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
   return ContentService
     .createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
