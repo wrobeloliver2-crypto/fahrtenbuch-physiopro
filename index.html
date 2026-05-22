@@ -301,7 +301,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 
 <div class="toast" id="toast"></div>
 
-<script>const GOOGLE_MAPS_API_KEY = 'HIER_API_KEY_EINTRAGEN';</script>
+<script>const GOOGLE_MAPS_API_KEY = 'AIzaSyDArIR_Wq3wpmgyo-ZVwG1unGBjJtjLTtM';</script>
 <script>
 const KM_PAUSCHALE = 0.30;
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyZ4fYJAxK7in_VVTAeqxCYHINABCwuVIhum8sr-I70DS5qHMETwnoSovV95Qiju0SU/exec';
@@ -461,31 +461,52 @@ function resetRoute(){
   document.getElementById('routePreview').classList.remove('show');
 }
 
-function calculateRoute(){
+async function calculateRoute(){
   if(!mapsReady){showToast('Google Maps lädt…');return;}
   const von=document.getElementById('inputVon').value.trim();
   const nach=document.getElementById('inputNach').value.trim();
   if(!von||!nach){showToast('Start und Ziel eingeben.','error');return;}
   const btn=document.getElementById('calcRouteBtn');
   btn.textContent='⏳ Berechne…'; btn.disabled=true;
-  new google.maps.DistanceMatrixService().getDistanceMatrix({
-    origins:[von], destinations:[nach],
-    travelMode:google.maps.TravelMode.DRIVING,
-    unitSystem:google.maps.UnitSystem.METRIC,
-  },(resp,status)=>{
-    btn.textContent='🗺️ Strecke berechnen'; btn.disabled=false;
-    if(status!=='OK'||resp.rows[0].elements[0].status!=='OK'){
-      showToast('Route nicht gefunden.','error'); return;
+  try {
+    // Routes API
+    const resp = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'X-Goog-Api-Key': GOOGLE_MAPS_API_KEY,
+        'X-Goog-FieldMask':'routes.distanceMeters,routes.duration,routes.legs.localizedValues'
+      },
+      body: JSON.stringify({
+        origin:{address:von},
+        destination:{address:nach},
+        travelMode:'DRIVE',
+        routingPreference:'TRAFFIC_UNAWARE',
+        languageCode:'de'
+      })
+    });
+    const data = await resp.json();
+    if(!data.routes||!data.routes.length){
+      showToast('Route nicht gefunden.','error');
+      btn.textContent='🗺️ Strecke berechnen'; btn.disabled=false;
+      return;
     }
-    const el=resp.rows[0].elements[0];
-    calcKm=Math.round(el.distance.value/100)/10;
-    calcDauer=el.duration.text;
+    const route=data.routes[0];
+    calcKm=Math.round(route.distanceMeters/100)/10;
+    // Dauer aus localizedValues oder selbst berechnen
+    const secs=parseInt(route.duration);
+    const mins=Math.round(secs/60);
+    calcDauer=mins>=60?Math.floor(mins/60)+'h '+(mins%60)+'min':mins+' min';
     document.getElementById('routeKm').textContent=calcKm+' km';
     document.getElementById('routeDauer').textContent=calcDauer;
     document.getElementById('routeKosten').textContent=(calcKm*KM_PAUSCHALE).toFixed(2)+' €';
-    document.getElementById('routeInfo').textContent=resp.originAddresses[0]+' → '+resp.destinationAddresses[0];
+    document.getElementById('routeInfo').textContent=von+' → '+nach;
     document.getElementById('routePreview').classList.add('show');
-  });
+  } catch(e){
+    showToast('Fehler bei der Berechnung.','error');
+    console.error(e);
+  }
+  btn.textContent='🗺️ Strecke berechnen'; btn.disabled=false;
 }
 
 function updateManualKm(){
