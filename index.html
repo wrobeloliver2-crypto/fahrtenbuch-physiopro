@@ -364,15 +364,16 @@ const KM_PAUSCHALE = 0.30;
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyZ4fYJAxK7in_VVTAeqxCYHINABCwuVIhum8sr-I70DS5qHMETwnoSovV95Qiju0SU/exec';
 
 const EMPLOYEES = [
-  { id: 'hanna',   name: 'Hanna Wrobel',       isAdmin: true  },
-  { id: 'anna',    name: 'Anna Bath',           isAdmin: false },
-  { id: 'julia',   name: 'Julia Mielke',        isAdmin: false },
-  { id: 'tuana',   name: 'Tuana Koyulhisarli',  isAdmin: false },
-  { id: 'maike',   name: 'Maike Schrader',      isAdmin: false },
-  { id: 'annika',  name: 'Annika Zwiener',      isAdmin: false },
-  { id: 'finn',    name: 'Finn Meyer',           isAdmin: false },
-  { id: 'phillip', name: 'Phillip Opelka',      isAdmin: false },
-  { id: 'imo',     name: 'Imo Thomsen',         isAdmin: false },
+  { id: 'hanna',   name: 'Hanna Wrobel',        isAdmin: true  },
+  { id: 'oliver',  name: 'Oliver Wrobel',        isAdmin: true  },
+  { id: 'anna',    name: 'Anna Bath',            isAdmin: false },
+  { id: 'julia',   name: 'Julia Mielke',         isAdmin: false },
+  { id: 'tuana',   name: 'Tuana Koyulhisarli',   isAdmin: false },
+  { id: 'maike',   name: 'Maike Schrader',       isAdmin: false },
+  { id: 'annika',  name: 'Annika Zwiener',       isAdmin: false },
+  { id: 'finn',    name: 'Finn Meyer',            isAdmin: false },
+  { id: 'phillip', name: 'Phillip Opelka',       isAdmin: false },
+  { id: 'imo',     name: 'Imo Thomsen',          isAdmin: false },
 ];
 
 // ═══════════════════════════════════════════════
@@ -504,7 +505,7 @@ function buildNameGrid() {
   EMPLOYEES.forEach(emp => {
     const btn = document.createElement('button');
     btn.className = 'name-btn';
-    btn.textContent = emp.name.split(' ')[0];
+    btn.textContent = emp.name;
     btn.onclick = () => selectEmployee(emp.id);
     btn.dataset.id = emp.id;
     grid.appendChild(btn);
