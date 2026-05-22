@@ -2,209 +2,182 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Fahrtenbuch – PhysioPro Lübeck</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Fahrtenbuch – PhysioPro</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --dark:   #2c2825;
-    --green:  #55725e;
-    --green2: #3d5445;
-    --cream:  #faf8f4;
-    --cream2: #f0ece4;
-    --text:   #2c2825;
-    --muted:  #8a8278;
-    --border: #ddd8ce;
-    --red:    #c0392b;
-    --radius: 12px;
-    --shadow: 0 2px 12px rgba(44,40,37,0.08);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; font-size: 15px; }
+:root {
+  --dark:#2c2825; --green:#55725e; --green2:#3d5445;
+  --cream:#faf8f4; --cream2:#f0ece4; --text:#2c2825;
+  --muted:#8a8278; --border:#ddd8ce; --red:#c0392b;
+  --shadow:0 2px 12px rgba(44,40,37,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overscroll-behavior:none;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);font-size:16px;-webkit-font-smoothing:antialiased;}
 
-  /* HEADER */
-  .app-header {
-    background: var(--dark); color: var(--cream); padding: 16px 20px 14px;
-    display: flex; align-items: center; justify-content: space-between;
-    position: sticky; top: 0; z-index: 100;
-  }
-  .app-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 500; }
-  .app-header .subtitle { font-size: 11px; color: rgba(250,248,244,0.5); margin-top: 2px; letter-spacing: 0.05em; text-transform: uppercase; }
-  .header-right { display: flex; align-items: center; gap: 12px; }
-  .user-badge { background: var(--green); color: var(--cream); border-radius: 20px; padding: 5px 12px; font-size: 13px; font-weight: 500; }
-  .logout-btn { background: none; border: 1px solid rgba(250,248,244,0.25); color: rgba(250,248,244,0.7); border-radius: 8px; padding: 5px 10px; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
-  .logout-btn:hover { border-color: rgba(250,248,244,0.5); color: var(--cream); }
+/* HEADER */
+.app-header{background:var(--dark);color:var(--cream);padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.app-header h1{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;}
+.app-header .subtitle{font-size:10px;color:rgba(250,248,244,0.5);margin-top:1px;letter-spacing:.05em;text-transform:uppercase;}
+.header-right{display:flex;align-items:center;gap:10px;}
+.user-badge{background:var(--green);color:var(--cream);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:500;}
+.logout-btn{background:none;border:1px solid rgba(250,248,244,0.3);color:rgba(250,248,244,0.7);border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;}
 
-  /* SCREENS */
-  .screen { display: none; }
-  .screen.active { display: block; }
+/* SCREENS */
+.screen{display:none;}
+.screen.active{display:block;}
 
-  /* LOGIN */
-  #screenLogin { min-height: 100vh; background: var(--dark); flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; display: none; }
-  #screenLogin.active { display: flex; }
-  .login-logo { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: var(--cream); margin-bottom: 4px; }
-  .login-sub { font-size: 12px; color: var(--green); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 40px; }
-  .login-card { background: var(--cream); border-radius: 16px; padding: 28px 24px; width: 100%; max-width: 360px; }
-  .login-label { font-size: 12px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; display: block; }
-  .name-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
-  .name-btn { background: var(--cream2); border: 2px solid transparent; border-radius: 10px; padding: 10px 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: var(--text); cursor: pointer; text-align: center; transition: all 0.15s; }
-  .name-btn:hover { background: #e8e4dc; }
-  .name-btn.selected { border-color: var(--green); background: #e8f0ea; color: var(--green2); }
-  .pin-row { display: flex; gap: 10px; margin-bottom: 16px; }
-  .pin-input { flex: 1; background: var(--cream2); border: 2px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 18px; letter-spacing: 8px; font-family: 'DM Sans', sans-serif; color: var(--text); text-align: center; }
-  .pin-input:focus { outline: none; border-color: var(--green); }
-  .login-btn { width: 100%; background: var(--green); color: var(--cream); border: none; border-radius: 10px; padding: 13px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; }
-  .login-btn:hover { background: var(--green2); }
-  .login-error { color: var(--red); font-size: 13px; text-align: center; margin-top: 10px; min-height: 20px; }
-  .first-login-hint { background: #e8f0ea; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: var(--green2); margin-bottom: 14px; line-height: 1.5; }
-  .pin-confirm-row { display: none; }
-  .pin-confirm-row.show { display: flex; }
+/* LOGIN */
+#screenLogin{min-height:100vh;background:var(--dark);display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 16px;}
+#screenLogin.active{display:flex;}
+.login-logo{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:500;color:var(--cream);margin-bottom:4px;}
+.login-sub{font-size:11px;color:var(--green);letter-spacing:.12em;text-transform:uppercase;margin-bottom:36px;}
+.login-card{background:var(--cream);border-radius:16px;padding:24px 20px;width:100%;max-width:380px;}
+.login-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:block;}
+.name-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
+.name-btn{background:var(--cream2);border:2px solid transparent;border-radius:10px;padding:10px 6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--text);cursor:pointer;text-align:center;transition:all .15s;line-height:1.3;}
+.name-btn.selected{border-color:var(--green);background:#e8f0ea;color:var(--green2);}
+.pin-row{display:flex;gap:10px;margin-bottom:14px;}
+.pin-input{flex:1;background:var(--cream2);border:2px solid var(--border);border-radius:10px;padding:14px;font-size:22px;letter-spacing:10px;font-family:'DM Sans',sans-serif;color:var(--text);text-align:center;-webkit-text-security:disc;}
+.pin-input:focus{outline:none;border-color:var(--green);}
+.login-btn{width:100%;background:var(--green);color:var(--cream);border:none;border-radius:10px;padding:14px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;margin-top:4px;}
+.login-error{color:var(--red);font-size:13px;text-align:center;margin-top:8px;min-height:18px;}
+.first-login-hint{background:#e8f0ea;border-radius:8px;padding:10px 12px;font-size:12px;color:var(--green2);margin-bottom:12px;line-height:1.5;}
+.pin-confirm-row{display:none;}
+.pin-confirm-row.show{display:flex;}
 
-  /* TABS */
-  .tab-bar { display: flex; background: var(--cream2); border-bottom: 1px solid var(--border); position: sticky; top: 56px; z-index: 90; }
-  .tab { flex: 1; padding: 12px 4px 10px; font-size: 12px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; text-align: center; cursor: pointer; border-bottom: 3px solid transparent; color: var(--muted); transition: all 0.15s; }
-  .tab.active { color: var(--green); border-bottom-color: var(--green); }
+/* RESET PIN BUTTON */
+.reset-link{display:block;text-align:center;font-size:12px;color:var(--muted);margin-top:10px;cursor:pointer;text-decoration:underline;}
 
-  /* CONTENT */
-  .tab-content { display: none; padding: 20px 16px 100px; }
-  .tab-content.active { display: block; }
-  .section-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 500; color: var(--dark); margin-bottom: 6px; }
-  .section-sub { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+/* TABS */
+.tab-bar{display:flex;background:var(--cream2);border-bottom:1px solid var(--border);position:sticky;top:52px;z-index:90;overflow-x:auto;}
+.tab{flex:1;min-width:60px;padding:11px 4px 9px;font-size:11px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;text-align:center;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);white-space:nowrap;}
+.tab.active{color:var(--green);border-bottom-color:var(--green);}
 
-  /* FORM */
-  .form-group { margin-bottom: 16px; }
-  .form-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
-  .form-input, .form-select { width: 100%; background: white; border: 1.5px solid var(--border); border-radius: 10px; padding: 11px 13px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); }
-  .form-input:focus, .form-select:focus { outline: none; border-color: var(--green); }
+/* CONTENT */
+.tab-content{display:none;padding:16px 14px 100px;}
+.tab-content.active{display:block;}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;color:var(--dark);margin-bottom:4px;}
+.section-sub{font-size:12px;color:var(--muted);margin-bottom:18px;}
 
-  /* MAPS AUTOCOMPLETE */
-  .maps-field-wrap { position: relative; }
-  .maps-field-wrap .form-input { padding-right: 38px; }
-  .maps-icon {
-    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-    font-size: 16px; pointer-events: none; opacity: 0.4;
-  }
-  /* Google Autocomplete Dropdown styling override */
-  .pac-container { border-radius: 10px !important; border: 1.5px solid var(--border) !important; box-shadow: var(--shadow) !important; font-family: 'DM Sans', sans-serif !important; margin-top: 4px !important; }
-  .pac-item { padding: 8px 12px !important; font-size: 13px !important; cursor: pointer; }
-  .pac-item:hover { background: var(--cream2) !important; }
-  .pac-item-query { font-weight: 600; color: var(--dark); }
+/* FORM */
+.form-group{margin-bottom:14px;}
+.form-label{display:block;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.form-input,.form-select{width:100%;background:white;border:1.5px solid var(--border);border-radius:10px;padding:13px;font-family:'DM Sans',sans-serif;font-size:16px;color:var(--text);-webkit-appearance:none;appearance:none;}
+.form-input:focus,.form-select:focus{outline:none;border-color:var(--green);}
 
-  /* ROUTE PREVIEW */
-  .route-preview {
-    background: #e8f0ea; border-radius: 12px; padding: 14px 16px;
-    margin-bottom: 16px; display: none; border-left: 4px solid var(--green);
-  }
-  .route-preview.show { display: block; }
-  .route-preview-title { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--green2); margin-bottom: 8px; }
-  .route-stats { display: flex; gap: 20px; }
-  .route-stat-val { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 600; color: var(--green2); line-height: 1; }
-  .route-stat-lbl { font-size: 10px; color: var(--green); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px; }
-  .route-info { font-size: 12px; color: var(--green2); margin-top: 8px; opacity: 0.8; }
-  .calc-spinner { font-size: 12px; color: var(--muted); padding: 6px 0; }
+/* MAPS */
+.maps-field-wrap{position:relative;}
+.maps-icon{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;opacity:.4;}
+.pac-container{border-radius:10px!important;border:1.5px solid var(--border)!important;box-shadow:var(--shadow)!important;font-family:'DM Sans',sans-serif!important;margin-top:4px!important;font-size:15px!important;}
+.pac-item{padding:10px 12px!important;cursor:pointer;}
 
-  /* VEHICLE */
-  .vehicle-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+/* ROUTE PREVIEW */
+.route-preview{background:#e8f0ea;border-radius:12px;padding:14px 16px;margin-bottom:14px;display:none;border-left:4px solid var(--green);}
+.route-preview.show{display:block;}
+.route-preview-title{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--green2);margin-bottom:8px;}
+.route-stats{display:flex;gap:20px;}
+.route-stat-val{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--green2);line-height:1;}
+.route-stat-lbl{font-size:10px;color:var(--green);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;}
+.route-info{font-size:11px;color:var(--green2);margin-top:8px;opacity:.8;}
 
-  /* SUBMIT */
-  .submit-btn { width: 100%; background: var(--green); color: var(--cream); border: none; border-radius: 12px; padding: 14px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
-  .submit-btn:hover { background: var(--green2); }
-  .submit-btn:disabled { background: var(--muted); cursor: not-allowed; }
+/* BUTTONS */
+.calc-btn{width:100%;background:var(--dark);color:var(--cream);border:none;border-radius:12px;padding:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:12px;}
+.submit-btn{width:100%;background:var(--green);color:var(--cream);border:none;border-radius:12px;padding:14px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;margin-top:6px;}
+.submit-btn:disabled,.calc-btn:disabled{background:var(--muted);cursor:not-allowed;}
 
-  /* ENTRIES */
-  .entry-card { background: white; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; box-shadow: var(--shadow); border-left: 4px solid var(--green); }
-  .entry-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
-  .entry-route { font-weight: 600; font-size: 14px; color: var(--dark); flex: 1; margin-right: 8px; }
-  .entry-date { font-size: 12px; color: var(--muted); white-space: nowrap; }
-  .entry-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-  .entry-badge { font-size: 11px; background: var(--cream2); border-radius: 6px; padding: 2px 8px; color: var(--text); }
-  .entry-badge.km { background: #e8f0ea; color: var(--green2); font-weight: 600; }
-  .entry-badge.cost { background: #e8f0ea; color: var(--green2); }
-  .entry-zweck { font-size: 12px; color: var(--muted); margin-top: 4px; font-style: italic; }
-  .entry-actions { display: flex; gap: 8px; margin-top: 10px; }
-  .btn-small { font-size: 12px; border-radius: 7px; padding: 5px 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 500; border: 1.5px solid var(--border); background: white; color: var(--muted); }
-  .btn-small:hover { border-color: var(--red); color: var(--red); }
-  .btn-small.edit:hover { border-color: var(--green); color: var(--green); }
-  .locked-tag { font-size: 11px; color: var(--muted); background: var(--cream2); border-radius: 6px; padding: 2px 7px; margin-top: 8px; display: inline-block; }
+/* ENTRIES */
+.entry-card{background:white;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow);border-left:4px solid var(--green);}
+.entry-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.entry-route{font-weight:600;font-size:14px;color:var(--dark);flex:1;margin-right:8px;line-height:1.3;}
+.entry-date{font-size:12px;color:var(--muted);white-space:nowrap;}
+.entry-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
+.entry-badge{font-size:11px;background:var(--cream2);border-radius:6px;padding:3px 8px;color:var(--text);}
+.entry-badge.km{background:#e8f0ea;color:var(--green2);font-weight:600;}
+.entry-badge.cost{background:#e8f0ea;color:var(--green2);}
+.entry-zweck{font-size:12px;color:var(--muted);margin-top:4px;font-style:italic;}
+.entry-actions{display:flex;gap:8px;margin-top:10px;}
+.btn-small{font-size:13px;border-radius:8px;padding:7px 12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;border:1.5px solid var(--border);background:white;color:var(--muted);}
+.locked-tag{font-size:11px;color:var(--muted);background:var(--cream2);border-radius:6px;padding:2px 7px;margin-top:8px;display:inline-block;}
 
-  /* AUSWERTUNG */
-  .month-selector { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-  .month-selector select { flex: 1; background: white; border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 12px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); }
-  .summary-card { background: var(--dark); color: var(--cream); border-radius: 14px; padding: 20px; margin-bottom: 16px; }
-  .summary-title { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(250,248,244,0.5); margin-bottom: 14px; }
-  .summary-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-  .stat-box { text-align: center; }
-  .stat-value { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 600; color: var(--cream); line-height: 1; }
-  .stat-label { font-size: 10px; color: rgba(250,248,244,0.5); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 4px; }
-  .stat-value.green { color: #7fb98a; }
-  .send-section { background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1.5px solid var(--border); }
-  .send-section h3 { font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--dark); }
-  .send-section p { font-size: 12px; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
-  .send-btn { width: 100%; background: var(--green); color: var(--cream); border: none; border-radius: 10px; padding: 12px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
-  .send-btn:disabled { background: var(--muted); cursor: not-allowed; }
-  .status-badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 20px; padding: 4px 10px; font-size: 11px; font-weight: 600; }
-  .status-badge.pending { background: #fff3cd; color: #856404; }
-  .status-badge.approved { background: #d1e7dd; color: #0a5c36; }
-  .status-badge.draft { background: var(--cream2); color: var(--muted); }
-  .export-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
-  .export-btn { background: white; border: 1.5px solid var(--border); border-radius: 10px; padding: 10px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; color: var(--text); cursor: pointer; text-align: center; }
-  .export-btn:hover { border-color: var(--green); color: var(--green); }
+/* AUSWERTUNG */
+.month-selector{margin-bottom:18px;}
+.month-selector select{width:100%;background:white;border:1.5px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Sans',sans-serif;font-size:16px;color:var(--text);-webkit-appearance:none;}
+.summary-card{background:var(--dark);color:var(--cream);border-radius:14px;padding:18px;margin-bottom:14px;}
+.summary-title{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(250,248,244,0.5);margin-bottom:12px;}
+.summary-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.stat-box{text-align:center;}
+.stat-value{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--cream);line-height:1;}
+.stat-value.green{color:#7fb98a;}
+.stat-label{font-size:10px;color:rgba(250,248,244,0.5);letter-spacing:.06em;text-transform:uppercase;margin-top:3px;}
+.send-section{background:white;border-radius:12px;padding:16px;margin-bottom:14px;border:1.5px solid var(--border);}
+.send-section h3{font-size:13px;font-weight:600;margin-bottom:6px;}
+.send-section p{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5;}
+.send-btn{width:100%;background:var(--green);color:var(--cream);border:none;border-radius:10px;padding:13px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;}
+.send-btn:disabled{background:var(--muted);}
+.status-badge{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;}
+.status-badge.pending{background:#fff3cd;color:#856404;}
+.status-badge.approved{background:#d1e7dd;color:#0a5c36;}
+.status-badge.draft{background:var(--cream2);color:var(--muted);}
+.export-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+.export-btn{background:white;border:1.5px solid var(--border);border-radius:10px;padding:11px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;text-align:center;}
 
-  /* ADMIN */
-  .admin-section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
-  .approval-card { background: white; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; box-shadow: var(--shadow); border-left: 4px solid #f0ad4e; }
-  .approval-card.approved { border-left-color: var(--green); }
-  .approval-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .approval-name { font-weight: 600; font-size: 14px; }
-  .approval-stats { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
-  .approval-actions { display: flex; gap: 8px; }
-  .approve-btn { background: var(--green); color: white; border: none; border-radius: 8px; padding: 7px 14px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; }
-  .reject-btn { background: white; color: var(--red); border: 1.5px solid var(--red); border-radius: 8px; padding: 6px 14px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; }
-  .comment-input { width: 100%; background: var(--cream2); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 10px; font-family: 'DM Sans', sans-serif; font-size: 13px; margin-top: 8px; margin-bottom: 8px; resize: vertical; min-height: 60px; }
+/* ADMIN */
+.admin-section-title{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.approval-card{background:white;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow);border-left:4px solid #f0ad4e;}
+.approval-card.approved{border-left-color:var(--green);}
+.approval-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.approval-name{font-weight:600;font-size:14px;}
+.approval-stats{font-size:12px;color:var(--muted);margin-bottom:10px;}
+.approval-actions{display:flex;gap:8px;}
+.approve-btn{background:var(--green);color:white;border:none;border-radius:8px;padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+.reject-btn{background:white;color:var(--red);border:1.5px solid var(--red);border-radius:8px;padding:7px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+.comment-input{width:100%;background:var(--cream2);border:1.5px solid var(--border);border-radius:8px;padding:10px;font-family:'DM Sans',sans-serif;font-size:14px;margin-top:8px;margin-bottom:8px;resize:vertical;min-height:60px;}
 
-  /* SETTINGS */
-  .settings-card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 14px; border: 1.5px solid var(--border); }
-  .settings-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+/* SETTINGS */
+.settings-card{background:white;border-radius:12px;padding:16px;margin-bottom:14px;border:1.5px solid var(--border);}
+.settings-card h3{font-size:14px;font-weight:600;margin-bottom:12px;}
 
-  /* EMPTY / TOAST */
-  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; }
-  .empty-state .icon { font-size: 36px; margin-bottom: 10px; }
-  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--dark); color: var(--cream); border-radius: 10px; padding: 12px 20px; font-size: 14px; font-weight: 500; z-index: 999; transition: transform 0.3s ease; max-width: 320px; text-align: center; }
-  .toast.show { transform: translateX(-50%) translateY(0); }
-  .toast.success { background: var(--green); }
-  .toast.error { background: var(--red); }
-
-  /* API KEY BANNER */
-  .api-banner { background: #fff3cd; border: 1.5px solid #ffc107; border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; font-size: 12px; color: #856404; line-height: 1.5; }
-  .api-banner b { display: block; margin-bottom: 4px; }
+/* MISC */
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px;}
+.empty-state .icon{font-size:36px;margin-bottom:10px;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--dark);color:var(--cream);border-radius:10px;padding:12px 20px;font-size:14px;font-weight:500;z-index:999;transition:transform .3s ease;max-width:300px;text-align:center;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.success{background:var(--green);}
+.toast.error{background:var(--red);}
+.api-banner{background:#fff3cd;border:1.5px solid #ffc107;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:#856404;line-height:1.5;}
 </style>
 </head>
 <body>
 
-<!-- ═══════════════ LOGIN ═══════════════ -->
-<div id="screenLogin" class="screen active">
+<!-- LOGIN -->
+<div id="screenLogin" class="screen">
   <div class="login-logo">PhysioPro</div>
   <div class="login-sub">Fahrtenbuch · Lübeck</div>
   <div class="login-card">
     <span class="login-label">Mitarbeiter:in auswählen</span>
     <div class="name-grid" id="nameGrid"></div>
     <div id="pinSection" style="display:none">
-      <div id="firstLoginHint" class="first-login-hint" style="display:none">👋 Erster Login! Bitte wähle eine 4-stellige PIN.</div>
+      <div id="firstLoginHint" class="first-login-hint" style="display:none">👋 Erster Login – wähle eine 4-stellige PIN</div>
       <span class="login-label">PIN eingeben</span>
       <div class="pin-row">
-        <input type="password" inputmode="numeric" maxlength="4" class="pin-input" id="pinInput" placeholder="••••">
+        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" class="pin-input" id="pinInput" placeholder="••••" autocomplete="off">
       </div>
       <div class="pin-confirm-row pin-row" id="pinConfirmRow">
-        <input type="password" inputmode="numeric" maxlength="4" class="pin-input" id="pinConfirm" placeholder="••••">
+        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" class="pin-input" id="pinConfirm" placeholder="••••" autocomplete="off">
       </div>
       <button class="login-btn" onclick="doLogin()">Anmelden</button>
       <div class="login-error" id="loginError"></div>
+      <span class="reset-link" onclick="resetPin()">PIN vergessen / zurücksetzen</span>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════ APP ═══════════════ -->
+<!-- APP -->
 <div id="screenApp" class="screen">
   <div class="app-header">
     <div>
@@ -213,106 +186,84 @@
     </div>
     <div class="header-right">
       <div class="user-badge" id="userBadge"></div>
-      <button class="logout-btn" onclick="logout()">Abmelden</button>
+      <button class="logout-btn" onclick="logout()">↩</button>
     </div>
   </div>
 
   <div class="tab-bar">
     <div class="tab active" onclick="showTab('tabNeu')">+ Fahrt</div>
     <div class="tab" onclick="showTab('tabEintraege')">Einträge</div>
-    <div class="tab" onclick="showTab('tabAuswertung')">Auswertung</div>
+    <div class="tab" onclick="showTab('tabAuswertung')">Monat</div>
     <div class="tab" onclick="showTab('tabPin')">PIN</div>
     <div class="tab" id="tabAdminLink" onclick="showTab('tabAdmin')" style="display:none">Admin</div>
   </div>
 
-  <!-- TAB: NEUE FAHRT -->
+  <!-- NEUE FAHRT -->
   <div class="tab-content active" id="tabNeu">
     <div class="section-title">Fahrt erfassen</div>
     <div class="section-sub" id="todayDate"></div>
 
     <div id="apiKeyBanner" class="api-banner" style="display:none">
-      <b>⚠️ Google Maps API Key fehlt</b>
-      Trage deinen API Key in die Datei ein (Zeile mit GOOGLE_MAPS_API_KEY). Bis dahin kannst du km manuell eingeben.
+      ⚠️ <b>Google Maps API Key fehlt</b> – km bitte manuell eingeben.
     </div>
 
     <div class="form-group">
       <label class="form-label">Datum</label>
       <input type="date" class="form-input" id="inputDatum">
     </div>
-    <div class="form-group">
-      <label class="form-label">Fahrzeug (Kennzeichen)</label>
-      <input type="text" class="form-input" id="inputFahrzeug" placeholder="z.B. HL-AB 123" maxlength="15">
-      <div class="vehicle-hint">Wird für nächste Einträge gespeichert</div>
-    </div>
 
-    <!-- START -->
     <div class="form-group">
       <label class="form-label">📍 Abfahrtsort</label>
       <div class="maps-field-wrap">
-        <input type="text" class="form-input" id="inputVon" placeholder="Adresse oder Ort eingeben…" autocomplete="off">
+        <input type="text" class="form-input" id="inputVon" placeholder="Adresse eingeben…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         <span class="maps-icon">🔍</span>
       </div>
     </div>
 
-    <!-- ZIEL -->
     <div class="form-group">
       <label class="form-label">🏁 Zielort</label>
       <div class="maps-field-wrap">
-        <input type="text" class="form-input" id="inputNach" placeholder="Adresse oder Ort eingeben…" autocomplete="off">
+        <input type="text" class="form-input" id="inputNach" placeholder="Adresse eingeben…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         <span class="maps-icon">🔍</span>
       </div>
     </div>
 
-    <!-- BERECHNEN BUTTON -->
-    <button class="submit-btn" id="calcRouteBtn" onclick="calculateRoute()" style="background:var(--dark);margin-bottom:12px">
-      🗺️ Strecke berechnen
-    </button>
+    <button class="calc-btn" id="calcRouteBtn" onclick="calculateRoute()">🗺️ Strecke berechnen</button>
 
-    <!-- ROUTE PREVIEW -->
     <div class="route-preview" id="routePreview">
       <div class="route-preview-title">Berechnete Route</div>
       <div class="route-stats">
-        <div>
-          <div class="route-stat-val" id="routeKm">–</div>
-          <div class="route-stat-lbl">Kilometer</div>
-        </div>
-        <div>
-          <div class="route-stat-val" id="routeDauer">–</div>
-          <div class="route-stat-lbl">Fahrzeit</div>
-        </div>
-        <div>
-          <div class="route-stat-val" id="routeKosten">–</div>
-          <div class="route-stat-lbl">Erstattung</div>
-        </div>
+        <div><div class="route-stat-val" id="routeKm">–</div><div class="route-stat-lbl">Kilometer</div></div>
+        <div><div class="route-stat-val" id="routeDauer">–</div><div class="route-stat-lbl">Fahrzeit</div></div>
+        <div><div class="route-stat-val" id="routeKosten">–</div><div class="route-stat-lbl">Erstattung</div></div>
       </div>
       <div class="route-info" id="routeInfo"></div>
     </div>
 
-    <!-- FALLBACK: manuelle km wenn kein API Key -->
     <div id="manualKmSection" style="display:none">
       <div class="form-group">
         <label class="form-label">Kilometer (manuell)</label>
-        <input type="number" class="form-input" id="inputKmManual" placeholder="0" inputmode="numeric" oninput="updateManualKm()">
-        <div class="vehicle-hint" id="manualKmCost"></div>
+        <input type="number" class="form-input" id="inputKmManual" placeholder="0" inputmode="decimal" oninput="updateManualKm()">
+        <div style="font-size:11px;color:var(--muted);margin-top:4px" id="manualKmCost"></div>
       </div>
     </div>
 
     <div class="form-group">
-      <label class="form-label">Reisezweck / Auftraggeber</label>
-      <input type="text" class="form-input" id="inputZweck" placeholder="z.B. Hausbesuch Frau Müller">
+      <label class="form-label">Reisezweck</label>
+      <input type="text" class="form-input" id="inputZweck" placeholder="z.B. Hausbesuch Frau Müller" autocorrect="on">
     </div>
 
-    <button class="submit-btn" onclick="saveEntry()" id="saveBtn">Eintrag speichern</button>
+    <button class="submit-btn" onclick="saveEntry()">Eintrag speichern</button>
   </div>
 
-  <!-- TAB: EINTRÄGE -->
+  <!-- EINTRÄGE -->
   <div class="tab-content" id="tabEintraege">
     <div class="section-title">Meine Fahrten</div>
     <div class="section-sub">Alle erfassten Einträge</div>
     <div id="entriesList"></div>
   </div>
 
-  <!-- TAB: AUSWERTUNG -->
+  <!-- AUSWERTUNG -->
   <div class="tab-content" id="tabAuswertung">
     <div class="section-title">Auswertung</div>
     <div class="month-selector">
@@ -321,28 +272,26 @@
     <div id="summaryContent"></div>
   </div>
 
-  <!-- TAB: PIN -->
+  <!-- PIN -->
   <div class="tab-content" id="tabPin">
     <div class="section-title">PIN ändern</div>
-    <div class="section-sub">Wähle einen neuen 4-stelligen PIN</div>
+    <div class="section-sub">Neuen 4-stelligen PIN wählen</div>
     <div class="settings-card">
-      <h3>Neuer PIN</h3>
       <div class="form-group">
         <label class="form-label">Neuer PIN</label>
-        <input type="password" inputmode="numeric" maxlength="4" class="form-input" id="newPin1" placeholder="••••">
+        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" class="form-input" id="newPin1" placeholder="••••">
       </div>
       <div class="form-group">
         <label class="form-label">PIN bestätigen</label>
-        <input type="password" inputmode="numeric" maxlength="4" class="form-input" id="newPin2" placeholder="••••">
+        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" class="form-input" id="newPin2" placeholder="••••">
       </div>
       <button class="submit-btn" onclick="changePin()">PIN speichern</button>
     </div>
   </div>
 
-  <!-- TAB: ADMIN -->
+  <!-- ADMIN -->
   <div class="tab-content" id="tabAdmin">
     <div class="section-title">Genehmigungen</div>
-    <div class="section-sub">Monatsabrechnungen der Mitarbeiter:innen</div>
     <div class="month-selector">
       <select id="adminMonthSelect" onchange="renderAdmin()"></select>
     </div>
@@ -352,592 +301,435 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- Google Maps – API Key hier eintragen -->
+<script>const GOOGLE_MAPS_API_KEY = 'HIER_API_KEY_EINTRAGEN';</script>
 <script>
-  const GOOGLE_MAPS_API_KEY = 'HIER_API_KEY_EINTRAGEN';
-</script>
-<script>
-// ═══════════════════════════════════════════════
-// KONFIGURATION
-// ═══════════════════════════════════════════════
 const KM_PAUSCHALE = 0.30;
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyZ4fYJAxK7in_VVTAeqxCYHINABCwuVIhum8sr-I70DS5qHMETwnoSovV95Qiju0SU/exec';
 
 const EMPLOYEES = [
-  { id: 'hanna',   name: 'Hanna Wrobel',        isAdmin: true  },
-  { id: 'oliver',  name: 'Oliver Wrobel',        isAdmin: true  },
-  { id: 'anna',    name: 'Anna Bath',            isAdmin: false },
-  { id: 'julia',   name: 'Julia Mielke',         isAdmin: false },
-  { id: 'tuana',   name: 'Tuana Koyulhisarli',   isAdmin: false },
-  { id: 'maike',   name: 'Maike Schrader',       isAdmin: false },
-  { id: 'annika',  name: 'Annika Zwiener',       isAdmin: false },
-  { id: 'finn',    name: 'Finn Meyer',            isAdmin: false },
-  { id: 'phillip', name: 'Phillip Opelka',       isAdmin: false },
-  { id: 'imo',     name: 'Imo Thomsen',          isAdmin: false },
+  {id:'hanna',   name:'Hanna Wrobel',       isAdmin:true},
+  {id:'oliver',  name:'Oliver Wrobel',       isAdmin:true},
+  {id:'anna',    name:'Anna Bath',           isAdmin:false},
+  {id:'julia',   name:'Julia Mielke',        isAdmin:false},
+  {id:'tuana',   name:'Tuana Koyulhisarli',  isAdmin:false},
+  {id:'maike',   name:'Maike Schrader',      isAdmin:false},
+  {id:'annika',  name:'Annika Zwiener',      isAdmin:false},
+  {id:'finn',    name:'Finn Meyer',          isAdmin:false},
+  {id:'phillip', name:'Phillip Opelka',      isAdmin:false},
+  {id:'imo',     name:'Imo Thomsen',         isAdmin:false},
 ];
 
-// ═══════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════
-let currentUser = null;
-let selectedEmployeeId = null;
-let isFirstLogin = false;
-let mapsReady = false;
-let autocompleteVon = null;
-let autocompleteNach = null;
-let calculatedKm = 0;
-let calculatedDuration = '';
+let currentUser=null, selectedEmpId=null, isFirstLogin=false;
+let mapsReady=false, acVon=null, acNach=null;
+let calcKm=0, calcDauer='';
 
-// ═══════════════════════════════════════════════
-// GOOGLE MAPS INIT
-// ═══════════════════════════════════════════════
-function initMaps() {
-  mapsReady = true;
-  const opts = { componentRestrictions: { country: 'de' }, fields: ['formatted_address','geometry','name'] };
-  autocompleteVon  = new google.maps.places.Autocomplete(document.getElementById('inputVon'),  opts);
-  autocompleteNach = new google.maps.places.Autocomplete(document.getElementById('inputNach'), opts);
-  // Strecke neu berechnen wenn Adresse geändert
-  autocompleteVon.addListener('place_changed',  resetRoute);
-  autocompleteNach.addListener('place_changed', resetRoute);
-}
-
-function resetRoute() {
-  calculatedKm = 0;
-  calculatedDuration = '';
-  document.getElementById('routePreview').classList.remove('show');
-}
-
-function loadMapsScript() {
-  if (!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY === 'HIER_API_KEY_EINTRAGEN') {
-    document.getElementById('apiKeyBanner').style.display = 'block';
-    document.getElementById('calcRouteBtn').style.display = 'none';
-    document.getElementById('manualKmSection').style.display = 'block';
-    return;
-  }
-  const script = document.createElement('script');
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&callback=initMaps`;
-  script.async = true;
-  script.defer = true;
-  script.onerror = () => {
-    showToast('Google Maps konnte nicht geladen werden.', 'error');
-    document.getElementById('manualKmSection').style.display = 'block';
-  };
-  document.head.appendChild(script);
-}
-
-// ═══════════════════════════════════════════════
-// STRECKE BERECHNEN
-// ═══════════════════════════════════════════════
-function calculateRoute() {
-  if (!mapsReady) { showToast('Google Maps wird geladen…'); return; }
-
-  const vonVal  = document.getElementById('inputVon').value.trim();
-  const nachVal = document.getElementById('inputNach').value.trim();
-
-  if (!vonVal || !nachVal) {
-    showToast('Bitte Start und Ziel eingeben.', 'error'); return;
-  }
-
-  document.getElementById('calcRouteBtn').textContent = '⏳ Berechne…';
-  document.getElementById('calcRouteBtn').disabled = true;
-
-  const service = new google.maps.DistanceMatrixService();
-  service.getDistanceMatrix({
-    origins: [vonVal],
-    destinations: [nachVal],
-    travelMode: google.maps.TravelMode.DRIVING,
-    unitSystem: google.maps.UnitSystem.METRIC,
-    avoidHighways: false,
-    avoidTolls: false,
-  }, (response, status) => {
-    document.getElementById('calcRouteBtn').textContent = '🗺️ Strecke berechnen';
-    document.getElementById('calcRouteBtn').disabled = false;
-
-    if (status !== 'OK') {
-      showToast('Strecke konnte nicht berechnet werden.', 'error'); return;
-    }
-
-    const element = response.rows[0].elements[0];
-    if (element.status !== 'OK') {
-      showToast('Route nicht gefunden. Bitte Adressen prüfen.', 'error'); return;
-    }
-
-    const meters   = element.distance.value;
-    const km       = Math.round(meters / 1000 * 10) / 10; // 1 Dezimalstelle
-    const duration = element.duration.text;
-    const kosten   = (km * KM_PAUSCHALE).toFixed(2);
-
-    calculatedKm       = km;
-    calculatedDuration = duration;
-
-    document.getElementById('routeKm').textContent    = km + ' km';
-    document.getElementById('routeDauer').textContent  = duration;
-    document.getElementById('routeKosten').textContent = kosten + ' €';
-    document.getElementById('routeInfo').textContent   =
-      `${response.originAddresses[0]} → ${response.destinationAddresses[0]}`;
-    document.getElementById('routePreview').classList.add('show');
-  });
-}
-
-// ═══════════════════════════════════════════════
-// MANUELLE KM (Fallback)
-// ═══════════════════════════════════════════════
-function updateManualKm() {
-  const km = parseFloat(document.getElementById('inputKmManual').value) || 0;
-  calculatedKm = km;
-  document.getElementById('manualKmCost').textContent = km > 0 ? `≙ ${(km * KM_PAUSCHALE).toFixed(2)} € Erstattung` : '';
-}
-
-// ═══════════════════════════════════════════════
-// LOGIN
-// ═══════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
+// ── INIT ──
+document.addEventListener('DOMContentLoaded',()=>{
   buildNameGrid();
   setToday();
   fillMonthSelectors();
   loadMapsScript();
-  // Login-Screen sicherstellen
-  document.getElementById('screenLogin').classList.add('active');
-  document.getElementById('screenApp').classList.remove('active');
+  showScreen('screenLogin');
 });
 
-function buildNameGrid() {
-  const grid = document.getElementById('nameGrid');
-  EMPLOYEES.forEach(emp => {
-    const btn = document.createElement('button');
-    btn.className = 'name-btn';
-    btn.textContent = emp.name;
-    btn.onclick = () => selectEmployee(emp.id);
-    btn.dataset.id = emp.id;
-    grid.appendChild(btn);
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ── LOGIN ──
+function buildNameGrid(){
+  const g=document.getElementById('nameGrid');
+  EMPLOYEES.forEach(emp=>{
+    const b=document.createElement('button');
+    b.className='name-btn';
+    b.textContent=emp.name;
+    b.dataset.id=emp.id;
+    b.onclick=()=>selectEmployee(emp.id);
+    g.appendChild(b);
   });
 }
 
-function selectEmployee(id) {
-  selectedEmployeeId = id;
-  document.querySelectorAll('.name-btn').forEach(b => b.classList.remove('selected'));
-  document.querySelector(`[data-id="${id}"]`).classList.add('selected');
-  const pin = localStorage.getItem(`fb_pin_${id}`);
-  // Admins (hanna/oliver) haben Standard-PIN 0000, kein Erst-Login-Modus
-  const isAdmin = EMPLOYEES.find(e => e.id === id)?.isAdmin;
-  isFirstLogin = !pin && !isAdmin;
-  document.getElementById('pinSection').style.display = 'block';
-  document.getElementById('firstLoginHint').style.display = isFirstLogin ? 'block' : 'none';
-  document.getElementById('pinConfirmRow').classList.toggle('show', isFirstLogin);
-  document.getElementById('pinInput').value = '';
-  document.getElementById('pinConfirm').value = '';
-  document.getElementById('loginError').textContent = '';
-  document.getElementById('pinInput').focus();
+function selectEmployee(id){
+  selectedEmpId=id;
+  document.querySelectorAll('.name-btn').forEach(b=>b.classList.remove('selected'));
+  document.querySelector('[data-id="'+id+'"]').classList.add('selected');
+  const emp=EMPLOYEES.find(e=>e.id===id);
+  const savedPin=localStorage.getItem('fb_pin_'+id);
+  // Admins: immer normaler Login (Fallback 0000)
+  isFirstLogin = !savedPin && !emp.isAdmin;
+  document.getElementById('pinSection').style.display='block';
+  document.getElementById('firstLoginHint').style.display=isFirstLogin?'block':'none';
+  document.getElementById('pinConfirmRow').classList.toggle('show',isFirstLogin);
+  document.getElementById('pinInput').value='';
+  document.getElementById('pinConfirm').value='';
+  document.getElementById('loginError').textContent='';
+  setTimeout(()=>document.getElementById('pinInput').focus(),100);
 }
 
-function doLogin() {
-  const emp = EMPLOYEES.find(e => e.id === selectedEmployeeId);
-  if (!emp) { document.getElementById('loginError').textContent = 'Bitte Mitarbeiter:in auswählen.'; return; }
-  const pin1 = document.getElementById('pinInput').value;
-  if (pin1.length !== 4) { document.getElementById('loginError').textContent = 'PIN muss 4-stellig sein.'; return; }
-  const savedPin = localStorage.getItem(`fb_pin_${emp.id}`);
+function doLogin(){
+  const emp=EMPLOYEES.find(e=>e.id===selectedEmpId);
+  if(!emp){document.getElementById('loginError').textContent='Bitte auswählen.';return;}
+  const pin=document.getElementById('pinInput').value;
+  if(pin.length!==4){document.getElementById('loginError').textContent='PIN = 4 Ziffern';return;}
+  const savedPin=localStorage.getItem('fb_pin_'+emp.id);
 
-  if (isFirstLogin) {
-    // Erster Login: PIN setzen (nur normale Mitarbeiter)
-    const pin2 = document.getElementById('pinConfirm').value;
-    if (pin1 !== pin2) { document.getElementById('loginError').textContent = 'PINs stimmen nicht überein.'; return; }
-    localStorage.setItem(`fb_pin_${emp.id}`, pin1);
-    currentUser = emp;
-    enterApp();
+  if(isFirstLogin){
+    const pin2=document.getElementById('pinConfirm').value;
+    if(pin!==pin2){document.getElementById('loginError').textContent='PINs stimmen nicht überein.';return;}
+    localStorage.setItem('fb_pin_'+emp.id,pin);
+    currentUser=emp; enterApp();
   } else {
-    // Normaler Login: gespeicherten PIN prüfen, Admins Fallback 0000
-    const validPin = savedPin || (emp.isAdmin ? '0000' : null);
-    if (!validPin || pin1 !== validPin) { document.getElementById('loginError').textContent = 'Falsche PIN.'; return; }
-    currentUser = emp;
-    enterApp();
+    // Admin-Fallback: 0000 wenn noch kein PIN gesetzt
+    const valid=savedPin||(emp.isAdmin?'0000':null);
+    if(!valid||pin!==valid){document.getElementById('loginError').textContent='Falsche PIN.';return;}
+    currentUser=emp; enterApp();
   }
 }
 
-function enterApp() {
-  document.getElementById('screenLogin').classList.remove('active');
-  document.getElementById('screenApp').classList.add('active');
-  document.getElementById('userBadge').textContent = currentUser.name.split(' ')[0];
-  if (currentUser.isAdmin) {
-    document.getElementById('tabAdminLink').style.display = 'flex';
-  }
-  const savedFz = localStorage.getItem('fb_fahrzeug_' + currentUser.id);
-  if (savedFz) document.getElementById('inputFahrzeug').value = savedFz;
+function resetPin(){
+  if(!selectedEmpId){showToast('Zuerst Namen auswählen.','error');return;}
+  const emp=EMPLOYEES.find(e=>e.id===selectedEmpId);
+  if(emp.isAdmin){showToast('Admin-PIN: 0000','error');return;}
+  if(!confirm('PIN für '+emp.name+' zurücksetzen? Beim nächsten Login kann ein neuer PIN gewählt werden.')){return;}
+  localStorage.removeItem('fb_pin_'+selectedEmpId);
+  // Neu selectieren damit isFirstLogin gesetzt wird
+  selectEmployee(selectedEmpId);
+  showToast('PIN zurückgesetzt');
+}
+
+function enterApp(){
+  showScreen('screenApp');
+  document.getElementById('userBadge').textContent=currentUser.name.split(' ')[0];
+  document.getElementById('tabAdminLink').style.display=currentUser.isAdmin?'flex':'none';
   showTab('tabNeu');
   renderEntries();
 }
 
-function logout() {
-  currentUser = null;
-  document.getElementById('screenApp').classList.remove('active');
-  document.getElementById('screenLogin').classList.add('active');
-  selectedEmployeeId = null;
-  document.querySelectorAll('.name-btn').forEach(b => b.classList.remove('selected'));
-  document.getElementById('pinSection').style.display = 'none';
+function logout(){
+  currentUser=null; selectedEmpId=null;
+  document.querySelectorAll('.name-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('pinSection').style.display='none';
+  document.getElementById('pinInput').value='';
+  showScreen('screenLogin');
 }
 
-// ═══════════════════════════════════════════════
-// TABS
-// ═══════════════════════════════════════════════
-function showTab(id) {
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+// ── TABS ──
+function showTab(id){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  const ids = ['tabNeu','tabEintraege','tabAuswertung','tabPin','tabAdmin'];
-  const idx = ids.indexOf(id);
-  const tabs = document.querySelectorAll('.tab');
-  if (idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
-  if (id === 'tabEintraege') renderEntries();
-  if (id === 'tabAuswertung') renderAuswertung();
-  if (id === 'tabAdmin') renderAdmin();
+  const ids=['tabNeu','tabEintraege','tabAuswertung','tabPin','tabAdmin'];
+  const tabs=document.querySelectorAll('.tab');
+  const i=ids.indexOf(id);
+  if(i>=0&&tabs[i])tabs[i].classList.add('active');
+  if(id==='tabEintraege')renderEntries();
+  if(id==='tabAuswertung')renderAuswertung();
+  if(id==='tabAdmin')renderAdmin();
 }
 
-// ═══════════════════════════════════════════════
-// EINTRAG SPEICHERN
-// ═══════════════════════════════════════════════
-function setToday() {
-  const today = new Date();
-  document.getElementById('inputDatum').value = today.toISOString().split('T')[0];
-  document.getElementById('todayDate').textContent = today.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-}
-
-function saveEntry() {
-  const datum    = document.getElementById('inputDatum').value;
-  const fahrzeug = document.getElementById('inputFahrzeug').value.trim();
-  const von      = document.getElementById('inputVon').value.trim();
-  const nach     = document.getElementById('inputNach').value.trim();
-  const zweck    = document.getElementById('inputZweck').value.trim();
-  const km       = calculatedKm;
-
-  if (!datum || !von || !nach) { showToast('Bitte Datum, Start und Ziel ausfüllen.', 'error'); return; }
-  if (!km || km <= 0)          { showToast('Bitte zuerst die Strecke berechnen.', 'error'); return; }
-
-  const kosten = +(km * KM_PAUSCHALE).toFixed(2);
-  const entry = {
-    id: Date.now(), datum, fahrzeug, von, nach, km, kosten, zweck,
-    dauer: calculatedDuration,
-    mitarbeiter: currentUser.id,
-    timestamp: new Date().toISOString(),
-    monat: datum.substring(0,7),
+// ── GOOGLE MAPS ──
+function loadMapsScript(){
+  if(!GOOGLE_MAPS_API_KEY||GOOGLE_MAPS_API_KEY==='HIER_API_KEY_EINTRAGEN'){
+    document.getElementById('apiKeyBanner').style.display='block';
+    document.getElementById('calcRouteBtn').style.display='none';
+    document.getElementById('manualKmSection').style.display='block';
+    return;
+  }
+  const s=document.createElement('script');
+  s.src='https://maps.googleapis.com/maps/api/js?key='+GOOGLE_MAPS_API_KEY+'&libraries=places&callback=initMaps&loading=async';
+  s.async=true; s.defer=true;
+  s.onerror=()=>{
+    document.getElementById('apiKeyBanner').style.display='block';
+    document.getElementById('calcRouteBtn').style.display='none';
+    document.getElementById('manualKmSection').style.display='block';
   };
-
-  if (fahrzeug) localStorage.setItem(`fb_fahrzeug_${currentUser.id}`, fahrzeug);
-
-  const key = `fb_entries_${currentUser.id}`;
-  const entries = JSON.parse(localStorage.getItem(key) || '[]');
-  entries.unshift(entry);
-  localStorage.setItem(key, JSON.stringify(entries));
-  sendToSheet(entry);
-
-  // Reset
-  document.getElementById('inputVon').value   = '';
-  document.getElementById('inputNach').value  = '';
-  document.getElementById('inputZweck').value = '';
-  document.getElementById('routePreview').classList.remove('show');
-  calculatedKm = 0;
-  calculatedDuration = '';
-  setToday();
-  showToast('Fahrt gespeichert ✓', 'success');
+  document.head.appendChild(s);
 }
 
-// ═══════════════════════════════════════════════
-// EINTRÄGE
-// ═══════════════════════════════════════════════
-function renderEntries() {
-  if (!currentUser) return;
-  const entries = JSON.parse(localStorage.getItem(`fb_entries_${currentUser.id}`) || '[]');
-  const subs    = JSON.parse(localStorage.getItem(`fb_submissions_${currentUser.id}`) || '{}');
-  const list    = document.getElementById('entriesList');
-  if (!entries.length) { list.innerHTML = '<div class="empty-state"><div class="icon">🚗</div>Noch keine Fahrten erfasst.</div>'; return; }
-  list.innerHTML = entries.map(e => {
-    const locked = subs[e.monat] && (subs[e.monat].status === 'pending' || subs[e.monat].status === 'approved');
-    return `<div class="entry-card">
-      <div class="entry-top">
-        <div class="entry-route">${e.von} → ${e.nach}</div>
-        <div class="entry-date">${formatDate(e.datum)}</div>
-      </div>
-      <div class="entry-meta">
-        <span class="entry-badge km">${e.km} km</span>
-        <span class="entry-badge cost">${e.kosten.toFixed(2)} €</span>
-        ${e.dauer ? `<span class="entry-badge">🕐 ${e.dauer}</span>` : ''}
-        ${e.fahrzeug ? `<span class="entry-badge">${e.fahrzeug}</span>` : ''}
-      </div>
-      ${e.zweck ? `<div class="entry-zweck">${e.zweck}</div>` : ''}
-      ${locked
-        ? `<span class="locked-tag">🔒 Eingereicht</span>`
-        : `<div class="entry-actions">
-             <button class="btn-small edit" onclick="editEntry(${e.id})">Bearbeiten</button>
-             <button class="btn-small" onclick="deleteEntry(${e.id})">Löschen</button>
-           </div>`}
-    </div>`;
+function initMaps(){
+  mapsReady=true;
+  const opts={componentRestrictions:{country:'de'},fields:['formatted_address','geometry','name']};
+  acVon =new google.maps.places.Autocomplete(document.getElementById('inputVon'), opts);
+  acNach=new google.maps.places.Autocomplete(document.getElementById('inputNach'),opts);
+  acVon.addListener('place_changed', resetRoute);
+  acNach.addListener('place_changed',resetRoute);
+}
+
+function resetRoute(){
+  calcKm=0; calcDauer='';
+  document.getElementById('routePreview').classList.remove('show');
+}
+
+function calculateRoute(){
+  if(!mapsReady){showToast('Google Maps lädt…');return;}
+  const von=document.getElementById('inputVon').value.trim();
+  const nach=document.getElementById('inputNach').value.trim();
+  if(!von||!nach){showToast('Start und Ziel eingeben.','error');return;}
+  const btn=document.getElementById('calcRouteBtn');
+  btn.textContent='⏳ Berechne…'; btn.disabled=true;
+  new google.maps.DistanceMatrixService().getDistanceMatrix({
+    origins:[von], destinations:[nach],
+    travelMode:google.maps.TravelMode.DRIVING,
+    unitSystem:google.maps.UnitSystem.METRIC,
+  },(resp,status)=>{
+    btn.textContent='🗺️ Strecke berechnen'; btn.disabled=false;
+    if(status!=='OK'||resp.rows[0].elements[0].status!=='OK'){
+      showToast('Route nicht gefunden.','error'); return;
+    }
+    const el=resp.rows[0].elements[0];
+    calcKm=Math.round(el.distance.value/100)/10;
+    calcDauer=el.duration.text;
+    document.getElementById('routeKm').textContent=calcKm+' km';
+    document.getElementById('routeDauer').textContent=calcDauer;
+    document.getElementById('routeKosten').textContent=(calcKm*KM_PAUSCHALE).toFixed(2)+' €';
+    document.getElementById('routeInfo').textContent=resp.originAddresses[0]+' → '+resp.destinationAddresses[0];
+    document.getElementById('routePreview').classList.add('show');
+  });
+}
+
+function updateManualKm(){
+  calcKm=parseFloat(document.getElementById('inputKmManual').value)||0;
+  document.getElementById('manualKmCost').textContent=calcKm>0?'≙ '+(calcKm*KM_PAUSCHALE).toFixed(2)+' € Erstattung':'';
+}
+
+// ── EINTRAG SPEICHERN ──
+function setToday(){
+  const t=new Date();
+  document.getElementById('inputDatum').value=t.toISOString().split('T')[0];
+  document.getElementById('todayDate').textContent=t.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+
+function saveEntry(){
+  const datum=document.getElementById('inputDatum').value;
+  const von=document.getElementById('inputVon').value.trim();
+  const nach=document.getElementById('inputNach').value.trim();
+  const zweck=document.getElementById('inputZweck').value.trim();
+  if(!datum||!von||!nach){showToast('Datum, Start und Ziel ausfüllen.','error');return;}
+  if(!calcKm||calcKm<=0){showToast('Bitte zuerst Strecke berechnen.','error');return;}
+  const kosten=+(calcKm*KM_PAUSCHALE).toFixed(2);
+  const entry={
+    id:Date.now(), datum, von, nach, km:calcKm, kosten, zweck,
+    dauer:calcDauer, mitarbeiter:currentUser.id,
+    timestamp:new Date().toISOString(), monat:datum.substring(0,7)
+  };
+  const key='fb_entries_'+currentUser.id;
+  const arr=JSON.parse(localStorage.getItem(key)||'[]');
+  arr.unshift(entry);
+  localStorage.setItem(key,JSON.stringify(arr));
+  sendToSheet(entry);
+  // Reset
+  document.getElementById('inputVon').value='';
+  document.getElementById('inputNach').value='';
+  document.getElementById('inputZweck').value='';
+  document.getElementById('routePreview').classList.remove('show');
+  calcKm=0; calcDauer='';
+  setToday();
+  showToast('Fahrt gespeichert ✓','success');
+}
+
+// ── EINTRÄGE ──
+function renderEntries(){
+  if(!currentUser)return;
+  const arr=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]');
+  const subs=JSON.parse(localStorage.getItem('fb_submissions_'+currentUser.id)||'{}');
+  const el=document.getElementById('entriesList');
+  if(!arr.length){el.innerHTML='<div class="empty-state"><div class="icon">🚗</div>Noch keine Fahrten.</div>';return;}
+  el.innerHTML=arr.map(e=>{
+    const locked=subs[e.monat]&&(subs[e.monat].status==='pending'||subs[e.monat].status==='approved');
+    return '<div class="entry-card">'
+      +'<div class="entry-top"><div class="entry-route">'+e.von+' → '+e.nach+'</div><div class="entry-date">'+fmtDate(e.datum)+'</div></div>'
+      +'<div class="entry-meta"><span class="entry-badge km">'+e.km+' km</span><span class="entry-badge cost">'+e.kosten.toFixed(2)+' €</span>'+(e.dauer?'<span class="entry-badge">🕐 '+e.dauer+'</span>':'')+'</div>'
+      +(e.zweck?'<div class="entry-zweck">'+e.zweck+'</div>':'')
+      +(locked?'<span class="locked-tag">🔒 Eingereicht</span>'
+        :'<div class="entry-actions"><button class="btn-small" style="color:var(--green);border-color:var(--green)" onclick="editEntry('+e.id+')">Bearb.</button><button class="btn-small" onclick="deleteEntry('+e.id+')">Löschen</button></div>')
+      +'</div>';
   }).join('');
 }
 
-function deleteEntry(id) {
-  if (!confirm('Eintrag wirklich löschen?')) return;
-  const key = `fb_entries_${currentUser.id}`;
-  const entries = JSON.parse(localStorage.getItem(key) || '[]').filter(e => e.id !== id);
-  localStorage.setItem(key, JSON.stringify(entries));
-  renderEntries();
-  showToast('Eintrag gelöscht');
+function deleteEntry(id){
+  if(!confirm('Löschen?'))return;
+  const key='fb_entries_'+currentUser.id;
+  localStorage.setItem(key,JSON.stringify(JSON.parse(localStorage.getItem(key)||'[]').filter(e=>e.id!==id)));
+  renderEntries(); showToast('Gelöscht');
 }
 
-function editEntry(id) {
-  const key = `fb_entries_${currentUser.id}`;
-  const entries = JSON.parse(localStorage.getItem(key) || '[]');
-  const e = entries.find(x => x.id === id);
-  if (!e) return;
-  document.getElementById('inputDatum').value    = e.datum;
-  document.getElementById('inputFahrzeug').value = e.fahrzeug || '';
-  document.getElementById('inputVon').value      = e.von;
-  document.getElementById('inputNach').value     = e.nach;
-  document.getElementById('inputZweck').value    = e.zweck || '';
-  calculatedKm = e.km;
-  calculatedDuration = e.dauer || '';
-  // Route-Preview befüllen
-  document.getElementById('routeKm').textContent    = e.km + ' km';
-  document.getElementById('routeDauer').textContent  = e.dauer || '–';
-  document.getElementById('routeKosten').textContent = e.kosten.toFixed(2) + ' €';
-  document.getElementById('routeInfo').textContent   = e.von + ' → ' + e.nach;
+function editEntry(id){
+  const arr=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]');
+  const e=arr.find(x=>x.id===id); if(!e)return;
+  document.getElementById('inputDatum').value=e.datum;
+  document.getElementById('inputVon').value=e.von;
+  document.getElementById('inputNach').value=e.nach;
+  document.getElementById('inputZweck').value=e.zweck||'';
+  calcKm=e.km; calcDauer=e.dauer||'';
+  document.getElementById('routeKm').textContent=e.km+' km';
+  document.getElementById('routeDauer').textContent=e.dauer||'–';
+  document.getElementById('routeKosten').textContent=e.kosten.toFixed(2)+' €';
+  document.getElementById('routeInfo').textContent=e.von+' → '+e.nach;
   document.getElementById('routePreview').classList.add('show');
-  // Alt löschen
-  localStorage.setItem(key, JSON.stringify(entries.filter(x => x.id !== id)));
+  localStorage.setItem('fb_entries_'+currentUser.id,JSON.stringify(arr.filter(x=>x.id!==id)));
   showTab('tabNeu');
 }
 
-// ═══════════════════════════════════════════════
-// AUSWERTUNG
-// ═══════════════════════════════════════════════
-function fillMonthSelectors() {
-  const now = new Date();
-  const months = [];
-  for (let i = 0; i < 12; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    months.push({ val: d.toISOString().substring(0,7), label: d.toLocaleDateString('de-DE',{month:'long',year:'numeric'}) });
+// ── AUSWERTUNG ──
+function fillMonthSelectors(){
+  const now=new Date(), months=[];
+  for(let i=0;i<12;i++){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    months.push({val:d.toISOString().substring(0,7),label:d.toLocaleDateString('de-DE',{month:'long',year:'numeric'})});
   }
-  ['monthSelect','adminMonthSelect'].forEach(id => {
-    const sel = document.getElementById(id);
-    if (sel) sel.innerHTML = months.map(m => `<option value="${m.val}">${m.label}</option>`).join('');
+  ['monthSelect','adminMonthSelect'].forEach(id=>{
+    const s=document.getElementById(id);
+    if(s)s.innerHTML=months.map(m=>'<option value="'+m.val+'">'+m.label+'</option>').join('');
   });
 }
 
-function renderAuswertung() {
-  if (!currentUser) return;
-  const monat   = document.getElementById('monthSelect').value;
-  const all     = JSON.parse(localStorage.getItem(`fb_entries_${currentUser.id}`) || '[]');
-  const entries = all.filter(e => e.monat === monat);
-  const subs    = JSON.parse(localStorage.getItem(`fb_submissions_${currentUser.id}`) || '{}');
-  const sub     = subs[monat] || null;
-  const totalKm     = entries.reduce((s,e) => s + e.km, 0);
-  const totalKosten = entries.reduce((s,e) => s + e.kosten, 0);
-  const label = new Date(monat+'-01').toLocaleDateString('de-DE',{month:'long',year:'numeric'});
-
-  let statusBadge = '<span class="status-badge draft">Offen</span>';
-  if (sub?.status === 'pending')  statusBadge = '<span class="status-badge pending">⏳ Eingereicht</span>';
-  if (sub?.status === 'approved') statusBadge = '<span class="status-badge approved">✓ Genehmigt</span>';
-
-  let html = `<div class="summary-card">
-    <div class="summary-title">${label} &nbsp; ${statusBadge}</div>
-    <div class="summary-stats">
-      <div class="stat-box"><div class="stat-value">${entries.length}</div><div class="stat-label">Fahrten</div></div>
-      <div class="stat-box"><div class="stat-value">${totalKm}</div><div class="stat-label">Kilometer</div></div>
-      <div class="stat-box"><div class="stat-value green">${totalKosten.toFixed(0)} €</div><div class="stat-label">Erstattung</div></div>
-    </div>
-  </div>`;
-
-  if (entries.length) {
-    html += `<div class="send-section">
-      <h3>Monatsabschluss</h3>
-      <p>${label}: ${entries.length} Fahrten · ${totalKm} km · ${totalKosten.toFixed(2)} € zur Genehmigung einreichen.</p>`;
-    if (!sub || sub.status === 'draft') {
-      html += `<button class="send-btn" onclick="submitMonth('${monat}')">Monat einreichen →</button>`;
-    } else if (sub.status === 'pending') {
-      html += `<button class="send-btn" disabled>Wartet auf Hannas Genehmigung</button>`;
-    } else if (sub.status === 'approved') {
-      if (sub.comment) html += `<p style="color:var(--green);margin-top:8px">💬 ${sub.comment}</p>`;
-    }
-    html += `<div class="export-row">
-      <button class="export-btn" onclick="exportCSV('${monat}')">📊 CSV Export</button>
-      <button class="export-btn" onclick="exportPDF('${monat}')">📄 PDF Export</button>
-    </div></div>`;
-
-    html += '<div style="margin-top:16px">' + entries.map(e => `
-      <div class="entry-card">
-        <div class="entry-top">
-          <div class="entry-route">${e.von} → ${e.nach}</div>
-          <div class="entry-date">${formatDate(e.datum)}</div>
-        </div>
-        <div class="entry-meta">
-          <span class="entry-badge km">${e.km} km</span>
-          <span class="entry-badge cost">${e.kosten.toFixed(2)} €</span>
-          ${e.dauer ? `<span class="entry-badge">🕐 ${e.dauer}</span>` : ''}
-          ${e.fahrzeug ? `<span class="entry-badge">${e.fahrzeug}</span>` : ''}
-        </div>
-        ${e.zweck ? `<div class="entry-zweck">${e.zweck}</div>` : ''}
-      </div>`).join('') + '</div>';
+function renderAuswertung(){
+  if(!currentUser)return;
+  const monat=document.getElementById('monthSelect').value;
+  const arr=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]').filter(e=>e.monat===monat);
+  const subs=JSON.parse(localStorage.getItem('fb_submissions_'+currentUser.id)||'{}');
+  const sub=subs[monat]||null;
+  const tkm=arr.reduce((s,e)=>s+e.km,0);
+  const tko=arr.reduce((s,e)=>s+e.kosten,0);
+  const label=new Date(monat+'-01').toLocaleDateString('de-DE',{month:'long',year:'numeric'});
+  let badge='<span class="status-badge draft">Offen</span>';
+  if(sub?.status==='pending')badge='<span class="status-badge pending">⏳ Eingereicht</span>';
+  if(sub?.status==='approved')badge='<span class="status-badge approved">✓ Genehmigt</span>';
+  let h='<div class="summary-card"><div class="summary-title">'+label+' '+badge+'</div>'
+    +'<div class="summary-stats">'
+    +'<div class="stat-box"><div class="stat-value">'+arr.length+'</div><div class="stat-label">Fahrten</div></div>'
+    +'<div class="stat-box"><div class="stat-value">'+tkm+'</div><div class="stat-label">Kilometer</div></div>'
+    +'<div class="stat-box"><div class="stat-value green">'+tko.toFixed(0)+' €</div><div class="stat-label">Erstattung</div></div>'
+    +'</div></div>';
+  if(arr.length){
+    h+='<div class="send-section"><h3>Monatsabschluss</h3><p>'+arr.length+' Fahrten · '+tkm+' km · '+tko.toFixed(2)+' €</p>';
+    if(!sub||sub.status==='draft')h+='<button class="send-btn" onclick="submitMonth(\''+monat+'\')">Einreichen →</button>';
+    else if(sub.status==='pending')h+='<button class="send-btn" disabled>Wartet auf Genehmigung</button>';
+    else if(sub.status==='approved'&&sub.comment)h+='<p style="color:var(--green);margin-top:8px">💬 '+sub.comment+'</p>';
+    h+='<div class="export-row"><button class="export-btn" onclick="exportCSV(\''+monat+'\')">📊 CSV</button><button class="export-btn" onclick="exportPDF(\''+monat+'\')">📄 PDF</button></div></div>';
+    h+=arr.map(e=>'<div class="entry-card">'
+      +'<div class="entry-top"><div class="entry-route">'+e.von+' → '+e.nach+'</div><div class="entry-date">'+fmtDate(e.datum)+'</div></div>'
+      +'<div class="entry-meta"><span class="entry-badge km">'+e.km+' km</span><span class="entry-badge cost">'+e.kosten.toFixed(2)+' €</span>'+(e.dauer?'<span class="entry-badge">🕐 '+e.dauer+'</span>':'')+'</div>'
+      +(e.zweck?'<div class="entry-zweck">'+e.zweck+'</div>':'')+'</div>').join('');
   } else {
-    html += '<div class="empty-state"><div class="icon">📋</div>Keine Fahrten in diesem Monat.</div>';
+    h+='<div class="empty-state"><div class="icon">📋</div>Keine Fahrten in diesem Monat.</div>';
   }
-  document.getElementById('summaryContent').innerHTML = html;
+  document.getElementById('summaryContent').innerHTML=h;
 }
 
-function submitMonth(monat) {
-  const all = JSON.parse(localStorage.getItem(`fb_entries_${currentUser.id}`) || '[]');
-  const entries = all.filter(e => e.monat === monat);
-  if (!entries.length) { showToast('Keine Einträge.', 'error'); return; }
-
-  const subs = JSON.parse(localStorage.getItem(`fb_submissions_${currentUser.id}`) || '{}');
-  const subData = { status:'pending', submittedAt: new Date().toISOString(), mitarbeiter: currentUser.id, mitarbeiterName: currentUser.name, monat, entries };
-  subs[monat] = subData;
-  localStorage.setItem(`fb_submissions_${currentUser.id}`, JSON.stringify(subs));
-
-  const allSubs = JSON.parse(localStorage.getItem('fb_all_submissions') || '{}');
-  allSubs[`${currentUser.id}_${monat}`] = subData;
-  localStorage.setItem('fb_all_submissions', JSON.stringify(allSubs));
-
-  sendSubmissionToSheet(subData);
-  showToast('Monat eingereicht ✓', 'success');
-  renderAuswertung();
+function submitMonth(monat){
+  const arr=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]').filter(e=>e.monat===monat);
+  if(!arr.length){showToast('Keine Einträge.','error');return;}
+  const subs=JSON.parse(localStorage.getItem('fb_submissions_'+currentUser.id)||'{}');
+  const data={status:'pending',submittedAt:new Date().toISOString(),mitarbeiter:currentUser.id,mitarbeiterName:currentUser.name,monat,entries:arr};
+  subs[monat]=data;
+  localStorage.setItem('fb_submissions_'+currentUser.id,JSON.stringify(subs));
+  const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
+  all[currentUser.id+'_'+monat]=data;
+  localStorage.setItem('fb_all_submissions',JSON.stringify(all));
+  sendSubmissionToSheet(data);
+  showToast('Eingereicht ✓','success'); renderAuswertung();
 }
 
-// ═══════════════════════════════════════════════
-// ADMIN
-// ═══════════════════════════════════════════════
-function renderAdmin() {
-  const monat = document.getElementById('adminMonthSelect').value;
-  const allSubs = JSON.parse(localStorage.getItem('fb_all_submissions') || '{}');
-  const monatSubs = Object.values(allSubs).filter(s => s.monat === monat);
-  const label = new Date(monat+'-01').toLocaleDateString('de-DE',{month:'long',year:'numeric'});
-
-  if (!monatSubs.length) {
-    document.getElementById('adminContent').innerHTML = `<div class="empty-state"><div class="icon">📬</div>Keine Einreichungen für ${label}.</div>`;
-    return;
-  }
-
-  let html = `<div class="admin-section-title">${label} – ${monatSubs.length} Einreichung(en)</div>`;
-  monatSubs.forEach(sub => {
-    const totalKm     = sub.entries.reduce((s,e)=>s+e.km,0);
-    const totalKosten = sub.entries.reduce((s,e)=>s+e.kosten,0);
-    const approved    = sub.status === 'approved';
-    html += `<div class="approval-card ${approved?'approved':''}">
-      <div class="approval-top">
-        <div class="approval-name">${sub.mitarbeiterName}</div>
-        ${approved ? '<span class="status-badge approved">✓ Genehmigt</span>' : '<span class="status-badge pending">⏳ Offen</span>'}
-      </div>
-      <div class="approval-stats">${sub.entries.length} Fahrten · ${totalKm} km · ${totalKosten.toFixed(2)} €</div>
-      ${!approved ? `
-        <textarea class="comment-input" id="comment_${sub.mitarbeiter}_${monat}" placeholder="Kommentar (optional)"></textarea>
-        <div class="approval-actions">
-          <button class="approve-btn" onclick="approveMonth('${sub.mitarbeiter}','${monat}')">Genehmigen ✓</button>
-          <button class="reject-btn" onclick="rejectMonth('${sub.mitarbeiter}','${monat}')">Zurücksenden</button>
-        </div>` :
-        (sub.comment ? `<div style="font-size:12px;color:var(--muted);margin-top:6px">Kommentar: ${sub.comment}</div>` : '')}
-    </div>`;
+// ── ADMIN ──
+function renderAdmin(){
+  const monat=document.getElementById('adminMonthSelect').value;
+  const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
+  const list=Object.values(all).filter(s=>s.monat===monat);
+  const label=new Date(monat+'-01').toLocaleDateString('de-DE',{month:'long',year:'numeric'});
+  if(!list.length){document.getElementById('adminContent').innerHTML='<div class="empty-state"><div class="icon">📬</div>Keine Einreichungen für '+label+'.</div>';return;}
+  let h='<div class="admin-section-title">'+label+' – '+list.length+' Einreichung(en)</div>';
+  list.forEach(sub=>{
+    const tkm=sub.entries.reduce((s,e)=>s+e.km,0);
+    const tko=sub.entries.reduce((s,e)=>s+e.kosten,0);
+    const ok=sub.status==='approved';
+    h+='<div class="approval-card'+(ok?' approved':'')+'"><div class="approval-top"><div class="approval-name">'+sub.mitarbeiterName+'</div>'
+      +(ok?'<span class="status-badge approved">✓ Genehmigt</span>':'<span class="status-badge pending">⏳ Offen</span>')+'</div>'
+      +'<div class="approval-stats">'+sub.entries.length+' Fahrten · '+tkm+' km · '+tko.toFixed(2)+' €</div>'
+      +(!ok?'<textarea class="comment-input" id="comment_'+sub.mitarbeiter+'_'+monat+'" placeholder="Kommentar (optional)"></textarea>'
+        +'<div class="approval-actions"><button class="approve-btn" onclick="approveMonth(\''+sub.mitarbeiter+'\',\''+monat+'\')">Genehmigen ✓</button>'
+        +'<button class="reject-btn" onclick="rejectMonth(\''+sub.mitarbeiter+'\',\''+monat+'\')">Zurücksenden</button></div>'
+        :(sub.comment?'<div style="font-size:12px;color:var(--muted);margin-top:6px">'+sub.comment+'</div>':''))
+      +'</div>';
   });
-  document.getElementById('adminContent').innerHTML = html;
+  document.getElementById('adminContent').innerHTML=h;
 }
 
-function approveMonth(id, monat) {
-  const comment = document.getElementById(`comment_${id}_${monat}`)?.value || '';
-  updateSubStatus(id, monat, 'approved', comment);
-  showToast('Genehmigt ✓', 'success'); renderAdmin();
+function approveMonth(id,monat){
+  const c=document.getElementById('comment_'+id+'_'+monat)?.value||'';
+  updateStatus(id,monat,'approved',c); showToast('Genehmigt ✓','success'); renderAdmin();
 }
-function rejectMonth(id, monat) {
-  const comment = document.getElementById(`comment_${id}_${monat}`)?.value || '';
-  if (!comment) { showToast('Bitte Kommentar eingeben.', 'error'); return; }
-  updateSubStatus(id, monat, 'draft', comment);
-  showToast('Zurückgesendet'); renderAdmin();
+function rejectMonth(id,monat){
+  const c=document.getElementById('comment_'+id+'_'+monat)?.value||'';
+  if(!c){showToast('Kommentar eingeben.','error');return;}
+  updateStatus(id,monat,'draft',c); showToast('Zurückgesendet'); renderAdmin();
 }
-function updateSubStatus(id, monat, status, comment) {
-  const allSubs = JSON.parse(localStorage.getItem('fb_all_submissions') || '{}');
-  const k = `${id}_${monat}`;
-  if (allSubs[k]) { allSubs[k].status = status; allSubs[k].comment = comment; }
-  localStorage.setItem('fb_all_submissions', JSON.stringify(allSubs));
-  const subs = JSON.parse(localStorage.getItem(`fb_submissions_${id}`) || '{}');
-  if (subs[monat]) { subs[monat].status = status; subs[monat].comment = comment; }
-  localStorage.setItem(`fb_submissions_${id}`, JSON.stringify(subs));
+function updateStatus(id,monat,status,comment){
+  const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
+  const k=id+'_'+monat;
+  if(all[k]){all[k].status=status;all[k].comment=comment;}
+  localStorage.setItem('fb_all_submissions',JSON.stringify(all));
+  const subs=JSON.parse(localStorage.getItem('fb_submissions_'+id)||'{}');
+  if(subs[monat]){subs[monat].status=status;subs[monat].comment=comment;}
+  localStorage.setItem('fb_submissions_'+id,JSON.stringify(subs));
 }
 
-// ═══════════════════════════════════════════════
-// EXPORT
-// ═══════════════════════════════════════════════
-function exportCSV(monat) {
-  const entries = JSON.parse(localStorage.getItem(`fb_entries_${currentUser.id}`) || '[]').filter(e=>e.monat===monat);
-  if (!entries.length) { showToast('Keine Daten.','error'); return; }
-  const header = 'Datum;Fahrzeug;Abfahrt;Ziel;km;Fahrzeit;Kosten (€);Zweck';
-  const rows = entries.map(e=>[e.datum,e.fahrzeug||'',e.von,e.nach,e.km,e.dauer||'',e.kosten.toFixed(2),e.zweck||''].join(';'));
-  downloadFile('\uFEFF'+[header,...rows].join('\n'), `Fahrtenbuch_${currentUser.name.replace(' ','_')}_${monat}.csv`, 'text/csv');
-}
-
-function exportPDF(monat) {
-  const entries = JSON.parse(localStorage.getItem(`fb_entries_${currentUser.id}`) || '[]').filter(e=>e.monat===monat);
-  if (!entries.length) { showToast('Keine Daten.','error'); return; }
-  const totalKm = entries.reduce((s,e)=>s+e.km,0);
-  const totalKosten = entries.reduce((s,e)=>s+e.kosten,0);
-  const label = new Date(monat+'-01').toLocaleDateString('de-DE',{month:'long',year:'numeric'});
-  const rows = entries.map(e=>`<tr><td>${formatDate(e.datum)}</td><td>${e.fahrzeug||'–'}</td><td>${e.von}</td><td>${e.nach}</td><td>${e.km}</td><td>${e.dauer||'–'}</td><td><b>${e.kosten.toFixed(2)} €</b></td><td>${e.zweck||'–'}</td></tr>`).join('');
-  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
-    body{font-family:Arial,sans-serif;font-size:12px;padding:30px;color:#2c2825}
-    h1{font-size:20px;margin-bottom:4px}.sub{color:#888;margin-bottom:20px}
-    table{width:100%;border-collapse:collapse}
-    th{background:#2c2825;color:#faf8f4;padding:7px 8px;text-align:left;font-size:11px}
-    td{border-bottom:1px solid #ddd;padding:6px 8px}
-    .total{margin-top:16px;font-size:14px;font-weight:bold;color:#55725e}
-    .footer{margin-top:40px;font-size:11px;color:#aaa;border-top:1px solid #ddd;padding-top:12px}
-  </style></head><body>
-  <h1>Fahrtenbuch – ${currentUser.name}</h1>
-  <div class="sub">${label} · PhysioPro Lübeck · Erstellt: ${new Date().toLocaleDateString('de-DE')}</div>
-  <table><thead><tr><th>Datum</th><th>Fahrzeug</th><th>Abfahrt</th><th>Ziel</th><th>km</th><th>Fahrzeit</th><th>Kosten</th><th>Zweck</th></tr></thead>
-  <tbody>${rows}</tbody></table>
-  <div class="total">Gesamt: ${entries.length} Fahrten · ${totalKm} km · ${totalKosten.toFixed(2)} € (à ${KM_PAUSCHALE.toFixed(2)} €/km)</div>
-  <div class="footer">Unterschrift Mitarbeiter:in: __________________________ &nbsp;&nbsp;&nbsp; Unterschrift Leitung: __________________________</div>
-  </body></html>`;
-  const win = window.open('','_blank'); win.document.write(html); win.document.close(); win.print();
-}
-
-function downloadFile(content, filename, mime) {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([content],{type:mime}));
-  a.download = filename; a.click();
-}
-
-// ═══════════════════════════════════════════════
-// PIN ÄNDERN
-// ═══════════════════════════════════════════════
-function changePin() {
-  const p1 = document.getElementById('newPin1').value;
-  const p2 = document.getElementById('newPin2').value;
-  if (p1.length !== 4) { showToast('PIN muss 4-stellig sein.','error'); return; }
-  if (p1 !== p2) { showToast('PINs stimmen nicht überein.','error'); return; }
-  localStorage.setItem(`fb_pin_${currentUser.id}`, p1);
-  document.getElementById('newPin1').value = '';
-  document.getElementById('newPin2').value = '';
+// ── PIN ──
+function changePin(){
+  const p1=document.getElementById('newPin1').value;
+  const p2=document.getElementById('newPin2').value;
+  if(p1.length!==4){showToast('PIN = 4 Ziffern','error');return;}
+  if(p1!==p2){showToast('PINs stimmen nicht überein.','error');return;}
+  localStorage.setItem('fb_pin_'+currentUser.id,p1);
+  document.getElementById('newPin1').value='';
+  document.getElementById('newPin2').value='';
   showToast('PIN gespeichert ✓','success');
 }
 
-// ═══════════════════════════════════════════════
-// GOOGLE SHEETS
-// ═══════════════════════════════════════════════
-async function sendToSheet(entry) {
-  if (!APPS_SCRIPT_URL) return;
-  try { await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'entry',...entry})}); }
-  catch(e) { console.warn('Sheet:', e); }
+// ── EXPORT ──
+function exportCSV(monat){
+  const arr=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]').filter(e=>e.monat===monat);
+  if(!arr.length){showToast('Keine Daten.','error');return;}
+  const rows=arr.map(e=>[e.datum,e.von,e.nach,e.km,e.dauer||'',e.kosten.toFixed(2),e.zweck||''].join(';'));
+  dlFile('\uFEFFDatum;Abfahrt;Ziel;km;Fahrzeit;Kosten€;Zweck\n'+rows.join('\n'),
+    'Fahrtenbuch_'+currentUser.name.replace(' ','_')+'_'+monat+'.csv','text/csv');
 }
-async function sendSubmissionToSheet(sub) {
-  if (!APPS_SCRIPT_URL) return;
-  try { await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'submission',...sub})}); }
-  catch(e) { console.warn('Sheet:', e); }
+function exportPDF(monat){
+  const arr=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]').filter(e=>e.monat===monat);
+  if(!arr.length){showToast('Keine Daten.','error');return;}
+  const tkm=arr.reduce((s,e)=>s+e.km,0);
+  const tko=arr.reduce((s,e)=>s+e.kosten,0);
+  const label=new Date(monat+'-01').toLocaleDateString('de-DE',{month:'long',year:'numeric'});
+  const rows=arr.map(e=>'<tr><td>'+fmtDate(e.datum)+'</td><td>'+e.von+'</td><td>'+e.nach+'</td><td>'+e.km+'</td><td>'+(e.dauer||'–')+'</td><td>'+e.kosten.toFixed(2)+' €</td><td>'+(e.zweck||'–')+'</td></tr>').join('');
+  const w=window.open('','_blank');
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Arial;font-size:12px;padding:24px}h1{font-size:18px}table{width:100%;border-collapse:collapse;margin-top:16px}th{background:#2c2825;color:#faf8f4;padding:6px 8px;text-align:left;font-size:11px}td{border-bottom:1px solid #ddd;padding:5px 8px}.total{margin-top:14px;font-weight:bold;color:#55725e}.sig{margin-top:40px;font-size:11px;color:#aaa;border-top:1px solid #ddd;padding-top:10px}</style></head><body>'
+    +'<h1>Fahrtenbuch – '+currentUser.name+'</h1><p style="color:#888">'+label+' · PhysioPro Lübeck · '+new Date().toLocaleDateString('de-DE')+'</p>'
+    +'<table><thead><tr><th>Datum</th><th>Abfahrt</th><th>Ziel</th><th>km</th><th>Fahrzeit</th><th>Kosten</th><th>Zweck</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    +'<div class="total">Gesamt: '+arr.length+' Fahrten · '+tkm+' km · '+tko.toFixed(2)+' €</div>'
+    +'<div class="sig">Unterschrift MA: ___________________________ &nbsp;&nbsp; Unterschrift Leitung: ___________________________</div>'
+    +'</body></html>');
+  w.document.close(); w.print();
+}
+function dlFile(c,n,m){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:m}));a.download=n;a.click();}
+
+// ── SHEETS ──
+async function sendToSheet(e){
+  if(!APPS_SCRIPT_URL)return;
+  try{await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'entry',...e})});}catch(e){console.warn(e);}
+}
+async function sendSubmissionToSheet(s){
+  if(!APPS_SCRIPT_URL)return;
+  try{await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'submission',...s})});}catch(e){console.warn(e);}
 }
 
-// ═══════════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════════
-function formatDate(s) { return new Date(s+'T12:00:00').toLocaleDateString('de-DE',{day:'2-digit',month:'short',year:'2-digit'}); }
-function showToast(msg, type='') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'toast show' + (type?' '+type:'');
-  setTimeout(()=>t.className='toast', 2800);
+// ── UTILS ──
+function fmtDate(s){return new Date(s+'T12:00:00').toLocaleDateString('de-DE',{day:'2-digit',month:'short',year:'2-digit'});}
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show'+(type?' '+type:'');
+  setTimeout(()=>t.className='toast',2800);
 }
-document.addEventListener('keydown', e => { if (e.key==='Enter' && !currentUser) doLogin(); });
 </script>
 </body>
 </html>
