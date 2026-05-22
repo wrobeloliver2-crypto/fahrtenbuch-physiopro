@@ -671,10 +671,38 @@ function submitAll(){
 }
 
 // ── ADMIN ──
-function renderAdmin(){
-  const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
-  const pending=Object.values(all).filter(s=>s.status==='pending');
-  const approved=Object.values(all).filter(s=>s.status==='approved'||s.status==='paid');
+async function renderAdmin(){
+  document.getElementById('adminContent').innerHTML='<div class="empty-state">⏳ Lade Daten…</div>';
+  window.currentAdminSubs={};
+  let pending=[], approved=[];
+  try {
+    const resp=await fetch(APPS_SCRIPT_URL+'?action=getSubmissions');
+    const json=await resp.json();
+    const subs=json.submissions||[];
+    pending=subs.filter(s=>s['Status']==='pending').map(s=>({
+      mitarbeiter:s['Mitarbeiter'], mitarbeiterName:s['Name'],
+      status:s['Status'], comment:s['Kommentar']||'',
+      submittedAt:s['Eingereicht am'], approvedAt:s['Genehmigt am']||'',
+      paidAt:s['Ausgezahlt am']||'',
+      submissionId:s['ID'],
+      entries:JSON.parse(s['Einträge (JSON)']||'[]')
+    }));
+    approved=subs.filter(s=>s['Status']==='approved'||s['Status']==='paid').map(s=>({
+      mitarbeiter:s['Mitarbeiter'], mitarbeiterName:s['Name'],
+      status:s['Status'], comment:s['Kommentar']||'',
+      submittedAt:s['Eingereicht am'], approvedAt:s['Genehmigt am']||'',
+      paidAt:s['Ausgezahlt am']||'',
+      submissionId:s['ID'],
+      entries:JSON.parse(s['Einträge (JSON)']||'[]')
+    }));
+  pending.forEach(s=>{window.currentAdminSubs[s.submissionId]=s;});
+  approved.forEach(s=>{window.currentAdminSubs[s.submissionId]=s;});
+  } catch(e) {
+    // Fallback localStorage
+    const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
+    pending=Object.values(all).filter(s=>s.status==='pending');
+    approved=Object.values(all).filter(s=>s.status==='approved'||s.status==='paid');
+  }
   let h='';
 
   // Offene Einreichungen
@@ -685,7 +713,7 @@ function renderAdmin(){
       const tko=sub.entries.reduce((s,e)=>s+e.kosten,0);
       const earliest=sub.entries.reduce((a,b)=>a.datum<b.datum?a:b).datum;
       const latest=sub.entries.reduce((a,b)=>a.datum>b.datum?a:b).datum;
-      h+='<div class="approval-card">'
+      h+='<div class="approval-card" data-subid="'+sub.submissionId+'">'
         +'<div class="approval-top"><div class="approval-name">'+sub.mitarbeiterName+'</div>'
         +'<span class="status-badge pending">⏳ Offen</span></div>'
         +'<div class="approval-stats">'+sub.entries.length+' Fahrten · '+tkm+' km · <b>'+tko.toFixed(2)+' €</b><br>'
@@ -708,7 +736,7 @@ function renderAdmin(){
       const tkm=sub.entries.reduce((s,e)=>s+e.km,0);
       const tko=sub.entries.reduce((s,e)=>s+e.kosten,0);
       const isPaid=sub.status==='paid';
-      h+='<div class="approval-card approved">'
+      h+='<div class="approval-card approved" data-subid="'+sub.submissionId+'">'
         +'<div class="approval-top"><div class="approval-name">'+sub.mitarbeiterName+'</div>'
         +(isPaid
           ?'<span class="status-badge approved">💶 Ausgezahlt '+fmtDate(sub.paidAt?.substring(0,10)||sub.submittedAt.substring(0,10))+'</span>'
@@ -717,7 +745,7 @@ function renderAdmin(){
         +'<div class="approval-stats">'+sub.entries.length+' Fahrten · '+tkm+' km · <b>'+tko.toFixed(2)+' €</b></div>'
         +(sub.comment?'<div style="font-size:12px;color:var(--muted);margin-bottom:8px">💬 '+sub.comment+'</div>':'')
         +'<div class="export-row">'
-        +'<button class="export-btn" onclick="belegPDF(\''+sub.mitarbeiter+'\')">📄 Beleg PDF</button>'
+        +'<button class="export-btn" onclick="belegPDF(currentAdminSubs[\''+sub.submissionId+'\'])">📄 Beleg PDF</button>'
         +(!isPaid?'<button class="export-btn" style="border-color:var(--green);color:var(--green)" onclick="markPaid(\''+sub.mitarbeiter+'_'+(sub.approvedAt||sub.submittedAt).substring(0,10)+'\')">💶 Als ausgezahlt markieren</button>':'<span style="font-size:12px;color:var(--muted);padding:10px">Ausgezahlt am '+fmtDate(sub.paidAt?.substring(0,10)||'')+'</span>')
         +'</div></div>';
     });
@@ -726,47 +754,53 @@ function renderAdmin(){
   document.getElementById('adminContent').innerHTML=h||'<div class="empty-state"><div class="icon">📋</div>Noch keine Abrechnungen.</div>';
 }
 
-function approveEntry(id){
+async function approveEntry(id){
+  const btn=event.target; btn.disabled=true; btn.textContent='⏳';
   const comment=document.getElementById('comment_'+id)?.value||'';
+  // submissionId aus dem aktuell geladenen DOM ermitteln
+  const subId=btn.closest('.approval-card')?.dataset?.subid||id;
+  try {
+    await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({type:'updateStatus',submissionId:subId,status:'approved',comment})});
+  } catch(e){}
+  // localStorage sync
   const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
-  const sub=all[id]; if(!sub)return;
-  const approvedAt=new Date().toISOString();
-  sub.status='approved'; sub.comment=comment; sub.approvedAt=approvedAt;
-  // Key zu id+datum damit mehrere Einreichungen pro MA möglich
-  const newKey=id+'_'+approvedAt.substring(0,10);
-  delete all[id];
-  all[newKey]=sub;
+  if(all[id]){all[id].status='approved';all[id].comment=comment;all[id].approvedAt=new Date().toISOString();}
   localStorage.setItem('fb_all_submissions',JSON.stringify(all));
-  const empApproved=JSON.parse(localStorage.getItem('fb_approved_'+id)||'[]');
-  empApproved.unshift({...sub});
-  localStorage.setItem('fb_approved_'+id,JSON.stringify(empApproved));
   localStorage.removeItem('fb_pending_'+id);
   showToast('Genehmigt ✓','success'); renderAdmin();
 }
 
-function rejectEntry(id){
+async function rejectEntry(id){
   const comment=document.getElementById('comment_'+id)?.value||'';
   if(!comment){showToast('Bitte Kommentar eingeben.','error');return;}
+  const subId=event.target.closest('.approval-card')?.dataset?.subid||id;
+  try {
+    await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({type:'updateStatus',submissionId:subId,status:'rejected',comment})});
+  } catch(e){}
   const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
   if(all[id]){all[id].status='rejected';all[id].comment=comment;}
   localStorage.setItem('fb_all_submissions',JSON.stringify(all));
-  const pending=JSON.parse(localStorage.getItem('fb_pending_'+id)||'null');
-  if(pending){pending.status='rejected';pending.comment=comment;localStorage.setItem('fb_pending_'+id,JSON.stringify(pending));}
+  const pend=JSON.parse(localStorage.getItem('fb_pending_'+id)||'null');
+  if(pend){pend.status='rejected';pend.comment=comment;localStorage.setItem('fb_pending_'+id,JSON.stringify(pend));}
   showToast('Zurückgesendet'); renderAdmin();
 }
 
-function markPaid(key){
+async function markPaid(subId){
+  try {
+    await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({type:'updateStatus',submissionId:subId,status:'paid'})});
+  } catch(e){}
+  // localStorage sync
   const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
-  if(all[key]){all[key].status='paid';all[key].paidAt=new Date().toISOString();}
+  Object.keys(all).forEach(k=>{if(all[k].submissionId===subId||k===subId){all[k].status='paid';all[k].paidAt=new Date().toISOString();}});
   localStorage.setItem('fb_all_submissions',JSON.stringify(all));
   showToast('Als ausgezahlt markiert 💶','success'); renderAdmin();
 }
 
-function belegPDF(id){
-  const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
-  // Suche nach approved/paid entry für diesen Mitarbeiter
-  const sub=Object.values(all).find(s=>s.mitarbeiter===id&&(s.status==='approved'||s.status==='paid'));
-  if(!sub){showToast('Kein Beleg gefunden.','error');return;}
+function belegPDF(sub){
+  if(!sub||!sub.entries){showToast('Kein Beleg gefunden.','error');return;}
   const tkm=sub.entries.reduce((s,e)=>s+e.km,0);
   const tko=sub.entries.reduce((s,e)=>s+e.kosten,0);
   const isPaid=sub.status==='paid';
