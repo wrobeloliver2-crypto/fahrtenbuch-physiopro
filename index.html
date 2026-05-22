@@ -517,7 +517,9 @@ function selectEmployee(id) {
   document.querySelectorAll('.name-btn').forEach(b => b.classList.remove('selected'));
   document.querySelector(`[data-id="${id}"]`).classList.add('selected');
   const pin = localStorage.getItem(`fb_pin_${id}`);
-  isFirstLogin = !pin && !(id === 'hanna');
+  // Admins (hanna/oliver) haben Standard-PIN 0000, kein Erst-Login-Modus
+  const isAdmin = EMPLOYEES.find(e => e.id === id)?.isAdmin;
+  isFirstLogin = !pin && !isAdmin;
   document.getElementById('pinSection').style.display = 'block';
   document.getElementById('firstLoginHint').style.display = isFirstLogin ? 'block' : 'none';
   document.getElementById('pinConfirmRow').classList.toggle('show', isFirstLogin);
@@ -531,18 +533,20 @@ function doLogin() {
   const emp = EMPLOYEES.find(e => e.id === selectedEmployeeId);
   if (!emp) { document.getElementById('loginError').textContent = 'Bitte Mitarbeiter:in auswählen.'; return; }
   const pin1 = document.getElementById('pinInput').value;
+  if (pin1.length !== 4) { document.getElementById('loginError').textContent = 'PIN muss 4-stellig sein.'; return; }
   const savedPin = localStorage.getItem(`fb_pin_${emp.id}`);
 
   if (isFirstLogin) {
+    // Erster Login: PIN setzen (nur normale Mitarbeiter)
     const pin2 = document.getElementById('pinConfirm').value;
-    if (pin1.length !== 4) { document.getElementById('loginError').textContent = 'PIN muss 4-stellig sein.'; return; }
-    if (pin1 !== pin2)     { document.getElementById('loginError').textContent = 'PINs stimmen nicht überein.'; return; }
+    if (pin1 !== pin2) { document.getElementById('loginError').textContent = 'PINs stimmen nicht überein.'; return; }
     localStorage.setItem(`fb_pin_${emp.id}`, pin1);
     currentUser = emp;
     sessionStorage.setItem('fb_user', JSON.stringify(emp));
     enterApp();
   } else {
-    const validPin = savedPin || (emp.id === 'hanna' ? '0000' : null);
+    // Normaler Login: gespeicherten PIN prüfen, Admins Fallback 0000
+    const validPin = savedPin || (emp.isAdmin ? '0000' : null);
     if (!validPin || pin1 !== validPin) { document.getElementById('loginError').textContent = 'Falsche PIN.'; return; }
     currentUser = emp;
     sessionStorage.setItem('fb_user', JSON.stringify(emp));
