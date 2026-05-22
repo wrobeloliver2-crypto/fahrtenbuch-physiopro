@@ -813,14 +813,19 @@ async function rejectEntry(id){
 
 async function markPaid(subId){
   const paidAt=new Date().toISOString();
+  // Sheet aktualisieren
   try {
     await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({type:'updateStatus',submissionId:subId,status:'paid',paidAt})});
   } catch(e){}
-  // Lokal in currentAdminSubs aktualisieren für sofortige UI-Aktualisierung
-  if(window.currentAdminSubs&&window.currentAdminSubs[subId]){
-    window.currentAdminSubs[subId].status='paid';
-    window.currentAdminSubs[subId].paidAt=paidAt;
+  // Cache aktualisieren - alle Keys prüfen
+  if(window.currentAdminSubs){
+    Object.keys(window.currentAdminSubs).forEach(k=>{
+      if(k===subId||window.currentAdminSubs[k].submissionId===subId||k.startsWith(subId.split('_')[0])){
+        window.currentAdminSubs[k].status='paid';
+        window.currentAdminSubs[k].paidAt=paidAt;
+      }
+    });
   }
   // localStorage sync
   const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
@@ -831,15 +836,15 @@ async function markPaid(subId){
   });
   localStorage.setItem('fb_all_submissions',JSON.stringify(all));
   showToast('Ausgezahlt markiert 💶','success');
-  // UI sofort neu rendern ohne Sheet-Reload
   renderAdminFromCache();
 }
 
 function renderAdminFromCache(){
-  if(!window.currentAdminSubs) return renderAdmin();
+  if(!window.currentAdminSubs||Object.keys(window.currentAdminSubs).length===0) return renderAdmin();
   const subs=Object.values(window.currentAdminSubs);
   const pending=subs.filter(s=>s.status==='pending');
   const approved=subs.filter(s=>s.status==='approved'||s.status==='paid');
+  if(pending.length===0&&approved.length===0) return renderAdmin();
   renderAdminHTML(pending, approved);
 }
 
