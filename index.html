@@ -690,6 +690,59 @@ function fetchFromSheet(action, params) {
   });
 }
 
+
+function renderAdminHTML(pending, approved){
+  let h='';
+  if(pending.length){
+    h+='<div class="admin-section-title">'+pending.length+' offene Einreichung(en)</div>';
+    pending.forEach(sub=>{
+      const tkm=sub.entries.reduce((s,e)=>s+e.km,0);
+      const tko=sub.entries.reduce((s,e)=>s+e.kosten,0);
+      const earliest=sub.entries.reduce((a,b)=>a.datum<b.datum?a:b).datum;
+      const latest=sub.entries.reduce((a,b)=>a.datum>b.datum?a:b).datum;
+      h+='<div class="approval-card" data-subid="'+sub.submissionId+'">'
+        +'<div class="approval-top"><div class="approval-name">'+sub.mitarbeiterName+'</div>'
+        +'<span class="status-badge pending">⏳ Offen</span></div>'
+        +'<div class="approval-stats">'+sub.entries.length+' Fahrten · '+tkm+' km · <b>'+tko.toFixed(2)+' €</b><br>'
+        +'<span style="font-size:11px;color:var(--muted)">'+fmtDate(earliest)+' – '+fmtDate(latest)+'</span></div>'
+        +sub.entries.map(e=>'<div style="font-size:12px;padding:5px 0;border-bottom:1px solid var(--border)">'+fmtDate(e.datum)+' · '+e.von+' → '+e.nach+' · <b>'+e.km+' km</b> · '+e.kosten.toFixed(2)+' €'+(e.zweck?' · <i>'+e.zweck+'</i>':'')+'</div>').join('')
+        +'<textarea class="comment-input" id="comment_'+sub.mitarbeiter+'" placeholder="Kommentar (optional)"></textarea>'
+        +'<div class="approval-actions">'
+        +'<button class="approve-btn" onclick="approveEntry(\''+sub.mitarbeiter+'\')">Genehmigen ✓</button>'
+        +'<button class="reject-btn" onclick="rejectEntry(\''+sub.mitarbeiter+'\')">Zurücksenden</button>'
+        +'</div></div>';
+    });
+  } else {
+    h+='<div class="empty-state"><div class="icon">📬</div>Keine offenen Einreichungen.</div>';
+  }
+  if(approved.length){
+    h+='<div class="admin-section-title" style="margin-top:24px">Genehmigte Abrechnungen</div>';
+    approved.forEach(sub=>{
+      const tkm=sub.entries.reduce((s,e)=>s+e.km,0);
+      const tko=sub.entries.reduce((s,e)=>s+e.kosten,0);
+      const isPaid=sub.status==='paid';
+      h+='<div class="approval-card approved" data-subid="'+sub.submissionId+'">'
+        +'<div class="approval-top"><div class="approval-name">'+sub.mitarbeiterName+'</div>'
+        +(isPaid
+          ?'<span class="status-badge approved">💶 Ausgezahlt</span>'
+          :'<span class="status-badge" style="background:#e8f0ea;color:var(--green2)">✓ Genehmigt</span>')
+        +'</div>'
+        +'<div class="approval-stats">'+sub.entries.length+' Fahrten · '+tkm+' km · <b>'+tko.toFixed(2)+' €</b>'
+        +'<br><span style="font-size:11px;color:var(--muted)">Eingereicht: '+fmtDate(String(sub.submittedAt).substring(0,10))+'</span>'
+        +(isPaid?'<br><span style="font-size:11px;color:var(--green);font-weight:600">💶 Ausgezahlt am: '+fmtDate(String(sub.paidAt||'').substring(0,10))+'</span>':'')
+        +'</div>'
+        +(sub.comment?'<div style="font-size:12px;color:var(--muted);margin-bottom:8px">💬 '+sub.comment+'</div>':'')
+        +(!isPaid
+          ?'<button onclick="markPaid(\''+sub.submissionId+'\')" style="width:100%;background:var(--green);color:white;border:none;border-radius:12px;padding:14px;font-family:DM Sans,sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px">💶 Jetzt als ausgezahlt markieren</button>'
+          :'<div style="background:#d1e7dd;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;font-weight:600;color:#0a5c36;text-align:center">💶 Ausgezahlt am '+fmtDate(String(sub.paidAt||'').substring(0,10))+' ✓</div>')
+        +'<div style="margin-top:8px">'
+        +'<button class="export-btn" style="width:100%" onclick="belegPDF(currentAdminSubs[\''+sub.submissionId+'\'])">📄 Beleg PDF</button>'
+        +'</div></div>';
+    });
+  }
+  document.getElementById('adminContent').innerHTML=h||'<div class="empty-state"><div class="icon">📋</div>Noch keine Abrechnungen.</div>';
+}
+
 // ── ADMIN ──
 async function renderAdmin(){
   document.getElementById('adminContent').innerHTML='<div class="empty-state">⏳ Lade Daten…</div>';
@@ -722,57 +775,7 @@ async function renderAdmin(){
     pending=Object.values(all).filter(s=>s.status==='pending');
     approved=Object.values(all).filter(s=>s.status==='approved'||s.status==='paid');
   }
-  let h='';
-
-  // Offene Einreichungen
-  if(pending.length){
-    h+='<div class="admin-section-title">'+pending.length+' offene Einreichung(en)</div>';
-    pending.forEach(sub=>{
-      const tkm=sub.entries.reduce((s,e)=>s+e.km,0);
-      const tko=sub.entries.reduce((s,e)=>s+e.kosten,0);
-      const earliest=sub.entries.reduce((a,b)=>a.datum<b.datum?a:b).datum;
-      const latest=sub.entries.reduce((a,b)=>a.datum>b.datum?a:b).datum;
-      h+='<div class="approval-card" data-subid="'+sub.submissionId+'">'
-        +'<div class="approval-top"><div class="approval-name">'+sub.mitarbeiterName+'</div>'
-        +'<span class="status-badge pending">⏳ Offen</span></div>'
-        +'<div class="approval-stats">'+sub.entries.length+' Fahrten · '+tkm+' km · <b>'+tko.toFixed(2)+' €</b><br>'
-        +'<span style="font-size:11px;color:var(--muted)">'+fmtDate(earliest)+' – '+fmtDate(latest)+'</span></div>'
-        +sub.entries.map(e=>'<div style="font-size:12px;padding:5px 0;border-bottom:1px solid var(--border)">'+fmtDate(e.datum)+' · '+e.von+' → '+e.nach+' · <b>'+e.km+' km</b> · '+e.kosten.toFixed(2)+' €'+(e.zweck?' · <i>'+e.zweck+'</i>':'')+'</div>').join('')
-        +'<textarea class="comment-input" id="comment_'+sub.mitarbeiter+'" placeholder="Kommentar (optional)"></textarea>'
-        +'<div class="approval-actions">'
-        +'<button class="approve-btn" onclick="approveEntry(\''+sub.mitarbeiter+'\')">Genehmigen ✓</button>'
-        +'<button class="reject-btn" onclick="rejectEntry(\''+sub.mitarbeiter+'\')">Zurücksenden</button>'
-        +'</div></div>';
-    });
-  } else {
-    h+='<div class="empty-state"><div class="icon">📬</div>Keine offenen Einreichungen.</div>';
-  }
-
-  // Genehmigte / Ausgezahlte
-  if(approved.length){
-    h+='<div class="admin-section-title" style="margin-top:24px">Genehmigte Abrechnungen</div>';
-    approved.forEach(sub=>{
-      const tkm=sub.entries.reduce((s,e)=>s+e.km,0);
-      const tko=sub.entries.reduce((s,e)=>s+e.kosten,0);
-      const isPaid=sub.status==='paid';
-      h+='<div class="approval-card approved" data-subid="'+sub.submissionId+'">'
-        +'<div class="approval-top"><div class="approval-name">'+sub.mitarbeiterName+'</div>'
-        +(isPaid
-          ?'<span class="status-badge approved">💶 Ausgezahlt '+fmtDate(sub.paidAt?.substring(0,10)||sub.submittedAt.substring(0,10))+'</span>'
-          :'<span class="status-badge" style="background:#e8f0ea;color:var(--green2)">✓ Genehmigt</span>')
-        +'</div>'
-        +'<div class="approval-stats">'+sub.entries.length+' Fahrten · '+tkm+' km · <b>'+tko.toFixed(2)+' €</b></div>'
-        +(sub.comment?'<div style="font-size:12px;color:var(--muted);margin-bottom:8px">💬 '+sub.comment+'</div>':'')
-        +(!isPaid
-        ? '<button onclick="markPaid(\''+sub.submissionId+'\')" style="width:100%;background:var(--green);color:white;border:none;border-radius:12px;padding:14px;font-family:DM Sans,sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px;letter-spacing:.02em">💶 Jetzt als ausgezahlt markieren</button>'
-        : '<div style="background:#d1e7dd;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;font-weight:600;color:#0a5c36;text-align:center">💶 Ausgezahlt am '+fmtDate(sub.paidAt?.substring(0,10)||'')+' ✓</div>')
-        +'<div class="export-row" style="margin-top:8px">'
-        +'<button class="export-btn" onclick="belegPDF(currentAdminSubs[\''+sub.submissionId+'\'])">📄 Beleg PDF</button>'
-        +'</div></div>';
-    });
-  }
-
-  document.getElementById('adminContent').innerHTML=h||'<div class="empty-state"><div class="icon">📋</div>Noch keine Abrechnungen.</div>';
+  renderAdminHTML(pending, approved);
 }
 
 async function approveEntry(id){
@@ -809,15 +812,35 @@ async function rejectEntry(id){
 }
 
 async function markPaid(subId){
+  const paidAt=new Date().toISOString();
   try {
     await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({type:'updateStatus',submissionId:subId,status:'paid'})});
+      body:JSON.stringify({type:'updateStatus',submissionId:subId,status:'paid',paidAt})});
   } catch(e){}
+  // Lokal in currentAdminSubs aktualisieren für sofortige UI-Aktualisierung
+  if(window.currentAdminSubs&&window.currentAdminSubs[subId]){
+    window.currentAdminSubs[subId].status='paid';
+    window.currentAdminSubs[subId].paidAt=paidAt;
+  }
   // localStorage sync
   const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
-  Object.keys(all).forEach(k=>{if(all[k].submissionId===subId||k===subId){all[k].status='paid';all[k].paidAt=new Date().toISOString();}});
+  Object.keys(all).forEach(k=>{
+    if(all[k].submissionId===subId||k===subId){
+      all[k].status='paid'; all[k].paidAt=paidAt;
+    }
+  });
   localStorage.setItem('fb_all_submissions',JSON.stringify(all));
-  showToast('Als ausgezahlt markiert 💶','success'); renderAdmin();
+  showToast('Ausgezahlt markiert 💶','success');
+  // UI sofort neu rendern ohne Sheet-Reload
+  renderAdminFromCache();
+}
+
+function renderAdminFromCache(){
+  if(!window.currentAdminSubs) return renderAdmin();
+  const subs=Object.values(window.currentAdminSubs);
+  const pending=subs.filter(s=>s.status==='pending');
+  const approved=subs.filter(s=>s.status==='approved'||s.status==='paid');
+  renderAdminHTML(pending, approved);
 }
 
 function belegPDF(sub){
