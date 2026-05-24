@@ -648,11 +648,20 @@ function renderEntries(){
       if(arr2.length) renderEntries();
     });
   }
-  const subs=JSON.parse(localStorage.getItem('fb_submissions_'+currentUser.id)||'{}');
+  // Alle eingereichten IDs sammeln
+  const submittedIds=new Set();
+  Object.keys(localStorage).forEach(k=>{
+    if(k.startsWith('fb_pending_'+currentUser.id)){
+      try{
+        const p=JSON.parse(localStorage.getItem(k)||'null');
+        if(p&&p.entries) p.entries.forEach(e=>submittedIds.add(String(e.id)));
+      }catch(e){}
+    }
+  });
   const el=document.getElementById('entriesList');
   if(!arr.length){el.innerHTML='<div class="empty-state"><div class="icon">🚗</div>Noch keine Fahrten.</div>';return;}
   el.innerHTML=arr.map(e=>{
-    const locked=subs[e.monat]&&(subs[e.monat].status==='pending'||subs[e.monat].status==='approved');
+    const locked=submittedIds.has(String(e.id));
     return '<div class="entry-card">'
       +'<div class="entry-top"><div class="entry-route">'+e.von+' → '+e.nach+'</div><div class="entry-date">'+fmtDate(e.datum)+'</div></div>'
       +'<div class="entry-meta"><span class="entry-badge km">'+e.km+' km</span><span class="entry-badge cost">'+e.kosten.toFixed(2)+' €</span>'+(e.dauer?'<span class="entry-badge">🕐 '+e.dauer+'</span>':'')+'</div>'
@@ -667,17 +676,21 @@ function deleteEntry(id){
   if(!confirm('Löschen?'))return;
   const key='fb_entries_'+currentUser.id;
   const entries=JSON.parse(localStorage.getItem(key)||'[]');
+  const doDelete=(arr)=>{
+    // Typ-sicherer Vergleich
+    const filtered=arr.filter(e=>String(e.id)!==String(id));
+    localStorage.setItem(key,JSON.stringify(filtered));
+    renderEntries();
+    showToast('Gelöscht');
+  };
   if(!entries.length){
-    showToast('Einträge werden neu geladen…');
+    showToast('Lade Einträge…');
     syncEntriesFromSheet().then(()=>{
-      const updated=JSON.parse(localStorage.getItem(key)||'[]').filter(e=>e.id!==id);
-      localStorage.setItem(key,JSON.stringify(updated));
-      renderEntries();
+      doDelete(JSON.parse(localStorage.getItem(key)||'[]'));
     });
     return;
   }
-  localStorage.setItem(key,JSON.stringify(entries.filter(e=>e.id!==id)));
-  renderEntries(); showToast('Gelöscht');
+  doDelete(entries);
 }
 
 function editEntry(id){
