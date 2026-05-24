@@ -1162,11 +1162,11 @@ async function approveEntry(id){
       }
     });
   }
-  // Apps Script updaten (zuverlässiger als Netlify Function)
-  fetch(APPS_SCRIPT_URL,{
-    method:'POST',mode:'no-cors',
+  // Netlify Function für zuverlässiges Sheet-Update
+  fetch('/.netlify/functions/sheet',{
+    method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({type:'updateStatus',submissionId:subId,mitarbeiter:id,status:'approved',comment})
+    body:JSON.stringify({action:'updateStatus',submissionId:subId,mitarbeiter:id,status:'approved',comment})
   }).catch(()=>{});
   // Status lokal speichern damit Refresh ihn nicht überschreibt
   const overrides=JSON.parse(localStorage.getItem('fb_status_overrides')||'{}');
@@ -1184,8 +1184,11 @@ async function rejectEntry(id){
   const subData=window['subData_'+id]||{};
   const subId=subData.submissionId||id;
   try {
-    await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({type:'updateStatus',submissionId:subId,status:'rejected',comment})});
+    await fetch('/.netlify/functions/sheet',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'updateStatus',submissionId:subId,status:'rejected',comment})
+    });
   } catch(e){}
   showToast('Zurückgesendet');
   setTimeout(()=>renderAdmin(), 500);
@@ -1195,8 +1198,11 @@ async function markPaid(subId){ markPaidByIndex(-1, subId); }
 
 async function markPaidByIndex(idx, subId){
   const paidAt=new Date().toISOString();
-  fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({type:'updateStatus',submissionId:subId,status:'paid',paidAt})}).catch(()=>{});
+  fetch('/.netlify/functions/sheet',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'updateStatus',submissionId:subId,status:'paid',paidAt})
+  }).catch(()=>{});
   if(window.adminSubsRaw && window.adminSubsRaw[idx]){
     window.adminSubsRaw[idx]['Status']='paid';
     window.adminSubsRaw[idx]['Ausgezahlt am']=paidAt;
