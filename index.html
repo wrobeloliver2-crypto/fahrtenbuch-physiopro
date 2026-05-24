@@ -332,6 +332,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
     <div class="section-sub">Offene Einreichungen der Mitarbeiter:innen</div>
     <div id="adminDebug" style="background:#fff3cd;border-radius:8px;padding:10px;margin-bottom:12px;font-size:11px;display:none;word-break:break-all"></div>
     <div id="adminContent"></div>
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Verwaltung</div>
+      <button onclick="clearOverrides()" style="background:white;border:1.5px solid var(--red);color:var(--red);border-radius:10px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;width:100%">🗑 Alle lokalen Status-Overrides löschen</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px">Nutze dies wenn überwiesene Einträge nicht verschwinden</div>
+    </div>
   </div>
 </div>
 
@@ -1213,6 +1218,16 @@ async function markPaidByIndex(idx, subId){
   }
   showToast('Als überwiesen markiert 💶','success');
   renderAdminFromRaw();
+}
+
+function clearOverrides(){
+  if(!confirm("Alle lokalen Status-Overrides löschen? Das Sheet bleibt unverändert.")) return;
+  Object.keys(localStorage).forEach(k=>{
+    if(k.startsWith("fb_status_overrides")||k.startsWith("fb_pending_")||k.startsWith("fb_approved_")) localStorage.removeItem(k);
+  });
+  window.adminSubsRaw=null;
+  showToast("Overrides gelöscht","success");
+  renderAdmin();
 }
 
 function renderAdminFromCache(){
