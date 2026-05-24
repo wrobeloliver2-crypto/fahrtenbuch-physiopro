@@ -5,7 +5,7 @@
 
 var SHEET_ID        = '1e5U3sTeNW27KX4jfQY_yaO9Pu2XvKo9IJZZKn6nvgQo';
 var SHEET_FAHRTEN   = 'Fahrten';
-var SHEET_ABSCHLUSS = 'Monatsabschlüsse';
+var SHEET_ABSCHLUSS = 'Abschluesse';
 
 // ── GET: Daten lesen ──────────────────────────────────────────
 function doGet(e) {
