@@ -245,18 +245,24 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 
     <div class="form-group">
       <label class="form-label">📍 Abfahrtsort</label>
-      <div class="maps-field-wrap">
-        <input type="text" class="form-input" id="inputVon" placeholder="Adresse eingeben…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-        <span class="maps-icon">🔍</span>
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <div class="maps-field-wrap" style="flex:1">
+          <input type="text" class="form-input" id="inputVon" placeholder="Straße eingeben…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <span class="maps-icon">🔍</span>
+        </div>
+        <input type="text" class="form-input" id="inputVonNr" placeholder="Nr." style="width:64px;flex-shrink:0" inputmode="text" onblur="combineAddress('Von')">
       </div>
       <button type="button" onclick="setPraxis('inputVon')" style="margin-top:6px;background:#e8f0ea;border:1.5px solid var(--green);border-radius:8px;padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--green2);cursor:pointer;width:100%;text-align:left">🏥 Praxis – Segeberger Str. 1, Stockelsdorf</button>
     </div>
 
     <div class="form-group">
       <label class="form-label">🏁 Zielort</label>
-      <div class="maps-field-wrap">
-        <input type="text" class="form-input" id="inputNach" placeholder="Adresse eingeben…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-        <span class="maps-icon">🔍</span>
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <div class="maps-field-wrap" style="flex:1">
+          <input type="text" class="form-input" id="inputNach" placeholder="Straße eingeben…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <span class="maps-icon">🔍</span>
+        </div>
+        <input type="text" class="form-input" id="inputNachNr" placeholder="Nr." style="width:64px;flex-shrink:0" inputmode="text" onblur="combineAddress('Nach')">
       </div>
       <button type="button" onclick="setPraxis('inputNach')" style="margin-top:6px;background:#e8f0ea;border:1.5px solid var(--green);border-radius:8px;padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--green2);cursor:pointer;width:100%;text-align:left">🏥 Praxis – Segeberger Str. 1, Stockelsdorf</button>
     </div>
@@ -511,12 +517,21 @@ function initMaps(){
   acNach=new google.maps.places.Autocomplete(document.getElementById('inputNach'),opts);
   acVon.addListener('place_changed', ()=>{
     const p=acVon.getPlace();
-    if(p&&p.formatted_address) document.getElementById('inputVon').value=p.formatted_address;
+    if(p&&p.name) {
+      // Nur Straßenname ohne Nummer übernehmen wenn Nr-Feld existiert
+      const nr = document.getElementById('inputVonNr').value.trim();
+      const street = p.name || p.formatted_address;
+      document.getElementById('inputVon').value = nr ? street.replace(/\s*\d+[a-z]?$/i,'').trim() : (p.formatted_address||street);
+    }
     resetRoute();
   });
   acNach.addListener('place_changed',()=>{
     const p=acNach.getPlace();
-    if(p&&p.formatted_address) document.getElementById('inputNach').value=p.formatted_address;
+    if(p&&p.name) {
+      const nr = document.getElementById('inputNachNr').value.trim();
+      const street = p.name || p.formatted_address;
+      document.getElementById('inputNach').value = nr ? street.replace(/\s*\d+[a-z]?$/i,'').trim() : (p.formatted_address||street);
+    }
     resetRoute();
   });
 }
@@ -528,12 +543,14 @@ function resetRoute(){
 
 async function calculateRoute(){
   if(!mapsReady){showToast('Google Maps lädt…');return;}
-  const von=document.getElementById('inputVon').value.trim();
-  const nach=document.getElementById('inputNach').value.trim();
+  // Straße + Hausnummer kombinieren
+  const vonStreet=document.getElementById('inputVon').value.trim();
+  const vonNr=document.getElementById('inputVonNr').value.trim();
+  const nachStreet=document.getElementById('inputNach').value.trim();
+  const nachNr=document.getElementById('inputNachNr').value.trim();
+  const von = vonNr && !/\d/.test(vonStreet.split(',')[0].slice(-5)) ? vonStreet+' '+vonNr : vonStreet;
+  const nach = nachNr && !/\d/.test(nachStreet.split(',')[0].slice(-5)) ? nachStreet+' '+nachNr : nachStreet;
   if(!von||!nach){showToast('Start und Ziel eingeben.','error');return;}
-  // Sicherstellen dass volle Adresse genutzt wird
-  document.getElementById('inputVon').blur();
-  document.getElementById('inputNach').blur();
   const btn=document.getElementById('calcRouteBtn');
   btn.textContent='⏳ Berechne…'; btn.disabled=true;
   try {
@@ -585,14 +602,29 @@ function updateManualKm(){
 // ── EINTRAG SPEICHERN ──
 const PRAXIS_ADRESSE = 'Segeberger Straße 1, 23617 Stockelsdorf';
 
+function combineAddress(which) {
+  const street = document.getElementById('input'+which).value.trim();
+  const nr = document.getElementById('input'+which+'Nr').value.trim();
+  if(street && nr) {
+    // Hausnummer in Straße einfügen falls noch nicht drin
+    const hasNr = /\d/.test(street.split(',')[0].slice(-5));
+    if(!hasNr) {
+      // Straße vor erstem Komma nehmen und Nummer anhängen
+      const parts = street.split(',');
+      parts[0] = parts[0].replace(/\s+$/, '') + ' ' + nr;
+      document.getElementById('input'+which).value = parts.join(',');
+    }
+    resetRoute();
+  }
+}
+
 function setPraxis(fieldId){
   const input = document.getElementById(fieldId);
   input.value = PRAXIS_ADRESSE;
-  input.dispatchEvent(new Event('input'));
+  // Hausnummer-Feld leeren da bereits in Adresse
+  const nrField = document.getElementById(fieldId+'Nr');
+  if(nrField) nrField.value = '';
   resetRoute();
-  // Kurz focus/blur damit Autocomplete den Wert akzeptiert
-  input.focus();
-  setTimeout(()=>input.blur(), 50);
 }
 
 function setToday(){
@@ -606,8 +638,12 @@ function setToday(){
 
 function saveEntry(){
   const datum=document.getElementById('inputDatum').value;
-  const von=document.getElementById('inputVon').value.trim();
-  const nach=document.getElementById('inputNach').value.trim();
+  const vonS=document.getElementById('inputVon').value.trim();
+  const vonN=document.getElementById('inputVonNr').value.trim();
+  const nachS=document.getElementById('inputNach').value.trim();
+  const nachN=document.getElementById('inputNachNr').value.trim();
+  const von = vonN && !/\d/.test(vonS.split(',')[0].slice(-5)) ? vonS+' '+vonN : vonS;
+  const nach = nachN && !/\d/.test(nachS.split(',')[0].slice(-5)) ? nachS+' '+nachN : nachS;
   const zweck=document.getElementById('inputZweck').value.trim();
   if(!datum||!von||!nach){showToast('Datum, Start und Ziel ausfüllen.','error');return;}
   if(!calcKm||calcKm<=0){showToast('Bitte zuerst Strecke berechnen.','error');return;}
@@ -624,7 +660,9 @@ function saveEntry(){
   sendToSheet(entry);
   // Reset
   document.getElementById('inputVon').value='';
+  document.getElementById('inputVonNr').value='';
   document.getElementById('inputNach').value='';
+  document.getElementById('inputNachNr').value='';
   document.getElementById('inputZweck').value='';
   document.getElementById('routePreview').classList.remove('show');
   calcKm=0; calcDauer='';
