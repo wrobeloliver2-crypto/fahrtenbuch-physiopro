@@ -244,7 +244,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
     </div>
 
     <div class="form-group">
-      <label class="form-label">📍 Abfahrtsort</label>
+      <label class="form-label">📍 Abfahrtsort <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">— Straße wählen, dann Nr. eingeben</span></label>
       <div style="display:flex;gap:8px;align-items:flex-start">
         <div class="maps-field-wrap" style="flex:1">
           <input type="text" class="form-input" id="inputVon" placeholder="Straße eingeben…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
@@ -256,7 +256,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
     </div>
 
     <div class="form-group">
-      <label class="form-label">🏁 Zielort</label>
+      <label class="form-label">🏁 Zielort <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">— Straße wählen, dann Nr. eingeben</span></label>
       <div style="display:flex;gap:8px;align-items:flex-start">
         <div class="maps-field-wrap" style="flex:1">
           <input type="text" class="form-input" id="inputNach" placeholder="Straße eingeben…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
@@ -517,19 +517,26 @@ function initMaps(){
   acNach=new google.maps.places.Autocomplete(document.getElementById('inputNach'),opts);
   acVon.addListener('place_changed', ()=>{
     const p=acVon.getPlace();
-    if(p&&p.formatted_address){
-      document.getElementById('inputVon').value=p.formatted_address;
-      document.getElementById('inputVonNr').value=''; // Nr schon in Adresse
+    if(p){
+      // Nur Straßenname übernehmen (ohne Nummer) damit Nr-Feld genutzt wird
+      const name = p.name || '';
+      const strOnly = name.replace(/\s+\d+[a-zA-Z]?$/, '').trim();
+      document.getElementById('inputVon').value = strOnly || name;
     }
     resetRoute();
+    // Fokus auf Nr-Feld setzen
+    setTimeout(()=>document.getElementById('inputVonNr').focus(), 100);
   });
   acNach.addListener('place_changed',()=>{
     const p=acNach.getPlace();
-    if(p&&p.formatted_address){
-      document.getElementById('inputNach').value=p.formatted_address;
-      document.getElementById('inputNachNr').value=''; // Nr schon in Adresse
+    if(p){
+      const name = p.name || '';
+      const strOnly = name.replace(/\s+\d+[a-zA-Z]?$/, '').trim();
+      document.getElementById('inputNach').value = strOnly || name;
     }
     resetRoute();
+    // Fokus auf Nr-Feld setzen
+    setTimeout(()=>document.getElementById('inputNachNr').focus(), 100);
   });
 }
 
