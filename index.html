@@ -861,8 +861,10 @@ async function renderAdmin(){
         entries: (()=>{ try{ return JSON.parse(entriesJson); }catch(e){ return []; } })()
       };
     };
-    pending=subs.filter(s=>String(s['Status']).trim()==='pending').map(mapSubRow);
-    approved=subs.filter(s=>{ const st=String(s['Status']).trim(); return st==='approved'||st==='paid'; }).map(mapSubRow);
+    pending=subs.filter(s=>String(s['Status']).trim()==='pending').map(s=>{ try{return mapSubRow(s);}catch(e){return null;} }).filter(Boolean);
+    approved=subs.filter(s=>{ const st=String(s['Status']).trim(); return st==='approved'||st==='paid'; }).map(s=>{ try{return mapSubRow(s);}catch(e){return null;} }).filter(Boolean);
+    const dbg3=document.getElementById('adminDebug');
+    if(dbg3){dbg3.textContent+=' | pending:'+pending.length+' approved:'+approved.length+' entries[0]:'+JSON.stringify(pending[0]?.entries?.length);}
   pending.forEach(s=>{window.currentAdminSubs[s.submissionId]=s;});
   approved.forEach(s=>{window.currentAdminSubs[s.submissionId]=s;});
   } catch(e) {
