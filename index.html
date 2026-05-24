@@ -443,8 +443,8 @@ async function syncEntriesFromSheet(){
       datum: String(e['Datum']).substring(0,10),
       von: e['Abfahrt']||'',
       nach: e['Ziel']||'',
-      km: parseFloat(e['km'])||0,
-      kosten: parseFloat(e['Kosten (€)'])||0,
+      km: Math.round((parseFloat(String(e['km']).replace(',','.'))||0)*10)/10,
+      kosten: Math.round((parseFloat(String(e['Kosten (€)']).replace(',','.'))||0)*100)/100,
       dauer: e['Fahrzeit']||'',
       zweck: e['Zweck']||'',
       mitarbeiter: e['Mitarbeiter']||currentUser.id,
@@ -676,16 +676,19 @@ function editEntry(id){
 // ── AUSWERTUNG ──
 function fillMonthSelectors(){ /* nicht mehr genutzt */ }
 
+function parseNum(v){ return parseFloat(String(v).replace(',','.')) || 0; }
+
 function renderAuswertung(){
   if(!currentUser)return;
   const allEntries=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]');
+  // km und kosten normalisieren
+  allEntries.forEach(e=>{ e.km=parseNum(e.km); e.kosten=parseNum(e.kosten); });
   const pending=JSON.parse(localStorage.getItem('fb_pending_'+currentUser.id)||'null');
-  // Offene Fahrten = alle die nicht in einer pending/approved Einreichung sind
   const submittedIds=new Set((pending?.entries||[]).map(e=>e.id));
   const approvedSubs=JSON.parse(localStorage.getItem('fb_approved_'+currentUser.id)||'[]');
   const approvedIds=new Set(approvedSubs.flatMap(s=>s.entries.map(e=>e.id)));
   const open=allEntries.filter(e=>!submittedIds.has(e.id)&&!approvedIds.has(e.id));
-  const tkm=open.reduce((s,e)=>s+e.km,0);
+  const tkm=Math.round(open.reduce((s,e)=>s+e.km,0)*10)/10;
   const tko=open.reduce((s,e)=>s+e.kosten,0);
 
   let h='<div class="summary-card">';
