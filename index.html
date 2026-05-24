@@ -627,13 +627,20 @@ function setPraxis(fieldId){
   resetRoute();
 }
 
-function setToday(){
+function setToday(prevNach=null, prevNachNr=null){
   const t=new Date();
   document.getElementById('inputDatum').value=t.toISOString().split('T')[0];
   document.getElementById('todayDate').textContent=t.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  // Abfahrt auf Praxis vorbelegen
+  // Abfahrt = vorheriges Ziel, sonst Praxis
   const vonField = document.getElementById('inputVon');
-  if(!vonField.value) vonField.value = PRAXIS_ADRESSE;
+  const vonNrField = document.getElementById('inputVonNr');
+  if(prevNach) {
+    vonField.value = prevNach;
+    if(vonNrField) vonNrField.value = prevNachNr||'';
+  } else if(!vonField.value) {
+    vonField.value = 'Segeberger Straße';
+    if(vonNrField) vonNrField.value = '1';
+  }
 }
 
 function saveEntry(){
@@ -659,6 +666,9 @@ function saveEntry(){
   localStorage.setItem(key,JSON.stringify(arr));
   sendToSheet(entry);
   // Reset
+  // Ziel merken für nächste Abfahrt
+  const lastNach = document.getElementById('inputNach').value.trim();
+  const lastNachNr = document.getElementById('inputNachNr').value.trim();
   document.getElementById('inputVon').value='';
   document.getElementById('inputVonNr').value='';
   document.getElementById('inputNach').value='';
@@ -666,7 +676,7 @@ function saveEntry(){
   document.getElementById('inputZweck').value='';
   document.getElementById('routePreview').classList.remove('show');
   calcKm=0; calcDauer='';
-  setToday();
+  setToday(lastNach, lastNachNr);
   showToast('Fahrt gespeichert ✓','success');
 }
 
