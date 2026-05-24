@@ -1020,6 +1020,8 @@ async function renderAdmin(){
       }
     });
     // Daten global speichern für belegPDF
+    // Neueste zuerst (nach Eingereicht-Datum sortieren)
+    subs.sort((a,b)=>String(b["Eingereicht am"]||"").localeCompare(String(a["Eingereicht am"]||"")));
     window.adminSubsRaw = subs;
     content.innerHTML = html || '<div class="empty-state"><div class="icon">📬</div>Keine Einreichungen.</div>';
 
