@@ -901,11 +901,14 @@ async function renderAdmin(){
       } else {
         if(s['Kommentar']) html += '<div style="font-size:12px;color:var(--muted);margin-top:4px">💬 '+s['Kommentar']+'</div>';
         if(!isPaid){
-          html += '<button onclick="markPaid(\'sub_'+i+'\', '+i+')" style="width:100%;background:var(--green);color:white;border:none;border-radius:12px;padding:14px;font-family:DM Sans,sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px">💶 Jetzt als ausgezahlt markieren</button>';
+          html += '<button onclick="markPaidByIndex('+i+', \'sub_'+i+'\')" style="width:100%;background:var(--green);color:white;border:none;border-radius:12px;padding:14px;font-family:DM Sans,sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px">💶 Als überwiesen markieren</button>';
         } else {
-          html += '<div style="background:#d1e7dd;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;font-weight:600;color:#0a5c36;text-align:center">💶 Ausgezahlt</div>';
+          html += '<div style="background:#d1e7dd;border-radius:10px;padding:10px 14px;margin-top:6px;font-size:13px;font-weight:600;color:#0a5c36;text-align:center">💶 Überwiesen ✓</div>';
         }
-        html += '<div style="margin-top:8px"><button class="export-btn" style="width:100%" onclick="belegPDFDirect('+i+')">📄 Beleg PDF</button></div>';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">';
+        html += '<button class="export-btn" onclick="belegPDFDirect('+i+')">📄 Beleg PDF</button>';
+        html += '<button class="export-btn" style="border-color:var(--green);color:var(--green)" onclick="sendBelegEmail('+i+')">📧 An Buchhaltung</button>';
+        html += '</div>';
       }
       html += '</div>';
     });
@@ -920,6 +923,28 @@ async function renderAdmin(){
   }
 }
 
+function sendBelegEmail(idx){
+  const s = window.adminSubsRaw[idx];
+  if(!s) return;
+  let entries = [];
+  Object.values(s).forEach(v => { if(String(v).startsWith('[{')){ try{entries=JSON.parse(String(v));}catch(e){} } });
+  const name = s['Name']||s['Mitarbeiter']||'';
+  const tkm = entries.reduce((sum,e)=>sum+(parseFloat(e.km)||0),0);
+  const tko = entries.reduce((sum,e)=>sum+(parseFloat(e.kosten)||0),0);
+  const datum = new Date().toLocaleDateString('de-DE');
+  const subject = encodeURIComponent('Fahrtkostenabrechnung '+name+' – '+datum);
+  const body = encodeURIComponent(
+    'Hallo,\n\nbitte finde anbei die Fahrtkostenabrechnung für '+name+'.\n\n'+
+    'Fahrten: '+entries.length+'\n'+
+    'Kilometer: '+tkm+' km\n'+
+    'Erstattungsbetrag: '+tko.toFixed(2)+' € (à 0,30 €/km)\n\n'+
+    'Bitte überweise den Betrag an die Mitarbeiter:in.\n\n'+
+    'Viele Grüße\nPhysioPro Lübeck'
+  );
+  window.open('mailto:physioproluebeck@getmyinvoices.net?subject='+subject+'&body='+body);
+  showToast('E-Mail wird geöffnet…','success');
+}
+
 function belegPDFDirect(idx){
   const s = window.adminSubsRaw[idx];
   if(!s) return;
@@ -932,58 +957,39 @@ function belegPDFDirect(idx){
 async function approveEntry(id){
   const btn=event.target; btn.disabled=true; btn.textContent='⏳';
   const comment=document.getElementById('comment_'+id)?.value||'';
-  // submissionId aus dem aktuell geladenen DOM ermitteln
-  const subId=btn.closest('.approval-card')?.dataset?.subid||id;
+  const subData=window['subData_'+id]||{};
+  const subId=subData.submissionId||id;
   try {
     await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({type:'updateStatus',submissionId:subId,status:'approved',comment})});
   } catch(e){}
-  // localStorage sync
-  const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
-  if(all[id]){all[id].status='approved';all[id].comment=comment;all[id].approvedAt=new Date().toISOString();}
-  localStorage.setItem('fb_all_submissions',JSON.stringify(all));
-  localStorage.removeItem('fb_pending_'+id);
-  showToast('Genehmigt ✓','success'); renderAdmin();
+  showToast('Genehmigt ✓','success');
+  setTimeout(()=>renderAdmin(), 500);
 }
 
 async function rejectEntry(id){
   const comment=document.getElementById('comment_'+id)?.value||'';
   if(!comment){showToast('Bitte Kommentar eingeben.','error');return;}
-  const subId=event.target.closest('.approval-card')?.dataset?.subid||id;
+  const subData=window['subData_'+id]||{};
+  const subId=subData.submissionId||id;
   try {
     await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({type:'updateStatus',submissionId:subId,status:'rejected',comment})});
   } catch(e){}
-  const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
-  if(all[id]){all[id].status='rejected';all[id].comment=comment;}
-  localStorage.setItem('fb_all_submissions',JSON.stringify(all));
-  const pend=JSON.parse(localStorage.getItem('fb_pending_'+id)||'null');
-  if(pend){pend.status='rejected';pend.comment=comment;localStorage.setItem('fb_pending_'+id,JSON.stringify(pend));}
-  showToast('Zurückgesendet'); renderAdmin();
+  showToast('Zurückgesendet');
+  setTimeout(()=>renderAdmin(), 500);
 }
 
 async function markPaid(subId){ markPaidByIndex(-1, subId); }
 
 async function markPaidByIndex(idx, subId){
   const paidAt=new Date().toISOString();
-  // Direkt im approvedList aktualisieren
-  if(window.approvedList&&idx>=0&&window.approvedList[idx]){
-    window.approvedList[idx].status='paid';
-    window.approvedList[idx].paidAt=paidAt;
-    subId=window.approvedList[idx].submissionId||subId;
-  }
-  // Sheet aktualisieren
   try {
     await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({type:'updateStatus',submissionId:subId,status:'paid',paidAt})});
   } catch(e){}
-  showToast('Ausgezahlt markiert 💶','success');
-  // UI sofort neu rendern aus approvedList
-  if(window.pendingList&&window.approvedList){
-    renderAdminHTML(window.pendingList, window.approvedList);
-  } else {
-    renderAdmin();
-  }
+  showToast('Als überwiesen markiert 💶','success');
+  setTimeout(()=>renderAdmin(), 500);
 }
 
 function renderAdminFromCache(){
