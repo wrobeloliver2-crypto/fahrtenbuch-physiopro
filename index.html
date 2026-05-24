@@ -1198,7 +1198,7 @@ async function markPaidByIndex(idx, subId){
   if(window.adminSubsRaw && window.adminSubsRaw[idx]){
     window.adminSubsRaw[idx]['Status']='paid';
     window.adminSubsRaw[idx]['Ausgezahlt am']=paidAt;
-    const mitId=String(window.adminSubsRaw[idx]['Mitarbeiter']||'')'.split('_')[0];
+    const mitId=String(window.adminSubsRaw[idx]['Mitarbeiter']||'').split('_')[0];
     const ov=JSON.parse(localStorage.getItem('fb_status_overrides')||'{}')
     ov[mitId]={status:'paid',paidAt,approvedAt:String(window.adminSubsRaw[idx]['Genehmigt am']||'')};
     localStorage.setItem('fb_status_overrides',JSON.stringify(ov));
