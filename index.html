@@ -659,9 +659,23 @@ function renderEntries(){
     }
   });
   const el=document.getElementById('entriesList');
-  if(!arr.length){el.innerHTML='<div class="empty-state"><div class="icon">🚗</div>Noch keine Fahrten.</div>';return;}
-  el.innerHTML=arr.map(e=>{
-    const locked=submittedIds.has(String(e.id));
+  if(!arr.length && !submittedCount){el.innerHTML='<div class="empty-state"><div class="icon">🚗</div>Noch keine Fahrten.</div>';return;}
+  if(!arr.length && submittedCount){
+    el.innerHTML='<div class="empty-state"><div class="icon">📬</div>'
+      +submittedCount+' Fahrten eingereicht – wartet auf Genehmigung.<br><br>'
+      +'<button class="submit-btn" style="max-width:280px" onclick="showTab(\'tabAuswertung\')">📄 PDF erstellen</button>'
+      +'</div>';
+    return;
+  }
+  let listHtml='';
+  if(submittedCount){
+    listHtml+='<div style="background:#fff3cd;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#856404">'
+      +'⏳ '+submittedCount+' Fahrten eingereicht – wartet auf Genehmigung. '
+      +'<span onclick="showTab(\'tabAuswertung\')" style="text-decoration:underline;cursor:pointer">PDF erstellen</span>'
+      +'</div>';
+  }
+  el.innerHTML=listHtml+arr.map(e=>{
+    const locked=false; // eingereichte werden oben ausgefiltert
     return '<div class="entry-card">'
       +'<div class="entry-top"><div class="entry-route">'+e.von+' → '+e.nach+'</div><div class="entry-date">'+fmtDate(e.datum)+'</div></div>'
       +'<div class="entry-meta"><span class="entry-badge km">'+e.km+' km</span><span class="entry-badge cost">'+e.kosten.toFixed(2)+' €</span>'+(e.dauer?'<span class="entry-badge">🕐 '+e.dauer+'</span>':'')+'</div>'
@@ -986,10 +1000,29 @@ async function sendBelegEmail(idx){
 
 function belegPDFDirect(idx){
   const s = window.adminSubsRaw[idx];
-  if(!s) return;
+  if(!s){ showToast('Keine Daten.','error'); return; }
   let entries = [];
-  Object.values(s).forEach(v => { if(String(v).startsWith('[{')){ try{entries=JSON.parse(String(v));}catch(e){} } });
-  belegPDF({mitarbeiterName:s['Name']||s['Mitarbeiter'], entries, submittedAt:s['Eingereicht am']||'', status:s['Status']||''});
+  // JSON-String suchen - auch mit Whitespace oder anderen Zeichen davor
+  Object.values(s).forEach(v => {
+    const sv = String(v||'').trim();
+    if(sv.includes('[{') || sv.startsWith('[')){
+      try{
+        const start = sv.indexOf('[');
+        entries = JSON.parse(sv.substring(start));
+      }catch(e){}
+    }
+  });
+  // Datum robust parsen
+  const rawDate = String(s['Eingereicht am']||'');
+  const submittedAt = rawDate.match(/\d{2}\.\d{2}\.\d{4}/) ? rawDate.substring(0,10) : rawDate;
+  belegPDF({
+    mitarbeiterName: s['Name']||String(s['Mitarbeiter']||'').split('_')[0]||'?',
+    entries,
+    submittedAt,
+    approvedAt: String(s['Genehmigt am']||''),
+    paidAt: String(s['Ausgezahlt am']||''),
+    status: s['Status']||''
+  });
 }
 
 
@@ -1105,15 +1138,33 @@ function renderAdminFromCache(){
   renderAdminHTML(pending, approved);
 }
 
+function fmtDateSafe(s){
+  if(!s) return '–';
+  const str=String(s).trim();
+  // DD.MM.YYYY HH:MM:SS
+  if(str.match(/^\d{2}\.\d{2}\.\d{4}/)){
+    const p=str.substring(0,10).split('.');
+    return p[0]+'.'+p[1]+'.'+p[2];
+  }
+  // YYYY-MM-DD
+  if(str.match(/^\d{4}-\d{2}-\d{2}/)){
+    const d=new Date(str.substring(0,10)+'T12:00:00');
+    return isNaN(d)?str.substring(0,10):d.toLocaleDateString('de-DE');
+  }
+  // Timestamp
+  const d=new Date(str);
+  return isNaN(d)?str:d.toLocaleDateString('de-DE');
+}
+
 function belegPDF(sub){
   if(!sub||!sub.entries){showToast('Kein Beleg gefunden.','error');return;}
-  const tkm=sub.entries.reduce((s,e)=>s+e.km,0);
-  const tko=sub.entries.reduce((s,e)=>s+e.kosten,0);
+  const tkm=Math.round(sub.entries.reduce((s,e)=>s+(parseFloat(e.km)||0),0)*10)/10;
+  const tko=sub.entries.reduce((s,e)=>s+(parseFloat(e.kosten)||(parseFloat(e.km)||0)*0.30),0);
   const isPaid=sub.status==='paid';
   const rows=sub.entries.map(e=>
     '<tr><td>'+fmtDate(e.datum)+'</td><td>'+e.von+'</td><td>'+e.nach+'</td>'
     +'<td style="text-align:center">'+e.km+'</td>'
-    +'<td style="text-align:right">'+e.kosten.toFixed(2)+' €</td>'
+    +'<td style="text-align:right">'+(parseFloat(e.kosten)||(parseFloat(e.km)||0)*0.30).toFixed(2)+' €</td>'
     +'<td>'+(e.zweck||'–')+'</td></tr>'
   ).join('');
   const w=window.open('','_blank');
@@ -1146,8 +1197,8 @@ function belegPDF(sub){
   </div>
   <div class="info-grid">
     <div class="info-item"><label>Mitarbeiter:in</label><span>${sub.mitarbeiterName}</span></div>
-    <div class="info-item"><label>Eingereicht am</label><span>${new Date(sub.submittedAt).toLocaleDateString('de-DE')}</span></div>
-    <div class="info-item"><label>Genehmigt am</label><span>${sub.approvedAt?new Date(sub.approvedAt).toLocaleDateString('de-DE'):'–'}</span></div>
+    <div class="info-item"><label>Eingereicht am</label><span>${fmtDateSafe(sub.submittedAt)}</span></div>
+    <div class="info-item"><label>Genehmigt am</label><span>${sub.approvedAt?fmtDateSafe(sub.approvedAt):'–'}</span></div>
     <div class="info-item"><label>Km-Pauschale</label><span>0,30 € / km</span></div>
   </div>
   <table>
@@ -1201,12 +1252,18 @@ function exportPDFOpen(){
   const tkm=arr.reduce((s,e)=>s+e.km,0);
   const tko=arr.reduce((s,e)=>s+e.kosten,0);
   const label='Aktuelle Abrechnung – '+new Date().toLocaleDateString('de-DE');
-  const rows=arr.map(e=>'<tr><td>'+fmtDate(e.datum)+'</td><td>'+e.von+'</td><td>'+e.nach+'</td><td>'+e.km+'</td><td>'+(e.dauer||'–')+'</td><td>'+e.kosten.toFixed(2)+' €</td><td>'+(e.zweck||'–')+'</td></tr>').join('');
+  const rows=arr.map(e=>{
+    const datum = e.datum && String(e.datum).match(/^\d{4}-\d{2}-\d{2}/) ? fmtDate(e.datum) : '–';
+    const km = parseFloat(e.km)||0;
+    const kosten = parseFloat(e.kosten)||Math.round(km*0.30*100)/100;
+    const zweck = (e.zweck && !String(e.zweck).match(/^\d{2}\.\d{2}\.\d{4}/) && !String(e.zweck).match(/^\d{4}-\d{2}-\d{2}/)) ? e.zweck : '–';
+    return '<tr><td>'+datum+'</td><td>'+(e.von||'–')+'</td><td>'+(e.nach||'–')+'</td><td>'+km+'</td><td>'+(e.dauer||'–')+'</td><td>'+kosten.toFixed(2)+' € </td><td>'+zweck+'</td></tr>';
+  }).join('');
   const w=window.open('','_blank');
   w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Arial;font-size:12px;padding:24px}h1{font-size:18px}table{width:100%;border-collapse:collapse;margin-top:16px}th{background:#2c2825;color:#faf8f4;padding:6px 8px;text-align:left;font-size:11px}td{border-bottom:1px solid #ddd;padding:5px 8px}.total{margin-top:14px;font-weight:bold;color:#55725e}.sig{margin-top:40px;font-size:11px;color:#aaa;border-top:1px solid #ddd;padding-top:10px}</style></head><body>'
     +'<h1>Fahrtenbuch – '+currentUser.name+'</h1><p style="color:#888">'+label+' · PhysioPro Lübeck · '+new Date().toLocaleDateString('de-DE')+'</p>'
     +'<table><thead><tr><th>Datum</th><th>Abfahrt</th><th>Ziel</th><th>km</th><th>Fahrzeit</th><th>Kosten</th><th>Zweck</th></tr></thead><tbody>'+rows+'</tbody></table>'
-    +'<div class="total">Gesamt: '+arr.length+' Fahrten · '+tkm+' km · '+tko.toFixed(2)+' €</div>'
+    +'<div class="total">Gesamt: '+arr.length+' Fahrten · '+Math.round(tkm*10)/10+' km · '+tko.toFixed(2)+' €</div>'
     +'<div class="sig">Unterschrift MA: ___________________________ &nbsp;&nbsp; Unterschrift Leitung: ___________________________</div>'
     +'</body></html>');
   w.document.close(); w.print();
