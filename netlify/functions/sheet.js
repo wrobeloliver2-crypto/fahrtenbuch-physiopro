@@ -144,13 +144,11 @@ exports.handler = async (event) => {
       const commCol = headers.indexOf('Kommentar');
       const idCol   = headers.indexOf('ID');
       const col = n => String.fromCharCode(65+n);
-      const target = body.mitarbeiter||'';
       const updates = [];
       for (let i=1;i<rows.length;i++) {
-        const rowMit = String(rows[i][mitCol]||'').split('_')[0];
-        const rowId  = String(rows[i][idCol]||'');
-        const match  = rowMit===target || rowId===body.rowId;
-        if (!match) continue;
+        // Nur nach rowId matchen - eindeutig pro Einreichung
+        const rowId = String(rows[i][idCol]||'');
+        if (!rowId || rowId !== body.rowId) continue;
         const r = i+1;
         if (statCol>=0) updates.push({range:`${SHEET_ABSCHLUSS}!${col(statCol)}${r}`,values:[[body.status]]});
         if (body.comment && commCol>=0) updates.push({range:`${SHEET_ABSCHLUSS}!${col(commCol)}${r}`,values:[[body.comment]]});
