@@ -500,7 +500,7 @@ function showTab(id){
   if(i>=0&&tabs[i])tabs[i].classList.add('active');
   if(id==='tabEintraege')renderEntries();
   if(id==='tabAuswertung')renderAuswertung();
-  if(id==='tabAdmin')renderAdmin();
+  if(id==='tabAdmin'){ const fresh=window.adminJustUpdated&&(Date.now()-window.adminJustUpdated<30000); if(!window.adminSubsRaw||window.adminSubsRaw.length===0||!fresh) renderAdmin(); else renderAdminFromRaw(); }
 }
 
 // ── GOOGLE MAPS ──
@@ -1115,23 +1115,31 @@ function renderAdminFromRaw(){
   content.innerHTML=h||'<div class="empty-state"><div class="icon">📬</div>Keine Einreichungen.</div>';
 }
 async function approveEntry(id){
-  const btn=event.target; btn.disabled=true; btn.textContent='✓';
+  const btn=event.target; btn.disabled=true; btn.textContent='⏳';
   const comment=document.getElementById('comment_'+id)?.value||'';
   const subData=window['subData_'+id]||{};
   const subId=subData.submissionId||id;
-  // Sheet im Hintergrund
-  fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({type:'updateStatus',submissionId:subId,status:'approved',comment})}).catch(()=>{});
   // Cache sofort aktualisieren
   if(window.adminSubsRaw){
     window.adminSubsRaw.forEach(s=>{
       if((s['Mitarbeiter']||'').split('_')[0]===id||(s['Mitarbeiter']||'')===id){
         s['Status']='approved';
+        s['Genehmigt am']=new Date().toLocaleDateString('de-DE');
         if(comment) s['Kommentar']=comment;
       }
     });
   }
+  // Sheet über Netlify Function updaten
+  try{
+    await fetch('/.netlify/functions/sheet',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'updateStatus',submissionId:subId,status:'approved',comment})
+    });
+  } catch(e){console.warn('Sheet update:',e);}
   showToast('Genehmigt ✓','success');
+  window.adminJustUpdated=Date.now();
+  btn.disabled=false;
   renderAdminFromRaw();
 }
 
