@@ -517,20 +517,17 @@ function initMaps(){
   acNach=new google.maps.places.Autocomplete(document.getElementById('inputNach'),opts);
   acVon.addListener('place_changed', ()=>{
     const p=acVon.getPlace();
-    if(p&&p.name) {
-      // Nur Straßenname ohne Nummer übernehmen wenn Nr-Feld existiert
-      const nr = document.getElementById('inputVonNr').value.trim();
-      const street = p.name || p.formatted_address;
-      document.getElementById('inputVon').value = nr ? street.replace(/\s*\d+[a-z]?$/i,'').trim() : (p.formatted_address||street);
+    if(p&&p.formatted_address){
+      document.getElementById('inputVon').value=p.formatted_address;
+      document.getElementById('inputVonNr').value=''; // Nr schon in Adresse
     }
     resetRoute();
   });
   acNach.addListener('place_changed',()=>{
     const p=acNach.getPlace();
-    if(p&&p.name) {
-      const nr = document.getElementById('inputNachNr').value.trim();
-      const street = p.name || p.formatted_address;
-      document.getElementById('inputNach').value = nr ? street.replace(/\s*\d+[a-z]?$/i,'').trim() : (p.formatted_address||street);
+    if(p&&p.formatted_address){
+      document.getElementById('inputNach').value=p.formatted_address;
+      document.getElementById('inputNachNr').value=''; // Nr schon in Adresse
     }
     resetRoute();
   });
@@ -543,13 +540,15 @@ function resetRoute(){
 
 async function calculateRoute(){
   if(!mapsReady){showToast('Google Maps lädt…');return;}
-  // Straße + Hausnummer kombinieren
   const vonStreet=document.getElementById('inputVon').value.trim();
   const vonNr=document.getElementById('inputVonNr').value.trim();
   const nachStreet=document.getElementById('inputNach').value.trim();
   const nachNr=document.getElementById('inputNachNr').value.trim();
-  const von = vonNr && !/\d/.test(vonStreet.split(',')[0].slice(-5)) ? vonStreet+' '+vonNr : vonStreet;
-  const nach = nachNr && !/\d/.test(nachStreet.split(',')[0].slice(-5)) ? nachStreet+' '+nachNr : nachStreet;
+  // Nr nur anhängen wenn Straße noch keine Zahl hat
+  const hasNrVon = /\d/.test(vonStreet.replace(/\D*$/, '').slice(-6));
+  const hasNrNach = /\d/.test(nachStreet.replace(/\D*$/, '').slice(-6));
+  const von = (!hasNrVon && vonNr) ? vonStreet+' '+vonNr : vonStreet;
+  const nach = (!hasNrNach && nachNr) ? nachStreet+' '+nachNr : nachStreet;
   if(!von||!nach){showToast('Start und Ziel eingeben.','error');return;}
   const btn=document.getElementById('calcRouteBtn');
   btn.textContent='⏳ Berechne…'; btn.disabled=true;
@@ -649,8 +648,10 @@ function saveEntry(){
   const vonN=document.getElementById('inputVonNr').value.trim();
   const nachS=document.getElementById('inputNach').value.trim();
   const nachN=document.getElementById('inputNachNr').value.trim();
-  const von = vonN && !/\d/.test(vonS.split(',')[0].slice(-5)) ? vonS+' '+vonN : vonS;
-  const nach = nachN && !/\d/.test(nachS.split(',')[0].slice(-5)) ? nachS+' '+nachN : nachS;
+  const hasNrV=/\d/.test(vonS.replace(/\D*$/,'').slice(-6));
+  const hasNrN=/\d/.test(nachS.replace(/\D*$/,'').slice(-6));
+  const von = (!hasNrV && vonN) ? vonS+' '+vonN : vonS;
+  const nach = (!hasNrN && nachN) ? nachS+' '+nachN : nachS;
   const zweck=document.getElementById('inputZweck').value.trim();
   if(!datum||!von||!nach){showToast('Datum, Start und Ziel ausfüllen.','error');return;}
   if(!calcKm||calcKm<=0){showToast('Bitte zuerst Strecke berechnen.','error');return;}
