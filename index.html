@@ -438,6 +438,7 @@ function resetPin(){
 }
 
 function enterApp(){
+  window.entriesSyncDone=false;
   showScreen('screenApp');
   document.getElementById('userBadge').textContent=currentUser.name.split(' ')[0];
   document.getElementById('tabAdminLink').style.display=currentUser.isAdmin?'flex':'none';
@@ -691,14 +692,17 @@ function getSubmittedIds(){
 function renderEntries(){
   if(!currentUser)return;
   const allArr=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]');
-  // Wenn leer: vom Sheet laden
-  if(!allArr.length && APPS_SCRIPT_URL){
-    syncEntriesFromSheet().then(()=>{
-      if(JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]').length) renderEntries();
-    });
+  // Wenn leer: einmalig vom Sheet laden versuchen
+  if(!allArr.length && APPS_SCRIPT_URL && !window.entriesSyncDone){
+    window.entriesSyncDone=true;
     document.getElementById('entriesList').innerHTML='<div class="empty-state">⏳ Lade...</div>';
+    syncEntriesFromSheet().then(()=>{
+      window.entriesSyncDone=false;
+      renderEntries();
+    });
     return;
   }
+  window.entriesSyncDone=false;
   const submittedIds=getSubmittedIds();
   // Eingereichte ausfiltern
   const openArr=allArr.filter(e=>!submittedIds.has(String(e.id)));
@@ -731,13 +735,14 @@ function renderEntries(){
 function deleteEntry(id){
   if(!confirm('Löschen?'))return;
   const key='fb_entries_'+currentUser.id;
-  // Aus localStorage löschen
   const entries=JSON.parse(localStorage.getItem(key)||'[]');
   const filtered=entries.filter(e=>String(e.id)!==String(id));
   localStorage.setItem(key,JSON.stringify(filtered));
-  // Auch Sheet-Einträge neu laden damit sync stimmt
-  syncEntriesFromSheet().then(()=>renderEntries());
+  renderEntries();
   showToast('Gelöscht');
+  // Sheet-Eintrag auch löschen (fire-and-forget)
+  fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({type:'deleteEntry',id:String(id),mitarbeiter:currentUser.id})}).catch(()=>{});
 }
 
 function editEntry(id){
