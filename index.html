@@ -1039,7 +1039,24 @@ async function sendSubmissionToSheet(s){
 }
 
 // ── UTILS ──
-function fmtDate(s){return new Date(s+'T12:00:00').toLocaleDateString('de-DE',{day:'2-digit',month:'short',year:'2-digit'});}
+function fmtDate(s){
+  if(!s) return '–';
+  // Verschiedene Formate abfangen: YYYY-MM-DD, DD.MM.YYYY, timestamp
+  let d;
+  const str = String(s).trim();
+  if(str.match(/^\d{4}-\d{2}-\d{2}/)){
+    d = new Date(str.substring(0,10)+'T12:00:00');
+  } else if(str.match(/^\d{1,2}\.\d{1,2}\.\d{4}/)){
+    const p=str.split('.');
+    d = new Date(p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0')+'T12:00:00');
+  } else if(str.match(/^\d{4}\/\d{2}\/\d{2}/)){
+    d = new Date(str.substring(0,10).replace(/\//g,'-')+'T12:00:00');
+  } else {
+    d = new Date(str);
+  }
+  if(isNaN(d)) return str.substring(0,10)||'–';
+  return d.toLocaleDateString('de-DE',{day:'2-digit',month:'short',year:'2-digit'});
+}
 function showToast(msg,type=''){
   const t=document.getElementById('toast');
   t.textContent=msg; t.className='toast show'+(type?' '+type:'');
