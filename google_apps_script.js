@@ -61,6 +61,14 @@ function getSubmissions(ss) {
     for (var j = 0; j < headers.length; j++) {
       obj[headers[j]] = row[j];
     }
+    // Normalisierung: verschiedene Spaltennamen vereinheitlichen
+    obj['Status'] = obj['Status'] || 'pending';
+    obj['Mitarbeiter'] = obj['Mitarbeiter'] || obj['mitarbeiter'] || '';
+    obj['Name'] = obj['Name'] || obj['Mitarbeitername'] || '';
+    // ID: aus ID-Spalte oder zusammengebaut
+    obj['ID'] = obj['ID'] || obj['Mitarbeiter'] + '_' + String(obj['Eingereicht am']).substring(0,10);
+    // Einträge JSON
+    obj['Einträge (JSON)'] = obj['Einträge (JSON)'] || obj['Eintraege'] || '[]';
     submissions.push(obj);
   }
   return {submissions: submissions};
@@ -105,19 +113,20 @@ function writeEntry(ss, data) {
 // ── SCHREIBEN: Einreichung ────────────────────────────────────
 function writeSubmission(ss, data) {
   var sheet = getOrCreateSheet(ss, SHEET_ABSCHLUSS, [
-    'ID', 'Mitarbeiter', 'Name', 'Status',
-    'Fahrten', 'km gesamt', 'Kosten (€)',
-    'Eingereicht am', 'Genehmigt am', 'Ausgezahlt am', 'Kommentar', 'Einträge (JSON)'
+    'Mitarbeiter', 'Name', 'Monat', 'Status',
+    'Fahrten', 'km gesamt', 'Kosten gesamt', 'Eingereicht am',
+    'Genehmigt am', 'Ausgezahlt am', 'Kommentar', 'Einträge (JSON)', 'ID'
   ]);
-  var totalKm = data.entries.reduce(function(s,e){return s+e.km;}, 0);
-  var totalKosten = data.entries.reduce(function(s,e){return s+e.kosten;}, 0);
+  var totalKm = data.entries.reduce(function(s,e){return s+(parseFloat(String(e.km).replace(',','.'))||0);}, 0);
+  var totalKosten = data.entries.reduce(function(s,e){return s+(parseFloat(String(e.kosten).replace(',','.'))||0);}, 0);
+  var subId = data.mitarbeiter + '_' + data.submittedAt.substring(0,10);
   sheet.appendRow([
-    data.mitarbeiter + '_' + data.submittedAt.substring(0,10),
     data.mitarbeiter, data.mitarbeiterName,
+    data.submittedAt.substring(0,7),
     'pending', data.entries.length,
-    totalKm, totalKosten.toFixed(2),
+    Math.round(totalKm*10)/10, totalKosten.toFixed(2),
     new Date(data.submittedAt), '', '', '',
-    JSON.stringify(data.entries)
+    JSON.stringify(data.entries), subId
   ]);
 }
 
@@ -134,7 +143,14 @@ function updateSubmissionStatus(ss, data) {
   var commCol  = headers.indexOf('Kommentar');
 
   for (var i = 1; i < rows.length; i++) {
-    if (rows[i][idCol] === data.submissionId) {
+    // ID kann in verschiedenen Spalten stehen, oder aus Mitarbeiter+Datum zusammengebaut
+    var rowId = idCol >= 0 ? rows[i][idCol] : '';
+    var mitCol = headers.indexOf('Mitarbeiter');
+    var datCol = headers.indexOf('Eingereicht am');
+    if (!rowId && mitCol >= 0 && datCol >= 0) {
+      rowId = rows[i][mitCol] + '_' + String(rows[i][datCol]).substring(0,10);
+    }
+    if (rowId === data.submissionId) {
       sheet.getRange(i+1, statCol+1).setValue(data.status);
       if (data.comment) sheet.getRange(i+1, commCol+1).setValue(data.comment);
       if (data.status === 'approved') sheet.getRange(i+1, apprCol+1).setValue(new Date());
