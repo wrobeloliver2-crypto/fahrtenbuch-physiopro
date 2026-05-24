@@ -505,7 +505,7 @@ function showTab(id){
   const i=ids.indexOf(id);
   if(i>=0&&tabs[i])tabs[i].classList.add('active');
   if(id==='tabEintraege')renderEntries();
-  if(id==='tabAuswertung')renderAuswertung();
+  if(id==='tabAuswertung'){syncEntriesFromSheet().then(()=>renderAuswertung());}
   if(id==='tabAdmin') renderAdminFromRaw();
 }
 
@@ -994,6 +994,16 @@ async function renderAdmin(){
       html += '</div>';
     });
 
+    // Lokale Overrides anwenden (falls Sheet noch nicht aktualisiert)
+    const overrides=JSON.parse(localStorage.getItem('fb_status_overrides')||'{}');
+    subs.forEach(s=>{
+      const mitId=String(s['Mitarbeiter']||'').split('_')[0];
+      if(overrides[mitId]){
+        s['Status']=overrides[mitId].status;
+        if(overrides[mitId].comment) s['Kommentar']=overrides[mitId].comment;
+        if(overrides[mitId].approvedAt) s['Genehmigt am']=overrides[mitId].approvedAt;
+      }
+    });
     // Daten global speichern für belegPDF
     window.adminSubsRaw = subs;
     content.innerHTML = html || '<div class="empty-state"><div class="icon">📬</div>Keine Einreichungen.</div>';
@@ -1141,6 +1151,10 @@ async function approveEntry(id){
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({type:'updateStatus',submissionId:subId,mitarbeiter:id,status:'approved',comment})
   }).catch(()=>{});
+  // Status lokal speichern damit Refresh ihn nicht überschreibt
+  const overrides=JSON.parse(localStorage.getItem('fb_status_overrides')||'{}');
+  overrides[id]={status:'approved',comment,approvedAt:new Date().toISOString()};
+  localStorage.setItem('fb_status_overrides',JSON.stringify(overrides));
   showToast('Genehmigt ✓','success');
   window.adminJustUpdated=Date.now();
   btn.disabled=false;
