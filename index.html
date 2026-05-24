@@ -866,7 +866,8 @@ async function renderAdmin(){
   pending.forEach(s=>{window.currentAdminSubs[s.submissionId]=s;});
   approved.forEach(s=>{window.currentAdminSubs[s.submissionId]=s;});
   } catch(e) {
-    // Fallback localStorage
+    const dbg2=document.getElementById('adminDebug');
+    if(dbg2){dbg2.style.display='block';dbg2.textContent+=' | FEHLER: '+e.message;}
     const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
     pending=Object.values(all).filter(s=>s.status==='pending');
     approved=Object.values(all).filter(s=>s.status==='approved'||s.status==='paid');
