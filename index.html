@@ -842,22 +842,27 @@ async function renderAdmin(){
     // Debug
     const dbg=document.getElementById('adminDebug');
     if(dbg){dbg.style.display='block';dbg.textContent='Rows:'+subs.length+' | Status-Werte:'+subs.map(s=>s["Status"]).join(',')+'| Spalten:'+(subs[0]?Object.keys(subs[0]).join('|'):'-');}
-    pending=subs.filter(s=>String(s['Status']).trim()==='pending').map(s=>({
-      mitarbeiter:s['Mitarbeiter'], mitarbeiterName:s['Name'],
-      status:s['Status'], comment:s['Kommentar']||'',
-      submittedAt:s['Eingereicht am'], approvedAt:s['Genehmigt am']||'',
-      paidAt:s['Ausgezahlt am']||'',
-      submissionId:s['ID'],
-      entries:JSON.parse(s['Einträge (JSON)']||'[]')
-    }));
-    approved=subs.filter(s=>s['Status']==='approved'||s['Status']==='paid').map(s=>({
-      mitarbeiter:s['Mitarbeiter'], mitarbeiterName:s['Name'],
-      status:s['Status'], comment:s['Kommentar']||'',
-      submittedAt:s['Eingereicht am'], approvedAt:s['Genehmigt am']||'',
-      paidAt:s['Ausgezahlt am']||'',
-      submissionId:s['ID'],
-      entries:JSON.parse(s['Einträge (JSON)']||'[]')
-    }));
+    const mapSubRow=s=>{
+      // Einträge JSON: suche in allen Werten nach dem JSON-Array
+      let entriesJson='[]';
+      const vals=Object.values(s);
+      for(let v of vals){ const sv=String(v||''); if(sv.startsWith('[{')){ entriesJson=sv; break; } }
+      // ID: aus Mitarbeiter-Spalte (hat Format hanna_2026-05-24)
+      const mitId=s['Mitarbeiter']||'';
+      return {
+        mitarbeiter: mitId.split('_')[0]||mitId,
+        mitarbeiterName: s['Name']||s['mitarbeiterName']||mitId,
+        status: String(s['Status']||'').trim(),
+        comment: s['Kommentar']||s['kommentar']||'',
+        submittedAt: s['Eingereicht am']||s['submittedAt']||'',
+        approvedAt: s['Genehmigt am']||'',
+        paidAt: s['Ausgezahlt am']||'',
+        submissionId: mitId||s['ID']||'',
+        entries: (()=>{ try{ return JSON.parse(entriesJson); }catch(e){ return []; } })()
+      };
+    };
+    pending=subs.filter(s=>String(s['Status']).trim()==='pending').map(mapSubRow);
+    approved=subs.filter(s=>{ const st=String(s['Status']).trim(); return st==='approved'||st==='paid'; }).map(mapSubRow);
   pending.forEach(s=>{window.currentAdminSubs[s.submissionId]=s;});
   approved.forEach(s=>{window.currentAdminSubs[s.submissionId]=s;});
   } catch(e) {
