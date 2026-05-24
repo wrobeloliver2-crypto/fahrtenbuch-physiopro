@@ -495,10 +495,13 @@ async function syncEntriesFromSheet(){
     }).filter(e=>e.von&&e.nach&&e.km>0);
 
     if(sheetEntries.length>0){
-      localStorage.setItem('fb_entries_'+currentUser.id, JSON.stringify(sheetEntries));
-      showToast('✓ '+sheetEntries.length+' Einträge geladen', 'success');
+      // Gelöschte IDs aus deletedIds berücksichtigen
+      const deleted=JSON.parse(localStorage.getItem('fb_deleted_'+currentUser.id)||'[]');
+      const filtered=sheetEntries.filter(e=>!deleted.includes(String(e.id)));
+      localStorage.setItem('fb_entries_'+currentUser.id, JSON.stringify(filtered));
+      showToast('✓ '+filtered.length+' Einträge geladen', 'success');
     } else {
-      showToast('Keine Einträge im Sheet gefunden');
+      showToast('Keine Einträge im Sheet');
     }
   } catch(e){
     showToast('⚠️ Server nicht erreichbar', 'error');
@@ -524,7 +527,7 @@ function showTab(id){
   if(i>=0&&tabs[i])tabs[i].classList.add('active');
   if(id==='tabEintraege')renderEntries();
   if(id==='tabAuswertung'){syncEntriesFromSheet().then(()=>renderAuswertung());}
-  if(id==='tabAdmin') renderAdminFromRaw();
+  if(id==='tabAdmin') renderAdmin();
 }
 
 // ── GOOGLE MAPS ──
@@ -738,11 +741,13 @@ function deleteEntry(id){
   const entries=JSON.parse(localStorage.getItem(key)||'[]');
   const filtered=entries.filter(e=>String(e.id)!==String(id));
   localStorage.setItem(key,JSON.stringify(filtered));
+  // Gelöschte ID merken damit sync sie nicht wieder holt
+  const deletedKey='fb_deleted_'+currentUser.id;
+  const deleted=JSON.parse(localStorage.getItem(deletedKey)||'[]');
+  if(!deleted.includes(String(id))) deleted.push(String(id));
+  localStorage.setItem(deletedKey,JSON.stringify(deleted));
   renderEntries();
   showToast('Gelöscht');
-  // Sheet-Eintrag auch löschen (fire-and-forget)
-  fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({type:'deleteEntry',id:String(id),mitarbeiter:currentUser.id})}).catch(()=>{});
 }
 
 function editEntry(id){
