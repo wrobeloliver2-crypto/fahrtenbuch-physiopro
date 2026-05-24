@@ -923,26 +923,35 @@ async function renderAdmin(){
   }
 }
 
-function sendBelegEmail(idx){
+async function sendBelegEmail(idx){
   const s = window.adminSubsRaw[idx];
   if(!s) return;
   let entries = [];
   Object.values(s).forEach(v => { if(String(v).startsWith('[{')){ try{entries=JSON.parse(String(v));}catch(e){} } });
   const name = s['Name']||s['Mitarbeiter']||'';
-  const tkm = entries.reduce((sum,e)=>sum+(parseFloat(e.km)||0),0);
+  const tkm = Math.round(entries.reduce((sum,e)=>sum+(parseFloat(e.km)||0),0)*10)/10;
   const tko = entries.reduce((sum,e)=>sum+(parseFloat(e.kosten)||0),0);
-  const datum = new Date().toLocaleDateString('de-DE');
-  const subject = encodeURIComponent('Fahrtkostenabrechnung '+name+' – '+datum);
-  const body = encodeURIComponent(
-    'Hallo,\n\nbitte finde anbei die Fahrtkostenabrechnung für '+name+'.\n\n'+
-    'Fahrten: '+entries.length+'\n'+
-    'Kilometer: '+tkm+' km\n'+
-    'Erstattungsbetrag: '+tko.toFixed(2)+' € (à 0,30 €/km)\n\n'+
-    'Bitte überweise den Betrag an die Mitarbeiter:in.\n\n'+
-    'Viele Grüße\nPhysioPro Lübeck'
-  );
-  window.open('mailto:physioproluebeck@getmyinvoices.net?subject='+subject+'&body='+body);
-  showToast('E-Mail wird geöffnet…','success');
+  const datum = String(s['Eingereicht am']||'').substring(0,10);
+  showToast('⏳ Sende E-Mail…');
+  try {
+    const resp = await fetch('/.netlify/functions/sendmail', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        name, fahrten: entries.length,
+        km: tkm, kosten: tko.toFixed(2),
+        datum, entries
+      })
+    });
+    const result = await resp.json();
+    if(result.ok){
+      showToast('✓ E-Mail gesendet an Buchhaltung','success');
+    } else {
+      showToast('Fehler: '+result.error,'error');
+    }
+  } catch(e) {
+    showToast('Fehler beim Senden: '+e.message,'error');
+  }
 }
 
 function belegPDFDirect(idx){
