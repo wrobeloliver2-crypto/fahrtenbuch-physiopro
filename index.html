@@ -833,49 +833,101 @@ function renderAdminHTML(pending, approved){
 
 // ── ADMIN ──
 async function renderAdmin(){
-  document.getElementById('adminContent').innerHTML='<div class="empty-state">⏳ Lade Daten…</div>';
-  window.currentAdminSubs={};
-  let pending=[], approved=[];
+  const content = document.getElementById('adminContent');
+  const dbg = document.getElementById('adminDebug');
+  content.innerHTML='<div class="empty-state">⏳ Lade Daten…</div>';
+  if(dbg) dbg.style.display='none';
+
   try {
-    const json=await fetchFromSheet('getSubmissions');
-    const subs=json.submissions||[];
-    // Debug
-    const dbg=document.getElementById('adminDebug');
-    if(dbg){dbg.style.display='block';dbg.textContent='Rows:'+subs.length+' | Status-Werte:'+subs.map(s=>s["Status"]).join(',')+'| Spalten:'+(subs[0]?Object.keys(subs[0]).join('|'):'-');}
-    const mapSubRow=s=>{
-      // Einträge JSON: suche in allen Werten nach dem JSON-Array
-      let entriesJson='[]';
-      const vals=Object.values(s);
-      for(let v of vals){ const sv=String(v||''); if(sv.startsWith('[{')){ entriesJson=sv; break; } }
-      // ID: aus Mitarbeiter-Spalte (hat Format hanna_2026-05-24)
-      const mitId=s['Mitarbeiter']||'';
-      return {
-        mitarbeiter: mitId.split('_')[0]||mitId,
-        mitarbeiterName: s['Name']||s['mitarbeiterName']||mitId,
-        status: String(s['Status']||'').trim(),
-        comment: s['Kommentar']||s['kommentar']||'',
-        submittedAt: s['Eingereicht am']||s['submittedAt']||'',
-        approvedAt: s['Genehmigt am']||'',
-        paidAt: s['Ausgezahlt am']||'',
-        submissionId: mitId||s['ID']||'',
-        entries: (()=>{ try{ return JSON.parse(entriesJson); }catch(e){ return []; } })()
-      };
-    };
-    pending=subs.filter(s=>String(s['Status']).trim()==='pending').map(s=>{ try{return mapSubRow(s);}catch(e){return null;} }).filter(Boolean);
-    approved=subs.filter(s=>{ const st=String(s['Status']).trim(); return st==='approved'||st==='paid'; }).map(s=>{ try{return mapSubRow(s);}catch(e){return null;} }).filter(Boolean);
-    const dbg3=document.getElementById('adminDebug');
-    if(dbg3){dbg3.textContent+=' | pending:'+pending.length+' approved:'+approved.length+' entries[0]:'+JSON.stringify(pending[0]?.entries?.length);}
-  pending.forEach(s=>{window.currentAdminSubs[s.submissionId]=s;});
-  approved.forEach(s=>{window.currentAdminSubs[s.submissionId]=s;});
+    const json = await fetchFromSheet('getSubmissions');
+    const subs = json.submissions || [];
+
+    if(dbg){
+      dbg.style.display='block';
+      dbg.textContent = subs.length + ' Zeilen | ' + (subs[0] ? Object.keys(subs[0]).join(' | ') : 'leer');
+    }
+
+    if(!subs.length){ content.innerHTML='<div class="empty-state"><div class="icon">📬</div>Keine Einreichungen.</div>'; return; }
+
+    let html = '';
+    subs.forEach((s, i) => {
+      const status = String(s['Status']||s['status']||'').trim();
+      const name = s['Name'] || s['name'] || s['Mitarbeiter'] || '?';
+      const km = s['km gesamt'] || s['km'] || '?';
+      const kosten = s['Kosten gesamt (€)'] || s['Kosten gesamt'] || s['kosten'] || '?';
+      const fahrten = s['Fahrten'] || '?';
+      const datum = String(s['Eingereicht am'] || s['datum'] || '').substring(0,10);
+      const mitId = String(s['Mitarbeiter']||'').split('_')[0] || String(s['Mitarbeiter']||'');
+
+      // Einträge JSON aus irgendwelcher Spalte
+      let entries = [];
+      Object.values(s).forEach(v => {
+        if(String(v).startsWith('[{')){ try{ entries=JSON.parse(String(v)); }catch(e){} }
+      });
+
+      const isPending = status === 'pending';
+      const isApproved = status === 'approved';
+      const isPaid = status === 'paid';
+
+      html += '<div class="approval-card' + (isApproved||isPaid?' approved':'') + '" data-subid="sub_'+i+'">';
+      html += '<div class="approval-top"><div class="approval-name">'+name+'</div>';
+      html += isPending ? '<span class="status-badge pending">⏳ Offen</span>' :
+              isPaid ? '<span class="status-badge approved">💶 Ausgezahlt</span>' :
+              '<span class="status-badge" style="background:#e8f0ea;color:var(--green2)">✓ Genehmigt</span>';
+      html += '</div>';
+      html += '<div class="approval-stats">'+fahrten+' Fahrten · '+km+' km · <b>'+kosten+' €</b>';
+      if(datum) html += '<br><span style="font-size:11px;color:var(--muted)">Eingereicht: '+fmtDate(datum)+'</span>';
+      html += '</div>';
+
+      if(entries.length){
+        entries.forEach(e => {
+          html += '<div style="font-size:12px;padding:5px 0;border-bottom:1px solid var(--border)">'+
+            fmtDate(String(e.datum||'').substring(0,10))+' · '+(e.von||'?')+' → '+(e.nach||'?')+
+            ' · <b>'+(e.km||0)+' km</b> · '+(parseFloat(e.kosten||0)).toFixed(2)+' €'+
+            (e.zweck?' · <i>'+e.zweck+'</i>':'')+'</div>';
+        });
+      }
+
+      if(isPending){
+        html += '<textarea class="comment-input" id="comment_'+mitId+'" placeholder="Kommentar (optional)"></textarea>';
+        html += '<div class="approval-actions">';
+        html += '<button class="approve-btn" onclick="approveEntry(\''+mitId+'\')">Genehmigen ✓</button>';
+        html += '<button class="reject-btn" onclick="rejectEntry(\''+mitId+'\')">Zurücksenden</button>';
+        html += '</div>';
+        // Daten für approve merken
+        window['subData_'+mitId] = {mitarbeiter:mitId, mitarbeiterName:name, status, entries, submittedAt:datum, submissionId:'sub_'+i};
+        if(!window.currentAdminSubs) window.currentAdminSubs={};
+        window.currentAdminSubs[mitId] = window['subData_'+mitId];
+      } else {
+        if(s['Kommentar']) html += '<div style="font-size:12px;color:var(--muted);margin-top:4px">💬 '+s['Kommentar']+'</div>';
+        if(!isPaid){
+          html += '<button onclick="markPaid(\'sub_'+i+'\', '+i+')" style="width:100%;background:var(--green);color:white;border:none;border-radius:12px;padding:14px;font-family:DM Sans,sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px">💶 Jetzt als ausgezahlt markieren</button>';
+        } else {
+          html += '<div style="background:#d1e7dd;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;font-weight:600;color:#0a5c36;text-align:center">💶 Ausgezahlt</div>';
+        }
+        html += '<div style="margin-top:8px"><button class="export-btn" style="width:100%" onclick="belegPDFDirect('+i+')">📄 Beleg PDF</button></div>';
+      }
+      html += '</div>';
+    });
+
+    // Daten global speichern für belegPDF
+    window.adminSubsRaw = subs;
+    content.innerHTML = html || '<div class="empty-state"><div class="icon">📬</div>Keine Einreichungen.</div>';
+
   } catch(e) {
-    const dbg2=document.getElementById('adminDebug');
-    if(dbg2){dbg2.style.display='block';dbg2.textContent+=' | FEHLER: '+e.message;}
-    const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
-    pending=Object.values(all).filter(s=>s.status==='pending');
-    approved=Object.values(all).filter(s=>s.status==='approved'||s.status==='paid');
+    if(dbg){dbg.style.display='block'; dbg.textContent='FEHLER: '+e.message;}
+    content.innerHTML='<div class="empty-state">⚠️ Fehler beim Laden: '+e.message+'</div>';
   }
-  renderAdminHTML(pending, approved);
 }
+
+function belegPDFDirect(idx){
+  const s = window.adminSubsRaw[idx];
+  if(!s) return;
+  let entries = [];
+  Object.values(s).forEach(v => { if(String(v).startsWith('[{')){ try{entries=JSON.parse(String(v));}catch(e){} } });
+  belegPDF({mitarbeiterName:s['Name']||s['Mitarbeiter'], entries, submittedAt:s['Eingereicht am']||'', status:s['Status']||''});
+}
+
 
 async function approveEntry(id){
   const btn=event.target; btn.disabled=true; btn.textContent='⏳';
