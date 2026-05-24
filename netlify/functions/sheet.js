@@ -2,7 +2,7 @@ const https = require('https');
 
 exports.handler = async (event) => {
   const { action, mitarbeiter } = event.queryStringParameters || {};
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxZoI5zN_eIrWBR_LltWqDsri-Tvz8BNbrI2qVixEpJOIWVEuTwy9fTkqfcBe_-rgPB/exec';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgAg4IfoQP_BJHpQ8iD92r6lfr-TDcp1gelbbmxiN_qJEjjTeczgjMVKjq4EuOS9sm/exec';
   
   let url = `${SCRIPT_URL}?action=${action||'getSubmissions'}`;
   if (mitarbeiter) url += `&mitarbeiter=${encodeURIComponent(mitarbeiter)}`;
