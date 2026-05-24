@@ -531,14 +531,19 @@ function mapSheetEntries(rows) {
 }
 
 function renderEintraege(el, all, submittedIds) {
-  if (!all.length) { el.innerHTML='<div class="empty-state"><div class="icon">🚗</div>Noch keine Fahrten.</div>'; return; }
-  el.innerHTML = all.map(e => {
-    const locked = e.fromSheet; // Sheet-Einträge = eingereicht = gesperrt
+  // Nur lokale Einträge anzeigen (noch nicht eingereicht)
+  const local = all.filter(e => !e.fromSheet);
+  if (!local.length) {
+    const hasSubmitted = all.some(e => e.fromSheet);
+    el.innerHTML='<div class="empty-state"><div class="icon">'+(hasSubmitted?'📬':'🚗')+'</div>'+(hasSubmitted?'Alle Fahrten eingereicht.':'Noch keine Fahrten.')+'</div>';
+    return;
+  }
+  el.innerHTML = local.map(e => {
     return '<div class="entry-card">'+
       '<div class="entry-top"><div class="entry-route">'+e.von+' → '+e.nach+'</div><div class="entry-date">'+fmtDate(e.datum)+'</div></div>'+
       '<div class="entry-meta"><span class="badge km">'+e.km+' km</span><span class="badge eur">'+parseNum(e.kosten).toFixed(2)+' €</span>'+(e.dauer?'<span class="badge">🕐 '+e.dauer+'</span>':'')+'</div>'+
       (e.zweck?'<div class="entry-zweck">'+e.zweck+'</div>':'')+
-      (locked ? '<span class="locked-tag">🔒 Im Sheet</span>' : '<button class="del-btn" onclick="delFahrt('+e.id+')">🗑 Löschen</button>')+
+      '<button class="del-btn" onclick="delFahrt('+e.id+')">🗑 Löschen</button>'+
       '</div>';
   }).join('');
 }
@@ -710,7 +715,8 @@ async function doApprove(i) {
   const btn = document.querySelector('#sub_'+i+' .approve-btn');
   if(btn){btn.disabled=true;btn.textContent='⏳';}
   try {
-    await apiPost({action:'updateStatus', rowId:sub.rowId, mitarbeiter:sub.mitarbeiter, status:'approved', comment, approvedAt:new Date().toISOString()});
+    // rowId als einzigen Identifier — nicht nach mitarbeiter matchen
+    await apiPost({action:'updateStatus', rowId:sub.rowId, status:'approved', comment});
     showToast('Genehmigt ✓','ok');
     loadAdmin();
   } catch(e) { showToast('Fehler: '+e.message,'err'); if(btn){btn.disabled=false;btn.textContent='Genehmigen ✓';} }
@@ -721,7 +727,7 @@ async function doReject(i) {
   const comment = document.getElementById('com_'+i)?.value||'';
   if (!comment) { showToast('Bitte Kommentar eingeben.','err'); return; }
   try {
-    await apiPost({action:'updateStatus', rowId:sub.rowId, mitarbeiter:sub.mitarbeiter, status:'rejected', comment});
+    await apiPost({action:'updateStatus', rowId:sub.rowId, status:'rejected', comment});
     showToast('Zurückgesendet');
     loadAdmin();
   } catch(e) { showToast('Fehler: '+e.message,'err'); }
@@ -732,7 +738,7 @@ async function doPaid(i) {
   const btn = document.querySelector('#sub_'+i+' .paid-btn');
   if(btn){btn.disabled=true;btn.textContent='⏳';}
   try {
-    await apiPost({action:'updateStatus', rowId:sub.rowId, mitarbeiter:sub.mitarbeiter, status:'paid', paidAt:new Date().toISOString()});
+    await apiPost({action:'updateStatus', rowId:sub.rowId, status:'paid'});
     showToast('Als überwiesen markiert 💶','ok');
     loadAdmin();
   } catch(e) { showToast('Fehler: '+e.message,'err'); if(btn){btn.disabled=false;btn.textContent='💶 Als überwiesen markieren';} }
