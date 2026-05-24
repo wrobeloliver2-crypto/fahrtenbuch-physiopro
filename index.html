@@ -434,27 +434,30 @@ function enterApp(){
 
 async function syncEntriesFromSheet(){
   try {
+    showToast('⏳ Lade Daten vom Server…');
     const json = await fetchFromSheet('getEntries', {mitarbeiter: currentUser.id});
     const sheetEntries = (json.entries||[]).map(e=>({
-      id: e['ID'] || Date.now(),
+      id: parseInt(e['ID'])||Date.now(),
       datum: String(e['Datum']).substring(0,10),
-      von: e['Abfahrt'],
-      nach: e['Ziel'],
+      von: e['Abfahrt']||'',
+      nach: e['Ziel']||'',
       km: parseFloat(e['km'])||0,
       kosten: parseFloat(e['Kosten (€)'])||0,
       dauer: e['Fahrzeit']||'',
       zweck: e['Zweck']||'',
-      mitarbeiter: e['Mitarbeiter'],
-      timestamp: e['Eingetragen am']||'',
+      mitarbeiter: e['Mitarbeiter']||currentUser.id,
+      timestamp: String(e['Eingetragen am']||''),
       monat: String(e['Datum']).substring(0,7),
-    }));
+    })).filter(e=>e.von&&e.nach&&e.km>0);
+
     if(sheetEntries.length>0){
-      // Sheet-Daten haben Vorrang — im localStorage speichern
       localStorage.setItem('fb_entries_'+currentUser.id, JSON.stringify(sheetEntries));
-      console.log('Einträge vom Sheet geladen:', sheetEntries.length);
+      showToast('✓ '+sheetEntries.length+' Einträge geladen', 'success');
+    } else {
+      showToast('Keine Einträge im Sheet gefunden');
     }
   } catch(e){
-    console.warn('Sheet-Sync fehlgeschlagen, nutze localStorage:', e);
+    showToast('⚠️ Server nicht erreichbar', 'error');
   }
 }
 
