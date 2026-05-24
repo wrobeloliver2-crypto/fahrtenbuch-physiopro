@@ -747,17 +747,19 @@ async function doPaid(i) {
 
 async function sendMail(i) {
   const sub = window.adminSubs[i];
-  const tkm = sub.entries.reduce((s,e)=>s+(parseFloat(e.km)||0),0);
-  const tko = sub.entries.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
+  if (!sub) { showToast('Fehler: Keine Daten.','err'); return; }
+  if (!sub.entries||!sub.entries.length) { showToast('Fehler: Keine Fahrten in Einreichung.','err'); return; }
+  const tkm = Math.round(sub.entries.reduce((s,e)=>s+(parseFloat(e.km)||0),0)*10)/10;
+  const tko = sub.entries.reduce((s,e)=>s+(parseFloat(e.kosten)||(parseFloat(e.km)||0)*0.30),0);
   showToast('⏳ Sende E-Mail…');
   try {
     const r = await fetch('/.netlify/functions/sendmail', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({name:sub.name, fahrten:sub.entries.length, km:tkm, kosten:tko.toFixed(2), datum:sub.submittedAt, entries:sub.entries})
+      body: JSON.stringify({name:sub.name||sub.mitarbeiter, fahrten:sub.entries.length, km:tkm, kosten:tko.toFixed(2), datum:sub.submittedAt, entries:sub.entries})
     });
     const j = await r.json();
     if (j.ok) showToast('✓ E-Mail gesendet','ok');
-    else showToast('Fehler: '+j.error,'err');
+    else showToast('Fehler: '+JSON.stringify(j.error).substring(0,80),'err');
   } catch(e) { showToast('Fehler: '+e.message,'err'); }
 }
 
