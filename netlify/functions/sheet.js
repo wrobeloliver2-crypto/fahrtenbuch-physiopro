@@ -99,7 +99,7 @@ exports.handler = async (event) => {
 
     // ── GET: Abrechnungen laden ──
     if (action==='getSubmissions') {
-      await ensureHeaders(token, SHEET_ABSCHLUSS, ['Mitarbeiter','Name','Monat','Status','Fahrten','km gesamt','Kosten gesamt','Eingereicht am','Genehmigt am','Ausgezahlt am','Kommentar','Eintraege','ID']);
+      await ensureHeaders(token, SHEET_ABSCHLUSS, ['Mitarbeiter','Name','Monat','Status','Fahrten','km gesamt','Kosten gesamt','Eingereicht am','Genehmigt am','Ausgezahlt am','Kommentar','Eintraege (JSON ID)','ID']);
       const data = await readSheet(token, SHEET_ABSCHLUSS);
       const submissions = rowsToObjects(data);
       return {statusCode:200,headers:CORS,body:JSON.stringify({submissions})};
@@ -119,7 +119,7 @@ exports.handler = async (event) => {
 
     // ── POST: Abrechnung einreichen ──
     if (action==='addSubmission') {
-      await ensureHeaders(token, SHEET_ABSCHLUSS, ['Mitarbeiter','Name','Monat','Status','Fahrten','km gesamt','Kosten gesamt','Eingereicht am','Genehmigt am','Ausgezahlt am','Kommentar','Eintraege','ID']);
+      await ensureHeaders(token, SHEET_ABSCHLUSS, ['Mitarbeiter','Name','Monat','Status','Fahrten','km gesamt','Kosten gesamt','Eingereicht am','Genehmigt am','Ausgezahlt am','Kommentar','Eintraege (JSON ID)','ID']);
       const subId = body.mitarbeiter+'_'+new Date().toISOString().substring(0,10);
       await appendRow(token, SHEET_ABSCHLUSS, [
         body.mitarbeiter, body.mitarbeiterName||'',
