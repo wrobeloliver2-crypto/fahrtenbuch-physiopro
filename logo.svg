@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2c2825;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3d3530;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6b9177;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#55725e;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Hintergrund -->
+  <rect width="200" height="200" rx="28" fill="url(#bgGrad)"/>
+
+  <!-- Straße / Weg - zwei parallele Linien -->
+  <path d="M 40 155 Q 100 110 160 155" stroke="#faf8f4" stroke-width="2.5" fill="none" opacity="0.15"/>
+  <path d="M 55 162 Q 100 120 145 162" stroke="#faf8f4" stroke-width="2.5" fill="none" opacity="0.15"/>
+
+  <!-- Blatt / Kreuz Symbol - Physiotherapie -->
+  <g transform="translate(100, 85)">
+    <!-- Vertikaler Balken -->
+    <rect x="-8" y="-28" width="16" height="56" rx="8" fill="url(#leafGrad)"/>
+    <!-- Horizontaler Balken -->
+    <rect x="-28" y="-8" width="56" height="16" rx="8" fill="url(#leafGrad)"/>
+    <!-- Kleiner weißer Mittelpunkt -->
+    <circle cx="0" cy="0" r="6" fill="#faf8f4" opacity="0.9"/>
+  </g>
+
+  <!-- Kleines Auto-Icon unten rechts -->
+  <g transform="translate(128, 148)" opacity="0.7">
+    <rect x="0" y="6" width="28" height="12" rx="3" fill="#55725e"/>
+    <rect x="5" y="2" width="18" height="9" rx="3" fill="#6b9177"/>
+    <circle cx="7" cy="19" r="3.5" fill="#2c2825" stroke="#faf8f4" stroke-width="1.5"/>
+    <circle cx="21" cy="19" r="3.5" fill="#2c2825" stroke="#faf8f4" stroke-width="1.5"/>
+  </g>
+
+  <!-- PP Monogramm unten links -->
+  <text x="24" y="168" font-family="Georgia, serif" font-size="13" font-weight="700" fill="#faf8f4" opacity="0.5" letter-spacing="1">PP</text>
+</svg>
