@@ -79,7 +79,9 @@ function rowsToObjects(data) {
 
 exports.handler = async (event) => {
   const headers = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
-  const { action, mitarbeiter } = event.queryStringParameters || {};
+  const params = event.queryStringParameters || {};
+  const action = params.action || (event.httpMethod==='POST'?JSON.parse(event.body||'{}').action:'');
+  const mitarbeiter = params.mitarbeiter || '';
 
   try {
     const token = await getAccessToken();
@@ -97,9 +99,47 @@ exports.handler = async (event) => {
       return { statusCode: 200, headers, body: JSON.stringify({ submissions }) };
     }
 
+    if (action === 'updateStatus') {
+      const body = JSON.parse(event.body||'{}');
+      await updateStatus(token, body.submissionId, body.status, body.comment);
+      return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
+    }
+
     return { statusCode: 200, headers, body: JSON.stringify({ status: 'Fahrtenbuch API aktiv' }) };
 
   } catch(e) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: e.message }) };
   }
 };
+
+async function updateStatus(token, submissionId, status, comment) {
+  const SHEET = 'Abschluesse';
+  const data = await readSheet(token, SHEET);
+  const rows = data.values || [];
+  if(rows.length < 2) return;
+  const headers = rows[0];
+  const mitCol = headers.indexOf('Mitarbeiter');
+  const statCol = headers.indexOf('Status');
+  const apprCol = headers.indexOf('Genehmigt am');
+  const paidCol = headers.indexOf('Ausgezahlt am');
+  const commCol = headers.indexOf('Kommentar');
+  const mitId = String(submissionId||'').split('_')[0];
+  let rowIdx = -1;
+  for(let i=1; i<rows.length; i++){
+    if(String(rows[i][mitCol]||'').split('_')[0]===mitId) rowIdx=i+1;
+  }
+  if(rowIdx<0) return;
+  const col = (n) => String.fromCharCode(65+n);
+  const updates = [];
+  if(statCol>=0) updates.push({range:`${SHEET}!${col(statCol)}${rowIdx}`,values:[[status]]});
+  if(comment&&commCol>=0) updates.push({range:`${SHEET}!${col(commCol)}${rowIdx}`,values:[[comment]]});
+  if(status==='approved'&&apprCol>=0) updates.push({range:`${SHEET}!${col(apprCol)}${rowIdx}`,values:[[new Date().toLocaleDateString('de-DE')]]});
+  if(status==='paid'&&paidCol>=0) updates.push({range:`${SHEET}!${col(paidCol)}${rowIdx}`,values:[[new Date().toLocaleDateString('de-DE')]]});
+  if(!updates.length) return;
+  const body = JSON.stringify({valueInputOption:'RAW',data:updates});
+  return new Promise((resolve,reject)=>{
+    const https=require('https');
+    const req=https.request({hostname:'sheets.googleapis.com',path:`/v4/spreadsheets/${SHEET_ID}/values:batchUpdate`,method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json','Content-Length':Buffer.byteLength(body)}},(r)=>{let d='';r.on('data',c=>d+=c);r.on('end',()=>resolve(d));});
+    req.on('error',reject);req.write(body);req.end();
+  });
+}
