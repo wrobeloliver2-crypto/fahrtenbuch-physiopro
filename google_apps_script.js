@@ -136,25 +136,25 @@ function updateSubmissionStatus(ss, data) {
   if (!sheet) return;
   var rows = sheet.getDataRange().getValues();
   var headers = rows[0];
-  var idCol    = headers.indexOf('ID');
+  var mitCol   = headers.indexOf('Mitarbeiter');
   var statCol  = headers.indexOf('Status');
   var apprCol  = headers.indexOf('Genehmigt am');
   var paidCol  = headers.indexOf('Ausgezahlt am');
   var commCol  = headers.indexOf('Kommentar');
+  var idCol    = headers.indexOf('ID');
+
+  // Mitarbeiter-ID aus data holen
+  var targetMit = data.mitarbeiter || String(data.submissionId||'').split('_')[0];
 
   for (var i = 1; i < rows.length; i++) {
-    // ID kann in verschiedenen Spalten stehen, oder aus Mitarbeiter+Datum zusammengebaut
+    var rowMit = String(rows[i][mitCol]||'').split('_')[0];
     var rowId = idCol >= 0 ? rows[i][idCol] : '';
-    var mitCol = headers.indexOf('Mitarbeiter');
-    var datCol = headers.indexOf('Eingereicht am');
-    if (!rowId && mitCol >= 0 && datCol >= 0) {
-      rowId = rows[i][mitCol] + '_' + String(rows[i][datCol]).substring(0,10);
-    }
-    if (rowId === data.submissionId) {
-      sheet.getRange(i+1, statCol+1).setValue(data.status);
-      if (data.comment) sheet.getRange(i+1, commCol+1).setValue(data.comment);
-      if (data.status === 'approved') sheet.getRange(i+1, apprCol+1).setValue(new Date());
-      if (data.status === 'paid')     sheet.getRange(i+1, paidCol+1).setValue(new Date());
+    // Match by mitarbeiter ID oder submission ID
+    if (rowMit === targetMit || rowId === data.submissionId) {
+      if (statCol >= 0) sheet.getRange(i+1, statCol+1).setValue(data.status);
+      if (data.comment && commCol >= 0) sheet.getRange(i+1, commCol+1).setValue(data.comment);
+      if (data.status === 'approved' && apprCol >= 0) sheet.getRange(i+1, apprCol+1).setValue(new Date());
+      if (data.status === 'paid' && paidCol >= 0) sheet.getRange(i+1, paidCol+1).setValue(new Date());
       return;
     }
   }
