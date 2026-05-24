@@ -638,52 +638,57 @@ function saveEntry(){
 }
 
 // ── EINTRÄGE ──
-function renderEntries(){
-  if(!currentUser)return;
-  const arr=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]');
-  // Wenn leer und Sheet verfügbar: sync und nochmal rendern
-  if(!arr.length && APPS_SCRIPT_URL){
-    syncEntriesFromSheet().then(()=>{
-      const arr2=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]');
-      if(arr2.length) renderEntries();
-    });
-  }
-  // Alle eingereichten IDs sammeln
-  const submittedIds=new Set();
+function getSubmittedIds(){
+  const ids=new Set();
   Object.keys(localStorage).forEach(k=>{
     if(k.startsWith('fb_pending_'+currentUser.id)){
       try{
         const p=JSON.parse(localStorage.getItem(k)||'null');
-        if(p&&p.entries) p.entries.forEach(e=>submittedIds.add(String(e.id)));
+        if(p&&p.entries) p.entries.forEach(e=>ids.add(String(e.id)));
       }catch(e){}
     }
   });
-  const el=document.getElementById('entriesList');
-  if(!arr.length && !submittedCount){el.innerHTML='<div class="empty-state"><div class="icon">🚗</div>Noch keine Fahrten.</div>';return;}
-  if(!arr.length && submittedCount){
-    el.innerHTML='<div class="empty-state"><div class="icon">📬</div>'
-      +submittedCount+' Fahrten eingereicht – wartet auf Genehmigung.<br><br>'
-      +'<button class="submit-btn" style="max-width:280px" onclick="showTab(\'tabAuswertung\')">📄 PDF erstellen</button>'
-      +'</div>';
+  return ids;
+}
+
+function renderEntries(){
+  if(!currentUser)return;
+  const allArr=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]');
+  // Wenn leer: vom Sheet laden
+  if(!allArr.length && APPS_SCRIPT_URL){
+    syncEntriesFromSheet().then(()=>{
+      if(JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]').length) renderEntries();
+    });
+    document.getElementById('entriesList').innerHTML='<div class="empty-state">⏳ Lade...</div>';
     return;
   }
-  let listHtml='';
-  if(submittedCount){
-    listHtml+='<div style="background:#fff3cd;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#856404">'
-      +'⏳ '+submittedCount+' Fahrten eingereicht – wartet auf Genehmigung. '
-      +'<span onclick="showTab(\'tabAuswertung\')" style="text-decoration:underline;cursor:pointer">PDF erstellen</span>'
+  const submittedIds=getSubmittedIds();
+  // Eingereichte ausfiltern
+  const openArr=allArr.filter(e=>!submittedIds.has(String(e.id)));
+  const submittedCount=allArr.length-openArr.length;
+  const el=document.getElementById('entriesList');
+  let html='';
+  // Info-Banner für eingereichte
+  if(submittedCount>0){
+    html+='<div style="background:#fff3cd;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#856404">'
+      +'⏳ <b>'+submittedCount+' Fahrten eingereicht</b> – wartet auf Genehmigung. '
+      +'<span onclick="showTab(\'tabAuswertung\')" style="text-decoration:underline;cursor:pointer">→ Abrechnung</span>'
       +'</div>';
   }
-  el.innerHTML=listHtml+arr.map(e=>{
-    const locked=false; // eingereichte werden oben ausgefiltert
+  if(!openArr.length){
+    html+='<div class="empty-state"><div class="icon">'+(submittedCount?'📬':'🚗')+'</div>'
+      +(submittedCount?'Alle Fahrten eingereicht.':'Noch keine Fahrten.')+'</div>';
+    el.innerHTML=html; return;
+  }
+  html+=openArr.map(e=>{
     return '<div class="entry-card">'
       +'<div class="entry-top"><div class="entry-route">'+e.von+' → '+e.nach+'</div><div class="entry-date">'+fmtDate(e.datum)+'</div></div>'
-      +'<div class="entry-meta"><span class="entry-badge km">'+e.km+' km</span><span class="entry-badge cost">'+e.kosten.toFixed(2)+' €</span>'+(e.dauer?'<span class="entry-badge">🕐 '+e.dauer+'</span>':'')+'</div>'
+      +'<div class="entry-meta"><span class="entry-badge km">'+e.km+' km</span><span class="entry-badge cost">'+(parseFloat(e.kosten)||0).toFixed(2)+' €</span>'+(e.dauer?'<span class="entry-badge">🕐 '+e.dauer+'</span>':'')+'</div>'
       +(e.zweck?'<div class="entry-zweck">'+e.zweck+'</div>':'')
-      +(locked?'<span class="locked-tag">🔒 Eingereicht</span>'
-        :'<div class="entry-actions"><button class="btn-small" onclick="deleteEntry('+e.id+')">🗑 Löschen</button></div>')
+      +'<div class="entry-actions"><button class="btn-small" onclick="deleteEntry('+e.id+')">🗑 Löschen</button></div>'
       +'</div>';
   }).join('');
+  el.innerHTML=html;
 }
 
 function deleteEntry(id){
@@ -1042,7 +1047,7 @@ function renderAdminFromRaw(){
     const mitId = String(s['Mitarbeiter']||'').split('_')[0]||String(s['Mitarbeiter']||'');
     let entries=[];
     Object.values(s).forEach(v=>{ if(String(v).startsWith('[{')){ try{entries=JSON.parse(String(v));}catch(e){} } });
-    const isPending=status==='pending', isPaid=status==='paid';
+    const isPending=status==='pending', isPaid=status==='paid', isApproved=status==='approved';
     h+='<div class="approval-card'+(status!=='pending'?' approved':'')+'" data-subid="sub_'+i+'">';
     h+='<div class="approval-top"><div class="approval-name">'+name+'</div>';
     h+=isPending?'<span class="status-badge pending">⏳ Offen</span>':
@@ -1121,12 +1126,16 @@ async function markPaid(subId){ markPaidByIndex(-1, subId); }
 
 async function markPaidByIndex(idx, subId){
   const paidAt=new Date().toISOString();
-  try {
-    await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({type:'updateStatus',submissionId:subId,status:'paid',paidAt})});
-  } catch(e){}
+  // Sheet im Hintergrund
+  fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({type:'updateStatus',submissionId:subId,status:'paid',paidAt})}).catch(()=>{});
+  // Cache sofort aktualisieren
+  if(window.adminSubsRaw && window.adminSubsRaw[idx]){
+    window.adminSubsRaw[idx]['Status']='paid';
+    window.adminSubsRaw[idx]['Ausgezahlt am']=paidAt;
+  }
   showToast('Als überwiesen markiert 💶','success');
-  setTimeout(()=>renderAdmin(), 500);
+  renderAdminFromRaw();
 }
 
 function renderAdminFromCache(){
