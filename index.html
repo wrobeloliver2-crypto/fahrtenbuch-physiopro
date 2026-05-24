@@ -1190,13 +1190,15 @@ async function markPaid(subId){ markPaidByIndex(-1, subId); }
 
 async function markPaidByIndex(idx, subId){
   const paidAt=new Date().toISOString();
-  // Sheet im Hintergrund
   fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({type:'updateStatus',submissionId:subId,status:'paid',paidAt})}).catch(()=>{});
-  // Cache sofort aktualisieren
   if(window.adminSubsRaw && window.adminSubsRaw[idx]){
     window.adminSubsRaw[idx]['Status']='paid';
     window.adminSubsRaw[idx]['Ausgezahlt am']=paidAt;
+    const mitId=String(window.adminSubsRaw[idx]['Mitarbeiter']||'')'.split('_')[0];
+    const ov=JSON.parse(localStorage.getItem('fb_status_overrides')||'{}')
+    ov[mitId]={status:'paid',paidAt,approvedAt:String(window.adminSubsRaw[idx]['Genehmigt am']||'')};
+    localStorage.setItem('fb_status_overrides',JSON.stringify(ov));
   }
   showToast('Als überwiesen markiert 💶','success');
   renderAdminFromRaw();
