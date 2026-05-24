@@ -669,11 +669,14 @@ function saveEntry(){
 // ── EINTRÄGE ──
 function getSubmittedIds(){
   const ids=new Set();
+  // Override prüfen - wenn genehmigt/überwiesen, keine IDs sperren
+  const ov=JSON.parse(localStorage.getItem('fb_status_overrides')||'{}')[currentUser.id];
+  if(ov&&(ov.status==='approved'||ov.status==='paid')) return ids;
   Object.keys(localStorage).forEach(k=>{
     if(k.startsWith('fb_pending_'+currentUser.id)){
       try{
         const p=JSON.parse(localStorage.getItem(k)||'null');
-        if(p&&p.entries) p.entries.forEach(e=>ids.add(String(e.id)));
+        if(p&&p.entries&&p.status==='pending') p.entries.forEach(e=>ids.add(String(e.id)));
       }catch(e){}
     }
   });
