@@ -92,7 +92,7 @@ exports.handler = async (event) => {
     }
 
     if (action === 'getSubmissions') {
-      const data = await readSheet(token, 'Monatsabschlüsse!A:L');
+      const data = await readSheet(token, 'Monatsabschlüsse!A:Z');
       const submissions = rowsToObjects(data);
       return { statusCode: 200, headers, body: JSON.stringify({ submissions }) };
     }
