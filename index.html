@@ -641,6 +641,13 @@ function saveEntry(){
 function renderEntries(){
   if(!currentUser)return;
   const arr=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]');
+  // Wenn leer und Sheet verfügbar: sync und nochmal rendern
+  if(!arr.length && APPS_SCRIPT_URL){
+    syncEntriesFromSheet().then(()=>{
+      const arr2=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]');
+      if(arr2.length) renderEntries();
+    });
+  }
   const subs=JSON.parse(localStorage.getItem('fb_submissions_'+currentUser.id)||'{}');
   const el=document.getElementById('entriesList');
   if(!arr.length){el.innerHTML='<div class="empty-state"><div class="icon">🚗</div>Noch keine Fahrten.</div>';return;}
@@ -659,7 +666,17 @@ function renderEntries(){
 function deleteEntry(id){
   if(!confirm('Löschen?'))return;
   const key='fb_entries_'+currentUser.id;
-  localStorage.setItem(key,JSON.stringify(JSON.parse(localStorage.getItem(key)||'[]').filter(e=>e.id!==id)));
+  const entries=JSON.parse(localStorage.getItem(key)||'[]');
+  if(!entries.length){
+    showToast('Einträge werden neu geladen…');
+    syncEntriesFromSheet().then(()=>{
+      const updated=JSON.parse(localStorage.getItem(key)||'[]').filter(e=>e.id!==id);
+      localStorage.setItem(key,JSON.stringify(updated));
+      renderEntries();
+    });
+    return;
+  }
+  localStorage.setItem(key,JSON.stringify(entries.filter(e=>e.id!==id)));
   renderEntries(); showToast('Gelöscht');
 }
 
@@ -719,7 +736,7 @@ function renderAuswertung(){
       +'<div class="send-section"><h3>Abrechnung einreichen</h3>'
       +'<p>'+open.length+' Fahrten · '+tkm+' km · '+tko.toFixed(2)+' € werden zur Genehmigung an Hanna gesendet.</p>'
       +'<button class="send-btn" onclick="submitAll()">Jetzt einreichen →</button>'
-      +'<div class="export-row"><button class="export-btn" onclick="exportCSVOpen()">📊 CSV</button><button class="export-btn" onclick="exportPDFOpen()">📄 PDF</button></div>'
+      +'<button class="export-btn" style="width:100%;margin-top:8px" onclick="exportPDFOpen()">🖨️ Drucken / PDF</button>'
       +'</div>';
     h+=open.map(e=>'<div class="entry-card">'
       +'<div class="entry-top"><div class="entry-route">'+e.von+' → '+e.nach+'</div><div class="entry-date">'+fmtDate(e.datum)+'</div></div>'
@@ -759,9 +776,9 @@ function submitAll(){
     mitarbeiterName:currentUser.name,
     entries:open
   };
-  localStorage.setItem('fb_pending_'+currentUser.id,JSON.stringify(data));
+  const subKey=currentUser.id+'_'+Date.now();
   const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
-  all[currentUser.id]=data;
+  all[subKey]=data;
   localStorage.setItem('fb_all_submissions',JSON.stringify(all));
   sendSubmissionToSheet(data);
   showToast('Eingereicht ✓','success'); renderAuswertung();
@@ -968,12 +985,20 @@ async function approveEntry(id){
   const comment=document.getElementById('comment_'+id)?.value||'';
   const subData=window['subData_'+id]||{};
   const subId=subData.submissionId||id;
-  try {
-    await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({type:'updateStatus',submissionId:subId,status:'approved',comment})});
-  } catch(e){}
+  // Sheet im Hintergrund aktualisieren
+  fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({type:'updateStatus',submissionId:subId,status:'approved',comment})}).catch(()=>{});
+  // Sofort in adminSubsRaw aktualisieren
+  if(window.adminSubsRaw){
+    window.adminSubsRaw.forEach(s=>{
+      if((s['Mitarbeiter']||'').split('_')[0]===id){
+        s['Status']='approved';
+        if(comment) s['Kommentar']=comment;
+      }
+    });
+  }
   showToast('Genehmigt ✓','success');
-  setTimeout(()=>renderAdmin(), 500);
+  renderAdmin();
 }
 
 async function rejectEntry(id){
@@ -1098,12 +1123,14 @@ function exportCSVOpen(){
     'Fahrtenbuch_'+currentUser.name.replace(' ','_')+'_'+monat+'.csv','text/csv');
 }
 function exportPDFOpen(){
-  const monat='offen';
-  const arr=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]').filter(e=>e.monat===monat);
+  const allEntries=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]');
+  const approvedSubs=JSON.parse(localStorage.getItem('fb_approved_'+currentUser.id)||'[]');
+  const approvedIds=new Set(approvedSubs.flatMap(s=>(s.entries||[]).map(e=>e.id)));
+  const arr=allEntries.filter(e=>!approvedIds.has(e.id));
   if(!arr.length){showToast('Keine Daten.','error');return;}
   const tkm=arr.reduce((s,e)=>s+e.km,0);
   const tko=arr.reduce((s,e)=>s+e.kosten,0);
-  const label=new Date(monat+'-01').toLocaleDateString('de-DE',{month:'long',year:'numeric'});
+  const label='Aktuelle Abrechnung – '+new Date().toLocaleDateString('de-DE');
   const rows=arr.map(e=>'<tr><td>'+fmtDate(e.datum)+'</td><td>'+e.von+'</td><td>'+e.nach+'</td><td>'+e.km+'</td><td>'+(e.dauer||'–')+'</td><td>'+e.kosten.toFixed(2)+' €</td><td>'+(e.zweck||'–')+'</td></tr>').join('');
   const w=window.open('','_blank');
   w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Arial;font-size:12px;padding:24px}h1{font-size:18px}table{width:100%;border-collapse:collapse;margin-top:16px}th{background:#2c2825;color:#faf8f4;padding:6px 8px;text-align:left;font-size:11px}td{border-bottom:1px solid #ddd;padding:5px 8px}.total{margin-top:14px;font-weight:bold;color:#55725e}.sig{margin-top:40px;font-size:11px;color:#aaa;border-top:1px solid #ddd;padding-top:10px}</style></head><body>'
