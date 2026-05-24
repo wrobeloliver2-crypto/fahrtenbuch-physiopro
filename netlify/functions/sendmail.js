@@ -1,8 +1,8 @@
 const https = require('https');
 
-const TENANT_ID = '84c5926a-a7f0-4d30-bfe6-8d445df9a2ba';
-const CLIENT_ID = 'f5bba1d2-0995-495f-99eb-cdc7285fc6ec';
-const CLIENT_SECRET = 'OeO8Q~bsUKBei50lVtb-QROzZpDuNMvz17gt-aHW';
+const TENANT_ID = process.env.AZURE_TENANT_ID;
+const CLIENT_ID = process.env.AZURE_CLIENT_ID;
+const CLIENT_SECRET = process.env.AZURE_CLIENT_SECRET;
 const FROM_EMAIL = 'hanna.wrobel@pilatescompany.de';
 
 function httpsPost(hostname, path, headers, body) {
