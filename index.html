@@ -509,8 +509,16 @@ function initMaps(){
   const opts={componentRestrictions:{country:'de'},fields:['formatted_address','geometry','name']};
   acVon =new google.maps.places.Autocomplete(document.getElementById('inputVon'), opts);
   acNach=new google.maps.places.Autocomplete(document.getElementById('inputNach'),opts);
-  acVon.addListener('place_changed', resetRoute);
-  acNach.addListener('place_changed',resetRoute);
+  acVon.addListener('place_changed', ()=>{
+    const p=acVon.getPlace();
+    if(p&&p.formatted_address) document.getElementById('inputVon').value=p.formatted_address;
+    resetRoute();
+  });
+  acNach.addListener('place_changed',()=>{
+    const p=acNach.getPlace();
+    if(p&&p.formatted_address) document.getElementById('inputNach').value=p.formatted_address;
+    resetRoute();
+  });
 }
 
 function resetRoute(){
@@ -523,6 +531,9 @@ async function calculateRoute(){
   const von=document.getElementById('inputVon').value.trim();
   const nach=document.getElementById('inputNach').value.trim();
   if(!von||!nach){showToast('Start und Ziel eingeben.','error');return;}
+  // Sicherstellen dass volle Adresse genutzt wird
+  document.getElementById('inputVon').blur();
+  document.getElementById('inputNach').blur();
   const btn=document.getElementById('calcRouteBtn');
   btn.textContent='⏳ Berechne…'; btn.disabled=true;
   try {
@@ -577,8 +588,11 @@ const PRAXIS_ADRESSE = 'Segeberger Straße 1, 23617 Stockelsdorf';
 function setPraxis(fieldId){
   const input = document.getElementById(fieldId);
   input.value = PRAXIS_ADRESSE;
-  // Autocomplete zurücksetzen
+  input.dispatchEvent(new Event('input'));
   resetRoute();
+  // Kurz focus/blur damit Autocomplete den Wert akzeptiert
+  input.focus();
+  setTimeout(()=>input.blur(), 50);
 }
 
 function setToday(){
