@@ -6,6 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Fahrtenbuch – PhysioPro</title>
+<link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
 <style>
@@ -156,6 +157,34 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 
 <!-- LOGIN -->
 <div id="screenLogin" class="screen">
+  <div style="margin-bottom:20px">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="80" height="80" style="display:block;margin:0 auto;filter:drop-shadow(0 4px 16px rgba(85,114,94,0.4))">
+      <defs>
+        <linearGradient id="bgG" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#3d3530"/>
+          <stop offset="100%" style="stop-color:#2c2825"/>
+        </linearGradient>
+        <linearGradient id="leafG" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#6b9177"/>
+          <stop offset="100%" style="stop-color:#55725e"/>
+        </linearGradient>
+      </defs>
+      <rect width="200" height="200" rx="40" fill="url(#bgG)"/>
+      <path d="M 30 158 Q 100 108 170 158" stroke="#faf8f4" stroke-width="3" fill="none" opacity="0.12"/>
+      <path d="M 45 168 Q 100 122 155 168" stroke="#faf8f4" stroke-width="3" fill="none" opacity="0.12"/>
+      <g transform="translate(100,88)">
+        <rect x="-9" y="-30" width="18" height="60" rx="9" fill="url(#leafG)"/>
+        <rect x="-30" y="-9" width="60" height="18" rx="9" fill="url(#leafG)"/>
+        <circle cx="0" cy="0" r="7" fill="#faf8f4" opacity="0.95"/>
+      </g>
+      <g transform="translate(126,145)" opacity="0.75">
+        <rect x="0" y="7" width="30" height="13" rx="4" fill="#55725e"/>
+        <rect x="5" y="2" width="20" height="10" rx="3" fill="#6b9177"/>
+        <circle cx="7" cy="21" r="4" fill="#2c2825" stroke="#faf8f4" stroke-width="1.5"/>
+        <circle cx="23" cy="21" r="4" fill="#2c2825" stroke="#faf8f4" stroke-width="1.5"/>
+      </g>
+    </svg>
+  </div>
   <div class="login-logo">PhysioPro</div>
   <div class="login-sub">Fahrtenbuch · Lübeck</div>
   <div class="login-card">
