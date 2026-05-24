@@ -50,7 +50,7 @@ function getAccessToken() {
 // Sheet Daten lesen
 function readSheet(token, range) {
   return new Promise((resolve, reject) => {
-    const path = `/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}`;
+    const path = `/v4/spreadsheets/${SHEET_ID}/values/${range.includes('%') ? range : encodeURIComponent(range)}`;
     https.get({
       hostname: 'sheets.googleapis.com',
       path,
@@ -92,7 +92,7 @@ exports.handler = async (event) => {
     }
 
     if (action === 'getSubmissions') {
-      const data = await readSheet(token, 'Monatsabschlüsse!A:Z');
+      const data = await readSheet(token, encodeURIComponent('Monatsabschlüsse')+'!A:Z');
       const submissions = rowsToObjects(data);
       return { statusCode: 200, headers, body: JSON.stringify({ submissions }) };
     }
