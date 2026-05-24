@@ -438,19 +438,25 @@ async function syncEntriesFromSheet(){
   try {
     showToast('⏳ Lade Daten vom Server…');
     const json = await fetchFromSheet('getEntries', {mitarbeiter: currentUser.id});
-    const sheetEntries = (json.entries||[]).map(e=>({
-      id: parseInt(e['ID'])||Date.now(),
-      datum: String(e['Datum']).substring(0,10),
-      von: e['Abfahrt']||'',
-      nach: e['Ziel']||'',
-      km: Math.round((parseFloat(String(e['km']).replace(',','.'))||0)*10)/10,
-      kosten: Math.round((parseFloat(String(e['Kosten (€)']).replace(',','.'))||0)*100)/100,
-      dauer: e['Fahrzeit']||'',
-      zweck: e['Zweck']||'',
-      mitarbeiter: e['Mitarbeiter']||currentUser.id,
-      timestamp: String(e['Eingetragen am']||''),
-      monat: String(e['Datum']).substring(0,7),
-    })).filter(e=>e.von&&e.nach&&e.km>0);
+    const sheetEntries = (json.entries||[]).map(e=>{
+      // Alle möglichen Spaltennamen abfangen
+      const datum = String(e['Datum']||e['datum']||'').substring(0,10);
+      const von = e['Abfahrt']||e['von']||'';
+      const nach = e['Ziel']||e['nach']||'';
+      const kmRaw = e['km']||e['KM']||e['Kilometer']||0;
+      const kostenRaw = e['Kosten (€)']||e['Kosten']||e['kosten']||0;
+      const km = Math.round((parseFloat(String(kmRaw).replace(',','.'))||0)*10)/10;
+      const kosten = km>0 ? Math.round(km*0.30*100)/100 : Math.round((parseFloat(String(kostenRaw).replace(',','.'))||0)*100)/100;
+      return {
+        id: parseInt(e['ID']||e['id'])||Date.now(),
+        datum, von, nach, km, kosten,
+        dauer: e['Fahrzeit']||e['dauer']||'',
+        zweck: e['Zweck']||e['zweck']||'',
+        mitarbeiter: e['Mitarbeiter']||e['mitarbeiter']||currentUser.id,
+        timestamp: String(e['Eingetragen am']||e['timestamp']||''),
+        monat: datum.substring(0,7),
+      };
+    }).filter(e=>e.von&&e.nach&&e.km>0);
 
     if(sheetEntries.length>0){
       localStorage.setItem('fb_entries_'+currentUser.id, JSON.stringify(sheetEntries));
