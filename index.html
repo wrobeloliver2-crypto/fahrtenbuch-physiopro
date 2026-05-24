@@ -658,7 +658,7 @@ function renderEntries(){
       +'<div class="entry-meta"><span class="entry-badge km">'+e.km+' km</span><span class="entry-badge cost">'+e.kosten.toFixed(2)+' €</span>'+(e.dauer?'<span class="entry-badge">🕐 '+e.dauer+'</span>':'')+'</div>'
       +(e.zweck?'<div class="entry-zweck">'+e.zweck+'</div>':'')
       +(locked?'<span class="locked-tag">🔒 Eingereicht</span>'
-        :'<div class="entry-actions"><button class="btn-small" style="color:var(--green);border-color:var(--green)" onclick="editEntry('+e.id+')">Bearb.</button><button class="btn-small" onclick="deleteEntry('+e.id+')">Löschen</button></div>')
+        :'<div class="entry-actions"><button class="btn-small" onclick="deleteEntry('+e.id+')">🗑 Löschen</button></div>')
       +'</div>';
   }).join('');
 }
@@ -980,25 +980,82 @@ function belegPDFDirect(idx){
 }
 
 
+
+function renderAdminFromRaw(){
+  if(!window.adminSubsRaw){ renderAdmin(); return; }
+  const content = document.getElementById('adminContent');
+  const subs = window.adminSubsRaw;
+  let h = '';
+  subs.forEach((s, i) => {
+    const status = String(s['Status']||'').trim();
+    const name = s['Name']||s['Mitarbeiter']||'?';
+    const km = s['km gesamt']||s['km']||'?';
+    const kosten = s['Kosten gesamt (€)']||s['Kosten gesamt']||'?';
+    const fahrten = s['Fahrten']||'?';
+    const datum = String(s['Eingereicht am']||'').substring(0,10);
+    const mitId = String(s['Mitarbeiter']||'').split('_')[0]||String(s['Mitarbeiter']||'');
+    let entries=[];
+    Object.values(s).forEach(v=>{ if(String(v).startsWith('[{')){ try{entries=JSON.parse(String(v));}catch(e){} } });
+    const isPending=status==='pending', isPaid=status==='paid';
+    h+='<div class="approval-card'+(status!=='pending'?' approved':'')+'" data-subid="sub_'+i+'">';
+    h+='<div class="approval-top"><div class="approval-name">'+name+'</div>';
+    h+=isPending?'<span class="status-badge pending">⏳ Offen</span>':
+       isPaid?'<span class="status-badge approved">💶 Ausgezahlt</span>':
+       '<span class="status-badge" style="background:#e8f0ea;color:var(--green2)">✓ Genehmigt</span>';
+    h+='</div>';
+    h+='<div class="approval-stats">'+fahrten+' Fahrten · '+km+' km · <b>'+kosten+' €</b>';
+    if(datum) h+='<br><span style="font-size:11px;color:var(--muted)">Eingereicht: '+fmtDate(datum)+'</span>';
+    h+='</div>';
+    if(entries.length) entries.forEach(e=>{
+      h+='<div style="font-size:12px;padding:5px 0;border-bottom:1px solid var(--border)">'+
+        fmtDate(String(e.datum||'').substring(0,10))+' · '+(e.von||'?')+' → '+(e.nach||'?')+
+        ' · <b>'+(e.km||0)+' km</b> · '+(parseFloat(e.kosten||0)).toFixed(2)+' €'+
+        (e.zweck?' · <i>'+e.zweck+'</i>':'')+'</div>';
+    });
+    if(isPending){
+      h+='<textarea class="comment-input" id="comment_'+mitId+'" placeholder="Kommentar (optional)"></textarea>';
+      h+='<div class="approval-actions">';
+      h+='<button class="approve-btn" onclick="approveEntry(\''+mitId+'\')">Genehmigen ✓</button>';
+      h+='<button class="reject-btn" onclick="rejectEntry(\''+mitId+'\')">Zurücksenden</button>';
+      h+='</div>';
+      window['subData_'+mitId]={mitarbeiter:mitId,mitarbeiterName:name,status,entries,submittedAt:datum,submissionId:'sub_'+i};
+      if(!window.currentAdminSubs) window.currentAdminSubs={};
+      window.currentAdminSubs[mitId]=window['subData_'+mitId];
+    } else {
+      if(s['Kommentar']) h+='<div style="font-size:12px;color:var(--muted);margin-top:4px">💬 '+s['Kommentar']+'</div>';
+      if(!isPaid){
+        h+='<button onclick="markPaidByIndex('+i+', \'sub_'+i+'\')" style="width:100%;background:var(--green);color:white;border:none;border-radius:12px;padding:14px;font-family:DM Sans,sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px">💶 Als überwiesen markieren</button>';
+      } else {
+        h+='<div style="background:#d1e7dd;border-radius:10px;padding:10px 14px;margin-top:6px;font-size:13px;font-weight:600;color:#0a5c36;text-align:center">💶 Überwiesen ✓</div>';
+      }
+      h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">';
+      h+='<button class="export-btn" onclick="belegPDFDirect('+i+')">📄 Beleg PDF</button>';
+      h+='<button class="export-btn" style="border-color:var(--green);color:var(--green)" onclick="sendBelegEmail('+i+')">📧 An Buchhaltung</button>';
+      h+='</div>';
+    }
+    h+='</div>';
+  });
+  content.innerHTML=h||'<div class="empty-state"><div class="icon">📬</div>Keine Einreichungen.</div>';
+}
 async function approveEntry(id){
-  const btn=event.target; btn.disabled=true; btn.textContent='⏳';
+  const btn=event.target; btn.disabled=true; btn.textContent='✓';
   const comment=document.getElementById('comment_'+id)?.value||'';
   const subData=window['subData_'+id]||{};
   const subId=subData.submissionId||id;
-  // Sheet im Hintergrund aktualisieren
+  // Sheet im Hintergrund
   fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({type:'updateStatus',submissionId:subId,status:'approved',comment})}).catch(()=>{});
-  // Sofort in adminSubsRaw aktualisieren
+  // Cache sofort aktualisieren
   if(window.adminSubsRaw){
     window.adminSubsRaw.forEach(s=>{
-      if((s['Mitarbeiter']||'').split('_')[0]===id){
+      if((s['Mitarbeiter']||'').split('_')[0]===id||(s['Mitarbeiter']||'')===id){
         s['Status']='approved';
         if(comment) s['Kommentar']=comment;
       }
     });
   }
   showToast('Genehmigt ✓','success');
-  renderAdmin();
+  renderAdminFromRaw();
 }
 
 async function rejectEntry(id){
