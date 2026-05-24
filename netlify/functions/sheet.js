@@ -101,7 +101,7 @@ exports.handler = async (event) => {
     if (action==='getSubmissions') {
       await ensureHeaders(token, SHEET_ABSCHLUSS, ['Mitarbeiter','Name','Monat','Status','Fahrten','km gesamt','Kosten gesamt','Eingereicht am','Genehmigt am','Ausgezahlt am','Kommentar','Eintraege (JSON ID)','ID']);
       const data = await readSheet(token, SHEET_ABSCHLUSS);
-      const submissions = rowsToObjects(data);
+      const submissions = rowsToObjects(data).map((s,i)=>({...s,_rowIdx:i+2})); // +2 weil Header = Zeile 1
       return {statusCode:200,headers:CORS,body:JSON.stringify({submissions})};
     }
 
@@ -120,7 +120,7 @@ exports.handler = async (event) => {
     // ── POST: Abrechnung einreichen ──
     if (action==='addSubmission') {
       await ensureHeaders(token, SHEET_ABSCHLUSS, ['Mitarbeiter','Name','Monat','Status','Fahrten','km gesamt','Kosten gesamt','Eingereicht am','Genehmigt am','Ausgezahlt am','Kommentar','Eintraege (JSON ID)','ID']);
-      const subId = body.mitarbeiter+'_'+new Date().toISOString().substring(0,10);
+      const subId = body.mitarbeiter+'_'+new Date().toISOString().substring(0,19).replace(/[:T]/g,'-');
       await appendRow(token, SHEET_ABSCHLUSS, [
         body.mitarbeiter, body.mitarbeiterName||'',
         new Date().toISOString().substring(0,7),
@@ -137,7 +137,6 @@ exports.handler = async (event) => {
       const rows = data.values||[];
       if (rows.length<2) return {statusCode:200,headers:CORS,body:JSON.stringify({ok:true,msg:'leer'})};
       const headers = rows[0];
-      const mitCol  = headers.indexOf('Mitarbeiter');
       const statCol = headers.indexOf('Status');
       const apprCol = headers.indexOf('Genehmigt am');
       const paidCol = headers.indexOf('Ausgezahlt am');
@@ -146,9 +145,13 @@ exports.handler = async (event) => {
       const col = n => String.fromCharCode(65+n);
       const updates = [];
       for (let i=1;i<rows.length;i++) {
-        // Nur nach rowId matchen - eindeutig pro Einreichung
+        // Exaktes Match auf rowId UND rowIdx
         const rowId = String(rows[i][idCol]||'');
-        if (!rowId || rowId !== body.rowId) continue;
+        const rowIdx = i + 1; // 1-basiert
+        // rowIdx hat Vorrang wenn übergeben, sonst rowId
+        const matchByIdx = body.rowIdx && rowIdx === body.rowIdx;
+        const matchById  = body.rowId && rowId === body.rowId;
+        if (!matchByIdx && !matchById) continue;
         const r = i+1;
         if (statCol>=0) updates.push({range:`${SHEET_ABSCHLUSS}!${col(statCol)}${r}`,values:[[body.status]]});
         if (body.comment && commCol>=0) updates.push({range:`${SHEET_ABSCHLUSS}!${col(commCol)}${r}`,values:[[body.comment]]});
