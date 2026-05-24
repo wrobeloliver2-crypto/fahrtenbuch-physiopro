@@ -452,7 +452,19 @@ async function syncEntriesFromSheet(){
         const status=String(latest['Status']||'').trim();
         let entries=[];
         Object.values(latest).forEach(v=>{const sv=String(v||'').trim();if(sv.includes('[{')){try{entries=JSON.parse(sv.substring(sv.indexOf('[')))}catch(e){}}});
-        if(entries.length) localStorage.setItem('fb_pending_'+currentUser.id+'_sync',JSON.stringify({status,entries,mitarbeiter:currentUser.id,mitarbeiterName:currentUser.name,submittedAt:String(latest['Eingereicht am']||''),approvedAt:String(latest['Genehmigt am']||''),paidAt:String(latest['Ausgezahlt am']||''),comment:String(latest['Kommentar']||'')}));
+        if(entries.length){
+          const ov=JSON.parse(localStorage.getItem('fb_status_overrides')||'{}')[currentUser.id];
+          localStorage.setItem('fb_pending_'+currentUser.id+'_sync',JSON.stringify({
+            status: ov?ov.status:status,
+            entries,
+            mitarbeiter:currentUser.id,
+            mitarbeiterName:currentUser.name,
+            submittedAt:String(latest['Eingereicht am']||''),
+            approvedAt:ov?ov.approvedAt:String(latest['Genehmigt am']||''),
+            paidAt:String(latest['Ausgezahlt am']||''),
+            comment:ov?ov.comment:String(latest['Kommentar']||'')
+          }));
+        }
       }
     } catch(se){console.warn('Sub-Sync:',se);}
     const json = await fetchFromSheet('getEntries', {mitarbeiter: currentUser.id});
