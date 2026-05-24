@@ -731,22 +731,13 @@ function renderEntries(){
 function deleteEntry(id){
   if(!confirm('Löschen?'))return;
   const key='fb_entries_'+currentUser.id;
+  // Aus localStorage löschen
   const entries=JSON.parse(localStorage.getItem(key)||'[]');
-  const doDelete=(arr)=>{
-    // Typ-sicherer Vergleich
-    const filtered=arr.filter(e=>String(e.id)!==String(id));
-    localStorage.setItem(key,JSON.stringify(filtered));
-    renderEntries();
-    showToast('Gelöscht');
-  };
-  if(!entries.length){
-    showToast('Lade Einträge…');
-    syncEntriesFromSheet().then(()=>{
-      doDelete(JSON.parse(localStorage.getItem(key)||'[]'));
-    });
-    return;
-  }
-  doDelete(entries);
+  const filtered=entries.filter(e=>String(e.id)!==String(id));
+  localStorage.setItem(key,JSON.stringify(filtered));
+  // Auch Sheet-Einträge neu laden damit sync stimmt
+  syncEntriesFromSheet().then(()=>renderEntries());
+  showToast('Gelöscht');
 }
 
 function editEntry(id){
@@ -1099,7 +1090,18 @@ function belegPDFDirect(idx){
 function renderAdminFromRaw(){
   if(!window.adminSubsRaw){ renderAdmin(); return; }
   const content = document.getElementById('adminContent');
-  const subs = window.adminSubsRaw;
+  // Overrides immer anwenden
+  const overrides=JSON.parse(localStorage.getItem('fb_status_overrides')||'{}');
+  const subs = window.adminSubsRaw.map(s=>{
+    const mitId=String(s['Mitarbeiter']||'').split('_')[0];
+    if(overrides[mitId]){
+      return {...s, 'Status':overrides[mitId].status,
+        'Genehmigt am':overrides[mitId].approvedAt||s['Genehmigt am'],
+        'Ausgezahlt am':overrides[mitId].paidAt||s['Ausgezahlt am'],
+        'Kommentar':overrides[mitId].comment||s['Kommentar']};
+    }
+    return s;
+  });
   let h = '';
   subs.forEach((s, i) => {
     const status = String(s['Status']||'').trim();
@@ -1195,8 +1197,12 @@ async function rejectEntry(id){
       body:JSON.stringify({action:'updateStatus',submissionId:subId,status:'rejected',comment})
     });
   } catch(e){}
+  // Override löschen damit Status vom Sheet kommt
+  const ov2=JSON.parse(localStorage.getItem('fb_status_overrides')||'{}');
+  delete ov2[id];
+  localStorage.setItem('fb_status_overrides',JSON.stringify(ov2));
   showToast('Zurückgesendet');
-  setTimeout(()=>renderAdmin(), 500);
+  setTimeout(()=>renderAdmin(), 1000);
 }
 
 async function markPaid(subId){ markPaidByIndex(-1, subId); }
