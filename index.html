@@ -839,7 +839,10 @@ async function renderAdmin(){
   try {
     const json=await fetchFromSheet('getSubmissions');
     const subs=json.submissions||[];
-    pending=subs.filter(s=>s['Status']==='pending').map(s=>({
+    // Debug
+    const dbg=document.getElementById('adminDebug');
+    if(dbg){dbg.style.display='block';dbg.textContent='Rows:'+subs.length+' | Status-Werte:'+subs.map(s=>s["Status"]).join(',')+'| Spalten:'+(subs[0]?Object.keys(subs[0]).join('|'):'-');}
+    pending=subs.filter(s=>String(s['Status']).trim()==='pending').map(s=>({
       mitarbeiter:s['Mitarbeiter'], mitarbeiterName:s['Name'],
       status:s['Status'], comment:s['Kommentar']||'',
       submittedAt:s['Eingereicht am'], approvedAt:s['Genehmigt am']||'',
