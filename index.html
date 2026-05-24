@@ -298,7 +298,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 
   <!-- AUSWERTUNG -->
   <div class="tab-content" id="tabAuswertung">
-    <div class="section-title">Abrechnung</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div class="section-title" style="margin-bottom:0">Abrechnung</div>
+      <button onclick="syncEntriesFromSheet().then(()=>renderAuswertung())" style="background:var(--green);color:white;border:none;border-radius:8px;padding:7px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">🔄 Aktualisieren</button>
+    </div>
     <div class="section-sub">Alle offenen Fahrten einreichen</div>
     <div id="summaryContent"></div>
   </div>
@@ -322,7 +325,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 
   <!-- ADMIN -->
   <div class="tab-content" id="tabAdmin">
-    <div class="section-title">Genehmigungen</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div class="section-title" style="margin-bottom:0">Genehmigungen</div>
+      <button onclick="renderAdmin()" style="background:var(--green);color:white;border:none;border-radius:8px;padding:7px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">🔄 Aktualisieren</button>
+    </div>
     <div class="section-sub">Offene Einreichungen der Mitarbeiter:innen</div>
     <div id="adminDebug" style="background:#fff3cd;border-radius:8px;padding:10px;margin-bottom:12px;font-size:11px;display:none;word-break:break-all"></div>
     <div id="adminContent"></div>
@@ -500,7 +506,7 @@ function showTab(id){
   if(i>=0&&tabs[i])tabs[i].classList.add('active');
   if(id==='tabEintraege')renderEntries();
   if(id==='tabAuswertung')renderAuswertung();
-  if(id==='tabAdmin'){ const fresh=window.adminJustUpdated&&(Date.now()-window.adminJustUpdated<30000); if(!window.adminSubsRaw||window.adminSubsRaw.length===0||!fresh) renderAdmin(); else renderAdminFromRaw(); }
+  if(id==='tabAdmin') renderAdminFromRaw();
 }
 
 // ── GOOGLE MAPS ──
