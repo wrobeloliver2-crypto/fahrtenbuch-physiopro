@@ -592,7 +592,8 @@ function mapSheetSub(s) {
     paidAt: String(s['Ausgezahlt am']||'').substring(0,10),
     comment: s['Kommentar']||'',
     entries,
-    rowId: s['ID']||String(s['Mitarbeiter']||'')
+    rowId: s['ID']||String(s['Mitarbeiter']||''),
+    rowIdx: s['_rowIdx']||null
   };
 }
 
@@ -716,7 +717,7 @@ async function doApprove(i) {
   if(btn){btn.disabled=true;btn.textContent='⏳';}
   try {
     // rowId als einzigen Identifier — nicht nach mitarbeiter matchen
-    await apiPost({action:'updateStatus', rowId:sub.rowId, status:'approved', comment});
+    await apiPost({action:'updateStatus', rowId:sub.rowId, rowIdx:sub.rowIdx, status:'approved', comment});
     showToast('Genehmigt ✓','ok');
     loadAdmin();
   } catch(e) { showToast('Fehler: '+e.message,'err'); if(btn){btn.disabled=false;btn.textContent='Genehmigen ✓';} }
@@ -727,7 +728,7 @@ async function doReject(i) {
   const comment = document.getElementById('com_'+i)?.value||'';
   if (!comment) { showToast('Bitte Kommentar eingeben.','err'); return; }
   try {
-    await apiPost({action:'updateStatus', rowId:sub.rowId, status:'rejected', comment});
+    await apiPost({action:'updateStatus', rowId:sub.rowId, rowIdx:sub.rowIdx, status:'rejected', comment});
     showToast('Zurückgesendet');
     loadAdmin();
   } catch(e) { showToast('Fehler: '+e.message,'err'); }
@@ -738,7 +739,7 @@ async function doPaid(i) {
   const btn = document.querySelector('#sub_'+i+' .paid-btn');
   if(btn){btn.disabled=true;btn.textContent='⏳';}
   try {
-    await apiPost({action:'updateStatus', rowId:sub.rowId, status:'paid'});
+    await apiPost({action:'updateStatus', rowId:sub.rowId, rowIdx:sub.rowIdx, status:'paid'});
     showToast('Als überwiesen markiert 💶','ok');
     loadAdmin();
   } catch(e) { showToast('Fehler: '+e.message,'err'); if(btn){btn.disabled=false;btn.textContent='💶 Als überwiesen markieren';} }
