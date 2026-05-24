@@ -249,6 +249,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
         <input type="text" class="form-input" id="inputVon" placeholder="Adresse eingeben…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         <span class="maps-icon">🔍</span>
       </div>
+      <button type="button" onclick="setPraxis('inputVon')" style="margin-top:6px;background:#e8f0ea;border:1.5px solid var(--green);border-radius:8px;padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--green2);cursor:pointer;width:100%;text-align:left">🏥 Praxis – Segeberger Str. 1, Stockelsdorf</button>
     </div>
 
     <div class="form-group">
@@ -257,6 +258,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
         <input type="text" class="form-input" id="inputNach" placeholder="Adresse eingeben…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         <span class="maps-icon">🔍</span>
       </div>
+      <button type="button" onclick="setPraxis('inputNach')" style="margin-top:6px;background:#e8f0ea;border:1.5px solid var(--green);border-radius:8px;padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--green2);cursor:pointer;width:100%;text-align:left">🏥 Praxis – Segeberger Str. 1, Stockelsdorf</button>
     </div>
 
     <button class="calc-btn" id="calcRouteBtn" onclick="calculateRoute()">🗺️ Strecke berechnen</button>
@@ -570,10 +572,22 @@ function updateManualKm(){
 }
 
 // ── EINTRAG SPEICHERN ──
+const PRAXIS_ADRESSE = 'Segeberger Straße 1, 23617 Stockelsdorf';
+
+function setPraxis(fieldId){
+  const input = document.getElementById(fieldId);
+  input.value = PRAXIS_ADRESSE;
+  // Autocomplete zurücksetzen
+  resetRoute();
+}
+
 function setToday(){
   const t=new Date();
   document.getElementById('inputDatum').value=t.toISOString().split('T')[0];
   document.getElementById('todayDate').textContent=t.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  // Abfahrt auf Praxis vorbelegen
+  const vonField = document.getElementById('inputVon');
+  if(!vonField.value) vonField.value = PRAXIS_ADRESSE;
 }
 
 function saveEntry(){
