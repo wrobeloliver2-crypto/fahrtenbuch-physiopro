@@ -4,37 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Fahrtenbuch – PhysioPro</title>
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-<link rel="icon" type="image/png" sizes="192x192" href="favicon.png">
-<link rel="apple-touch-icon" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="favicon.png">
 <style>
-:root {
-  --dark:#2c2825; --green:#55725e; --green2:#3d5445;
-  --cream:#faf8f4; --cream2:#f0ece4; --text:#2c2825;
-  --muted:#8a8278; --border:#ddd8ce; --red:#c0392b;
-  --shadow:0 2px 12px rgba(44,40,37,0.08);
-}
+:root{--dark:#2c2825;--green:#55725e;--green2:#3d5445;--cream:#faf8f4;--cream2:#f0ece4;--text:#2c2825;--muted:#8a8278;--border:#ddd8ce;--red:#c0392b;--shadow:0 2px 12px rgba(44,40,37,0.08);}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;overscroll-behavior:none;}
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);font-size:16px;-webkit-font-smoothing:antialiased;}
-
-/* HEADER */
 .app-header{background:var(--dark);color:var(--cream);padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
 .app-header h1{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;}
-.app-header .subtitle{font-size:10px;color:rgba(250,248,244,0.5);margin-top:1px;letter-spacing:.05em;text-transform:uppercase;}
+.subtitle{font-size:10px;color:rgba(250,248,244,0.5);margin-top:1px;letter-spacing:.05em;text-transform:uppercase;}
 .header-right{display:flex;align-items:center;gap:10px;}
 .user-badge{background:var(--green);color:var(--cream);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:500;}
 .logout-btn{background:none;border:1px solid rgba(250,248,244,0.3);color:rgba(250,248,244,0.7);border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;}
-
-/* SCREENS */
-.screen{display:none;}
-.screen.active{display:block;}
-
-/* LOGIN */
+.screen{display:none;}.screen.active{display:block;}
 #screenLogin{min-height:100vh;background:var(--dark);display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 16px;}
 #screenLogin.active{display:flex;}
 .login-logo{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:500;color:var(--cream);margin-bottom:4px;}
@@ -42,168 +27,107 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .login-card{background:var(--cream);border-radius:16px;padding:24px 20px;width:100%;max-width:380px;}
 .login-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:block;}
 .name-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
-.name-btn{background:var(--cream2);border:2px solid transparent;border-radius:10px;padding:10px 6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--text);cursor:pointer;text-align:center;transition:all .15s;line-height:1.3;}
+.name-btn{background:var(--cream2);border:2px solid transparent;border-radius:10px;padding:10px 6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--text);cursor:pointer;text-align:center;line-height:1.3;}
 .name-btn.selected{border-color:var(--green);background:#e8f0ea;color:var(--green2);}
-.pin-row{display:flex;gap:10px;margin-bottom:14px;}
-.pin-input{flex:1;background:var(--cream2);border:2px solid var(--border);border-radius:10px;padding:14px;font-size:22px;letter-spacing:10px;font-family:'DM Sans',sans-serif;color:var(--text);text-align:center;-webkit-text-security:disc;}
+.pin-input{width:100%;background:var(--cream2);border:2px solid var(--border);border-radius:10px;padding:14px;font-size:22px;letter-spacing:10px;font-family:'DM Sans',sans-serif;color:var(--text);text-align:center;margin-bottom:14px;}
 .pin-input:focus{outline:none;border-color:var(--green);}
-.login-btn{width:100%;background:var(--green);color:var(--cream);border:none;border-radius:10px;padding:14px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;margin-top:4px;}
+.login-btn{width:100%;background:var(--green);color:var(--cream);border:none;border-radius:10px;padding:14px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;}
 .login-error{color:var(--red);font-size:13px;text-align:center;margin-top:8px;min-height:18px;}
-.first-login-hint{background:#e8f0ea;border-radius:8px;padding:10px 12px;font-size:12px;color:var(--green2);margin-bottom:12px;line-height:1.5;}
-.pin-confirm-row{display:none;}
-.pin-confirm-row.show{display:flex;}
-
-/* RESET PIN BUTTON */
+.first-hint{background:#e8f0ea;border-radius:8px;padding:10px 12px;font-size:12px;color:var(--green2);margin-bottom:12px;line-height:1.5;display:none;}
+.pin-confirm{display:none;margin-bottom:14px;}
 .reset-link{display:block;text-align:center;font-size:12px;color:var(--muted);margin-top:10px;cursor:pointer;text-decoration:underline;}
-
-/* TABS */
-.tab-bar{display:flex;background:var(--cream2);border-bottom:1px solid var(--border);position:sticky;top:52px;z-index:90;overflow-x:auto;}
-.tab{flex:1;min-width:60px;padding:11px 4px 9px;font-size:11px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;text-align:center;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);white-space:nowrap;}
+.tab-bar{display:flex;background:var(--cream2);border-bottom:1px solid var(--border);position:sticky;top:52px;z-index:90;}
+.tab{flex:1;min-width:55px;padding:11px 4px 9px;font-size:11px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;text-align:center;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);}
 .tab.active{color:var(--green);border-bottom-color:var(--green);}
-
-/* CONTENT */
 .tab-content{display:none;padding:16px 14px 100px;}
 .tab-content.active{display:block;}
-.section-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;color:var(--dark);margin-bottom:4px;}
-.section-sub{font-size:12px;color:var(--muted);margin-bottom:18px;}
-
-/* FORM */
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;color:var(--dark);}
+.refresh-btn{background:var(--green);color:white;border:none;border-radius:8px;padding:7px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
 .form-group{margin-bottom:14px;}
 .form-label{display:block;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
-.form-input,.form-select{width:100%;background:white;border:1.5px solid var(--border);border-radius:10px;padding:13px;font-family:'DM Sans',sans-serif;font-size:16px;color:var(--text);-webkit-appearance:none;appearance:none;}
-.form-input:focus,.form-select:focus{outline:none;border-color:var(--green);}
-
-/* MAPS */
-.maps-field-wrap{position:relative;}
+.form-input{width:100%;background:white;border:1.5px solid var(--border);border-radius:10px;padding:13px;font-family:'DM Sans',sans-serif;font-size:16px;color:var(--text);-webkit-appearance:none;}
+.form-input:focus{outline:none;border-color:var(--green);}
+.maps-wrap{position:relative;}
+.maps-wrap .form-input{padding-right:38px;}
 .maps-icon{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;opacity:.4;}
-.pac-container{border-radius:10px!important;border:1.5px solid var(--border)!important;box-shadow:var(--shadow)!important;font-family:'DM Sans',sans-serif!important;margin-top:4px!important;font-size:15px!important;}
+.pac-container{border-radius:10px!important;border:1.5px solid var(--border)!important;font-family:'DM Sans',sans-serif!important;font-size:15px!important;}
 .pac-item{padding:10px 12px!important;cursor:pointer;}
-
-/* ROUTE PREVIEW */
+.praxis-btn{width:100%;background:#e8f0ea;border:1.5px solid var(--green);border-radius:8px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--green2);cursor:pointer;text-align:left;margin-top:6px;}
 .route-preview{background:#e8f0ea;border-radius:12px;padding:14px 16px;margin-bottom:14px;display:none;border-left:4px solid var(--green);}
 .route-preview.show{display:block;}
-.route-preview-title{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--green2);margin-bottom:8px;}
+.route-title{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--green2);margin-bottom:8px;}
 .route-stats{display:flex;gap:20px;}
-.route-stat-val{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--green2);line-height:1;}
-.route-stat-lbl{font-size:10px;color:var(--green);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;}
+.route-val{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--green2);line-height:1;}
+.route-lbl{font-size:10px;color:var(--green);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;}
 .route-info{font-size:11px;color:var(--green2);margin-top:8px;opacity:.8;}
-
-/* BUTTONS */
 .calc-btn{width:100%;background:var(--dark);color:var(--cream);border:none;border-radius:12px;padding:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:12px;}
-.submit-btn{width:100%;background:var(--green);color:var(--cream);border:none;border-radius:12px;padding:14px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;margin-top:6px;}
-.submit-btn:disabled,.calc-btn:disabled{background:var(--muted);cursor:not-allowed;}
-
-/* ENTRIES */
+.save-btn{width:100%;background:var(--green);color:var(--cream);border:none;border-radius:12px;padding:14px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;margin-top:6px;}
+.save-btn:disabled,.calc-btn:disabled{background:var(--muted);cursor:not-allowed;}
 .entry-card{background:white;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow);border-left:4px solid var(--green);}
 .entry-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
 .entry-route{font-weight:600;font-size:14px;color:var(--dark);flex:1;margin-right:8px;line-height:1.3;}
 .entry-date{font-size:12px;color:var(--muted);white-space:nowrap;}
 .entry-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
-.entry-badge{font-size:11px;background:var(--cream2);border-radius:6px;padding:3px 8px;color:var(--text);}
-.entry-badge.km{background:#e8f0ea;color:var(--green2);font-weight:600;}
-.entry-badge.cost{background:#e8f0ea;color:var(--green2);}
+.badge{font-size:11px;background:var(--cream2);border-radius:6px;padding:3px 8px;}
+.badge.km{background:#e8f0ea;color:var(--green2);font-weight:600;}
+.badge.eur{background:#e8f0ea;color:var(--green2);}
 .entry-zweck{font-size:12px;color:var(--muted);margin-top:4px;font-style:italic;}
-.entry-actions{display:flex;gap:8px;margin-top:10px;}
-.btn-small{font-size:13px;border-radius:8px;padding:7px 12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;border:1.5px solid var(--border);background:white;color:var(--muted);}
-.locked-tag{font-size:11px;color:var(--muted);background:var(--cream2);border-radius:6px;padding:2px 7px;margin-top:8px;display:inline-block;}
-
-/* AUSWERTUNG */
-.month-selector{margin-bottom:18px;}
-.month-selector select{width:100%;background:white;border:1.5px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Sans',sans-serif;font-size:16px;color:var(--text);-webkit-appearance:none;}
+.del-btn{font-size:13px;border-radius:8px;padding:7px 12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;border:1.5px solid var(--border);background:white;color:var(--muted);margin-top:10px;}
+.del-btn:active{border-color:var(--red);color:var(--red);}
+.locked-tag{font-size:11px;color:var(--muted);background:var(--cream2);border-radius:6px;padding:3px 8px;margin-top:8px;display:inline-block;}
 .summary-card{background:var(--dark);color:var(--cream);border-radius:14px;padding:18px;margin-bottom:14px;}
-.summary-title{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(250,248,244,0.5);margin-bottom:12px;}
-.summary-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
-.stat-box{text-align:center;}
-.stat-value{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--cream);line-height:1;}
-.stat-value.green{color:#7fb98a;}
-.stat-label{font-size:10px;color:rgba(250,248,244,0.5);letter-spacing:.06em;text-transform:uppercase;margin-top:3px;}
-.send-section{background:white;border-radius:12px;padding:16px;margin-bottom:14px;border:1.5px solid var(--border);}
-.send-section h3{font-size:13px;font-weight:600;margin-bottom:6px;}
-.send-section p{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5;}
-.send-btn{width:100%;background:var(--green);color:var(--cream);border:none;border-radius:10px;padding:13px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;}
-.send-btn:disabled{background:var(--muted);}
-.status-badge{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;}
-.status-badge.pending{background:#fff3cd;color:#856404;}
-.status-badge.approved{background:#d1e7dd;color:#0a5c36;}
-.status-badge.draft{background:var(--cream2);color:var(--muted);}
-.export-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
-.export-btn{background:white;border:1.5px solid var(--border);border-radius:10px;padding:11px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;text-align:center;}
-
-/* ADMIN */
-.admin-section-title{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
-.approval-card{background:white;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow);border-left:4px solid #f0ad4e;}
-.approval-card.approved{border-left-color:var(--green);}
-.approval-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-.approval-name{font-weight:600;font-size:14px;}
-.approval-stats{font-size:12px;color:var(--muted);margin-bottom:10px;}
-.approval-actions{display:flex;gap:8px;}
-.approve-btn{background:var(--green);color:white;border:none;border-radius:8px;padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
-.reject-btn{background:white;color:var(--red);border:1.5px solid var(--red);border-radius:8px;padding:7px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
-.comment-input{width:100%;background:var(--cream2);border:1.5px solid var(--border);border-radius:8px;padding:10px;font-family:'DM Sans',sans-serif;font-size:14px;margin-top:8px;margin-bottom:8px;resize:vertical;min-height:60px;}
-
-/* SETTINGS */
+.sum-title{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:rgba(250,248,244,0.5);margin-bottom:12px;}
+.sum-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.stat-val{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--cream);line-height:1;}
+.stat-val.g{color:#7fb98a;}
+.stat-lbl{font-size:10px;color:rgba(250,248,244,0.5);letter-spacing:.06em;text-transform:uppercase;margin-top:3px;}
+.status-box{border-radius:12px;padding:14px;margin-bottom:14px;font-size:13px;}
+.status-box.pending{background:#fff3cd;color:#856404;}
+.status-box.approved{background:#d1e7dd;color:#0a5c36;}
+.status-box.paid{background:#d1e7dd;color:#0a5c36;}
+.submit-btn{width:100%;background:var(--green);color:var(--cream);border:none;border-radius:12px;padding:14px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;}
+.submit-btn:disabled{background:var(--muted);cursor:not-allowed;}
+.export-btn{background:white;border:1.5px solid var(--border);border-radius:10px;padding:11px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;text-align:center;width:100%;margin-top:8px;}
+.approval-card{background:white;border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow);border-left:4px solid #f0ad4e;}
+.approval-card.done{border-left-color:var(--green);}
+.appr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.appr-name{font-weight:600;font-size:15px;}
+.appr-stats{font-size:12px;color:var(--muted);margin-bottom:10px;}
+.appr-entry{font-size:12px;padding:5px 0;border-bottom:1px solid var(--border);}
+.comment-input{width:100%;background:var(--cream2);border:1.5px solid var(--border);border-radius:8px;padding:10px;font-family:'DM Sans',sans-serif;font-size:14px;margin:8px 0;resize:vertical;min-height:60px;}
+.action-row{display:flex;gap:8px;margin-top:4px;}
+.approve-btn{background:var(--green);color:white;border:none;border-radius:8px;padding:10px 16px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;flex:1;}
+.reject-btn{background:white;color:var(--red);border:1.5px solid var(--red);border-radius:8px;padding:9px 16px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;flex:1;}
+.paid-btn{width:100%;background:var(--green);color:white;border:none;border-radius:12px;padding:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px;}
+.two-btn{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
 .settings-card{background:white;border-radius:12px;padding:16px;margin-bottom:14px;border:1.5px solid var(--border);}
-.settings-card h3{font-size:14px;font-weight:600;margin-bottom:12px;}
-
-/* MISC */
 .empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px;}
 .empty-state .icon{font-size:36px;margin-bottom:10px;}
+.loading{text-align:center;padding:30px;color:var(--muted);}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--dark);color:var(--cream);border-radius:10px;padding:12px 20px;font-size:14px;font-weight:500;z-index:999;transition:transform .3s ease;max-width:300px;text-align:center;}
 .toast.show{transform:translateX(-50%) translateY(0);}
-.toast.success{background:var(--green);}
-.toast.error{background:var(--red);}
-.api-banner{background:#fff3cd;border:1.5px solid #ffc107;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:#856404;line-height:1.5;}
+.toast.ok{background:var(--green);}
+.toast.err{background:var(--red);}
 </style>
 </head>
 <body>
 
 <!-- LOGIN -->
 <div id="screenLogin" class="screen">
-  <div style="margin-bottom:20px">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="80" height="80" style="display:block;margin:0 auto;filter:drop-shadow(0 4px 16px rgba(85,114,94,0.4))">
-      <defs>
-        <linearGradient id="bgG" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#3d3530"/>
-          <stop offset="100%" style="stop-color:#2c2825"/>
-        </linearGradient>
-        <linearGradient id="leafG" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#6b9177"/>
-          <stop offset="100%" style="stop-color:#55725e"/>
-        </linearGradient>
-      </defs>
-      <rect width="200" height="200" rx="40" fill="url(#bgG)"/>
-      <path d="M 30 158 Q 100 108 170 158" stroke="#faf8f4" stroke-width="3" fill="none" opacity="0.12"/>
-      <path d="M 45 168 Q 100 122 155 168" stroke="#faf8f4" stroke-width="3" fill="none" opacity="0.12"/>
-      <g transform="translate(100,88)">
-        <rect x="-9" y="-30" width="18" height="60" rx="9" fill="url(#leafG)"/>
-        <rect x="-30" y="-9" width="60" height="18" rx="9" fill="url(#leafG)"/>
-        <circle cx="0" cy="0" r="7" fill="#faf8f4" opacity="0.95"/>
-      </g>
-      <g transform="translate(126,145)" opacity="0.75">
-        <rect x="0" y="7" width="30" height="13" rx="4" fill="#55725e"/>
-        <rect x="5" y="2" width="20" height="10" rx="3" fill="#6b9177"/>
-        <circle cx="7" cy="21" r="4" fill="#2c2825" stroke="#faf8f4" stroke-width="1.5"/>
-        <circle cx="23" cy="21" r="4" fill="#2c2825" stroke="#faf8f4" stroke-width="1.5"/>
-      </g>
-    </svg>
-  </div>
   <div class="login-logo">PhysioPro</div>
   <div class="login-sub">Fahrtenbuch · Lübeck</div>
   <div class="login-card">
     <span class="login-label">Mitarbeiter:in auswählen</span>
     <div class="name-grid" id="nameGrid"></div>
-    <div id="pinSection" style="display:none">
-      <div id="firstLoginHint" class="first-login-hint" style="display:none">👋 Erster Login – wähle eine 4-stellige PIN</div>
-      <span class="login-label">PIN eingeben</span>
-      <div class="pin-row">
-        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" class="pin-input" id="pinInput" placeholder="••••" autocomplete="off">
-      </div>
-      <div class="pin-confirm-row pin-row" id="pinConfirmRow">
-        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" class="pin-input" id="pinConfirm" placeholder="••••" autocomplete="off">
-      </div>
+    <div id="pinArea" style="display:none">
+      <div class="first-hint" id="firstHint">👋 Erster Login – wähle eine 4-stellige PIN</div>
+      <span class="login-label">PIN</span>
+      <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" class="pin-input" id="pinInput" placeholder="••••" autocomplete="off">
+      <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" class="pin-input pin-confirm" id="pinConfirm" placeholder="PIN bestätigen" autocomplete="off">
       <button class="login-btn" onclick="doLogin()">Anmelden</button>
       <div class="login-error" id="loginError"></div>
-      <span class="reset-link" onclick="resetPin()">PIN vergessen / zurücksetzen</span>
+      <span class="reset-link" onclick="resetPin()">PIN vergessen?</span>
     </div>
   </div>
 </div>
@@ -211,1216 +135,722 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 <!-- APP -->
 <div id="screenApp" class="screen">
   <div class="app-header">
-    <div>
-      <h1>Fahrtenbuch</h1>
-      <div class="subtitle">PhysioPro Lübeck</div>
-    </div>
+    <div><h1>Fahrtenbuch</h1><div class="subtitle">PhysioPro Lübeck</div></div>
     <div class="header-right">
       <div class="user-badge" id="userBadge"></div>
       <button class="logout-btn" onclick="logout()">↩</button>
     </div>
   </div>
-
   <div class="tab-bar">
     <div class="tab active" onclick="showTab('tabNeu')">+ Fahrt</div>
     <div class="tab" onclick="showTab('tabEintraege')">Einträge</div>
-    <div class="tab" onclick="showTab('tabAuswertung')">Abrechnung</div>
+    <div class="tab" onclick="showTab('tabAbrechnung')">Abrechnung</div>
     <div class="tab" onclick="showTab('tabPin')">PIN</div>
     <div class="tab" id="tabAdminLink" onclick="showTab('tabAdmin')" style="display:none">Admin</div>
   </div>
 
   <!-- NEUE FAHRT -->
   <div class="tab-content active" id="tabNeu">
-    <div class="section-title">Fahrt erfassen</div>
-    <div class="section-sub" id="todayDate"></div>
-
-    <div id="apiKeyBanner" class="api-banner" style="display:none">
-      ⚠️ <b>Google Maps API Key fehlt</b> – km bitte manuell eingeben.
-    </div>
-
+    <div class="section-title" style="margin-bottom:4px">Fahrt erfassen</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px" id="todayLabel"></div>
     <div class="form-group">
       <label class="form-label">Datum</label>
       <input type="date" class="form-input" id="inputDatum">
     </div>
-
     <div class="form-group">
-      <label class="form-label">📍 Abfahrtsort</label>
-      <div class="maps-field-wrap">
-        <input type="text" class="form-input" id="inputVon" placeholder="Adresse eingeben…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <label class="form-label">📍 Abfahrt</label>
+      <div class="maps-wrap">
+        <input type="text" class="form-input" id="inputVon" placeholder="Adresse…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         <span class="maps-icon">🔍</span>
       </div>
-      <button type="button" onclick="setPraxis('inputVon')" style="margin-top:6px;background:#e8f0ea;border:1.5px solid var(--green);border-radius:8px;padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--green2);cursor:pointer;width:100%;text-align:left">🏥 Praxis – Segeberger Str. 1, Stockelsdorf</button>
+      <button class="praxis-btn" onclick="setPraxis('inputVon')">🏥 Praxis – Segeberger Str. 1, Stockelsdorf</button>
     </div>
-
     <div class="form-group">
-      <label class="form-label">🏁 Zielort</label>
-      <div class="maps-field-wrap">
-        <input type="text" class="form-input" id="inputNach" placeholder="Adresse eingeben…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <label class="form-label">🏁 Ziel</label>
+      <div class="maps-wrap">
+        <input type="text" class="form-input" id="inputNach" placeholder="Adresse…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         <span class="maps-icon">🔍</span>
       </div>
-      <button type="button" onclick="setPraxis('inputNach')" style="margin-top:6px;background:#e8f0ea;border:1.5px solid var(--green);border-radius:8px;padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--green2);cursor:pointer;width:100%;text-align:left">🏥 Praxis – Segeberger Str. 1, Stockelsdorf</button>
+      <button class="praxis-btn" onclick="setPraxis('inputNach')">🏥 Praxis – Segeberger Str. 1, Stockelsdorf</button>
     </div>
-
-    <button class="calc-btn" id="calcRouteBtn" onclick="calculateRoute()">🗺️ Strecke berechnen</button>
-
+    <button class="calc-btn" id="calcBtn" onclick="calculateRoute()">🗺️ Strecke berechnen</button>
     <div class="route-preview" id="routePreview">
-      <div class="route-preview-title">Berechnete Route</div>
+      <div class="route-title">Berechnete Route</div>
       <div class="route-stats">
-        <div><div class="route-stat-val" id="routeKm">–</div><div class="route-stat-lbl">Kilometer</div></div>
-        <div><div class="route-stat-val" id="routeDauer">–</div><div class="route-stat-lbl">Fahrzeit</div></div>
-        <div><div class="route-stat-val" id="routeKosten">–</div><div class="route-stat-lbl">Erstattung</div></div>
+        <div><div class="route-val" id="rKm">–</div><div class="route-lbl">Kilometer</div></div>
+        <div><div class="route-val" id="rDauer">–</div><div class="route-lbl">Fahrzeit</div></div>
+        <div><div class="route-val" id="rEuro">–</div><div class="route-lbl">Erstattung</div></div>
       </div>
-      <div class="route-info" id="routeInfo"></div>
+      <div class="route-info" id="rInfo"></div>
     </div>
-
-    <div id="manualKmSection" style="display:none">
-      <div class="form-group">
-        <label class="form-label">Kilometer (manuell)</label>
-        <input type="number" class="form-input" id="inputKmManual" placeholder="0" inputmode="decimal" oninput="updateManualKm()">
-        <div style="font-size:11px;color:var(--muted);margin-top:4px" id="manualKmCost"></div>
-      </div>
-    </div>
-
     <div class="form-group">
       <label class="form-label">Reisezweck</label>
-      <input type="text" class="form-input" id="inputZweck" placeholder="z.B. Hausbesuch Frau Müller" autocorrect="on">
+      <input type="text" class="form-input" id="inputZweck" placeholder="z.B. Hausbesuch Frau Müller">
     </div>
-
-    <button class="submit-btn" onclick="saveEntry()">Eintrag speichern</button>
+    <button class="save-btn" onclick="saveFahrt()">Fahrt speichern</button>
   </div>
 
   <!-- EINTRÄGE -->
   <div class="tab-content" id="tabEintraege">
-    <div class="section-title">Meine Fahrten</div>
-    <div class="section-sub">Alle erfassten Einträge</div>
-    <div id="entriesList"></div>
+    <div class="page-header">
+      <div class="section-title">Einträge</div>
+    </div>
+    <div id="entriesList"><div class="loading">⏳</div></div>
   </div>
 
-  <!-- AUSWERTUNG -->
-  <div class="tab-content" id="tabAuswertung">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <div class="section-title" style="margin-bottom:0">Abrechnung</div>
-      <button onclick="syncEntriesFromSheet().then(()=>renderAuswertung())" style="background:var(--green);color:white;border:none;border-radius:8px;padding:7px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">🔄 Aktualisieren</button>
+  <!-- ABRECHNUNG -->
+  <div class="tab-content" id="tabAbrechnung">
+    <div class="page-header">
+      <div class="section-title">Abrechnung</div>
+      <button class="refresh-btn" onclick="loadAbrechnung()">🔄</button>
     </div>
-    <div class="section-sub">Alle offenen Fahrten einreichen</div>
-    <div id="summaryContent"></div>
+    <div id="abrechnungContent"><div class="loading">⏳</div></div>
   </div>
 
   <!-- PIN -->
   <div class="tab-content" id="tabPin">
-    <div class="section-title">PIN ändern</div>
-    <div class="section-sub">Neuen 4-stelligen PIN wählen</div>
+    <div class="section-title" style="margin-bottom:16px">PIN ändern</div>
     <div class="settings-card">
       <div class="form-group">
         <label class="form-label">Neuer PIN</label>
-        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" class="form-input" id="newPin1" placeholder="••••">
+        <input type="password" inputmode="numeric" maxlength="4" class="form-input" id="newPin1" placeholder="••••">
       </div>
       <div class="form-group">
-        <label class="form-label">PIN bestätigen</label>
-        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" class="form-input" id="newPin2" placeholder="••••">
+        <label class="form-label">Bestätigen</label>
+        <input type="password" inputmode="numeric" maxlength="4" class="form-input" id="newPin2" placeholder="••••">
       </div>
-      <button class="submit-btn" onclick="changePin()">PIN speichern</button>
+      <button class="save-btn" onclick="changePin()">PIN speichern</button>
     </div>
   </div>
 
   <!-- ADMIN -->
   <div class="tab-content" id="tabAdmin">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <div class="section-title" style="margin-bottom:0">Genehmigungen</div>
-      <button onclick="renderAdmin()" style="background:var(--green);color:white;border:none;border-radius:8px;padding:7px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">🔄 Aktualisieren</button>
+    <div class="page-header">
+      <div class="section-title">Genehmigungen</div>
+      <button class="refresh-btn" onclick="loadAdmin()">🔄</button>
     </div>
-    <div class="section-sub">Offene Einreichungen der Mitarbeiter:innen</div>
-    <div id="adminDebug" style="background:#fff3cd;border-radius:8px;padding:10px;margin-bottom:12px;font-size:11px;display:none;word-break:break-all"></div>
-    <div id="adminContent"></div>
-    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
-      <div style="font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Verwaltung</div>
-      <button onclick="clearOverrides()" style="background:white;border:1.5px solid var(--red);color:var(--red);border-radius:10px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;width:100%">🗑 Alle lokalen Status-Overrides löschen</button>
-      <div style="font-size:11px;color:var(--muted);margin-top:6px">Nutze dies wenn überwiesene Einträge nicht verschwinden</div>
+    <div id="adminList"><div class="loading">⏳</div></div>
+    <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border)">
+      <button onclick="clearAllLocalData()" style="background:white;border:1.5px solid var(--red);color:var(--red);border-radius:10px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;width:100%">🗑 Lokale Daten zurücksetzen</button>
     </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
-
-<script>const GOOGLE_MAPS_API_KEY = 'AIzaSyDArIR_Wq3wpmgyo-ZVwG1unGBjJtjLTtM';</script>
+<script>const GOOGLE_MAPS_API_KEY='AIzaSyDArIR_Wq3wpmgyo-ZVwG1unGBjJtjLTtM';</script>
 <script>
-const KM_PAUSCHALE = 0.30;
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxNg6iqZzUUZ8i9pRukc5b8BdqGDuGs1-EH5eLD2xPVnkpeR3iKKjqLEd3WWNPGLHjc/exec';
+// ═══════════════════════════════════════════
+// KONFIGURATION
+// ═══════════════════════════════════════════
+const KM_RATE = 0.30;
+const PRAXIS = 'Segeberger Straße 1, 23617 Stockelsdorf';
+const API = '/.netlify/functions/sheet';
+const APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbxNg6iqZzUUZ8i9pRukc5b8BdqGDuGs1-EH5eLD2xPVnkpeR3iKKjqLEd3WWNPGLHjc/exec';
 
 const EMPLOYEES = [
-  {id:'hanna',   name:'Hanna Wrobel',       isAdmin:true},
-  {id:'anna',    name:'Anna Bath',           isAdmin:false},
-  {id:'julia',   name:'Julia Mielke',        isAdmin:false},
-  {id:'tuana',   name:'Tuana Koyulhisarli',  isAdmin:false},
-  {id:'maike',   name:'Maike Schrader',      isAdmin:false},
-  {id:'annika',  name:'Annika Zwiener',      isAdmin:false},
-  {id:'finn',    name:'Finn Meyer',          isAdmin:false},
-  {id:'phillip', name:'Phillip Opelka',      isAdmin:false},
-  {id:'imo',     name:'Imo Thomsen',         isAdmin:false},
+  {id:'hanna',   name:'Hanna Wrobel',       admin:true},
+  {id:'anna',    name:'Anna Bath',           admin:false},
+  {id:'julia',   name:'Julia Mielke',        admin:false},
+  {id:'tuana',   name:'Tuana Koyulhisarli',  admin:false},
+  {id:'maike',   name:'Maike Schrader',      admin:false},
+  {id:'annika',  name:'Annika Zwiener',      admin:false},
+  {id:'finn',    name:'Finn Meyer',          admin:false},
+  {id:'phillip', name:'Phillip Opelka',      admin:false},
+  {id:'imo',     name:'Imo Thomsen',         admin:false},
 ];
 
-let currentUser=null, selectedEmpId=null, isFirstLogin=false;
-let mapsReady=false, acVon=null, acNach=null;
-let calcKm=0, calcDauer='';
+// ═══════════════════════════════════════════
+// STATE — alles im Memory, Sheet ist Wahrheit
+// ═══════════════════════════════════════════
+let user = null;
+let selectedId = null;
+let isFirst = false;
+let mapsOk = false;
+let acVon = null, acNach = null;
+let calcKm = 0, calcDauer = '';
 
-// ── INIT ──
-document.addEventListener('DOMContentLoaded',()=>{
-  buildNameGrid();
-  setToday();
-  loadMapsScript();
-  showScreen('screenLogin');
-});
+// Lokale Fahrten (noch nicht eingereicht)
+function getLocal()    { return JSON.parse(localStorage.getItem('local_'+user.id)||'[]'); }
+function setLocal(arr) { localStorage.setItem('local_'+user.id, JSON.stringify(arr)); }
+function getPin(id)    { return localStorage.getItem('pin_'+id); }
+function setPin(id, p) { localStorage.setItem('pin_'+id, p); }
 
-function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+// ═══════════════════════════════════════════
+// API HELPERS
+// ═══════════════════════════════════════════
+async function apiGet(action, params={}) {
+  const q = new URLSearchParams({action, ...params});
+  const r = await fetch(API+'?'+q);
+  if (!r.ok) throw new Error('HTTP '+r.status);
+  return r.json();
 }
 
-// ── LOGIN ──
-function buildNameGrid(){
-  const g=document.getElementById('nameGrid');
-  EMPLOYEES.forEach(emp=>{
-    const b=document.createElement('button');
-    b.className='name-btn';
-    b.textContent=emp.name;
-    b.dataset.id=emp.id;
-    b.onclick=()=>selectEmployee(emp.id);
+async function apiPost(body) {
+  const r = await fetch(API, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error('HTTP '+r.status);
+  return r.json();
+}
+
+// ═══════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  buildGrid();
+  setToday();
+  loadMaps();
+  document.getElementById('screenLogin').classList.add('active');
+});
+
+function buildGrid() {
+  const g = document.getElementById('nameGrid');
+  EMPLOYEES.forEach(e => {
+    const b = document.createElement('button');
+    b.className = 'name-btn';
+    b.textContent = e.name;
+    b.dataset.id = e.id;
+    b.onclick = () => selectEmp(e.id);
     g.appendChild(b);
   });
 }
 
-function selectEmployee(id){
-  selectedEmpId=id;
-  document.querySelectorAll('.name-btn').forEach(b=>b.classList.remove('selected'));
-  document.querySelector('[data-id="'+id+'"]').classList.add('selected');
-  const emp=EMPLOYEES.find(e=>e.id===id);
-  const savedPin=localStorage.getItem('fb_pin_'+id);
-  // Admins: immer normaler Login (Fallback 0000)
-  isFirstLogin = !savedPin && !emp.isAdmin;
-  document.getElementById('pinSection').style.display='block';
-  document.getElementById('firstLoginHint').style.display=isFirstLogin?'block':'none';
-  document.getElementById('pinConfirmRow').classList.toggle('show',isFirstLogin);
-  document.getElementById('pinInput').value='';
-  document.getElementById('pinConfirm').value='';
-  document.getElementById('loginError').textContent='';
-  setTimeout(()=>document.getElementById('pinInput').focus(),100);
+function selectEmp(id) {
+  selectedId = id;
+  document.querySelectorAll('.name-btn').forEach(b => b.classList.toggle('selected', b.dataset.id===id));
+  const emp = EMPLOYEES.find(e => e.id===id);
+  const pin = getPin(id);
+  isFirst = !pin && !emp.admin;
+  document.getElementById('pinArea').style.display = 'block';
+  document.getElementById('firstHint').style.display = isFirst ? 'block' : 'none';
+  document.getElementById('pinConfirm').style.display = isFirst ? 'block' : 'none';
+  document.getElementById('pinInput').value = '';
+  document.getElementById('pinConfirm').value = '';
+  document.getElementById('loginError').textContent = '';
+  setTimeout(() => document.getElementById('pinInput').focus(), 100);
 }
 
-function doLogin(){
-  const emp=EMPLOYEES.find(e=>e.id===selectedEmpId);
-  if(!emp){document.getElementById('loginError').textContent='Bitte auswählen.';return;}
-  const pin=document.getElementById('pinInput').value;
-  if(pin.length!==4){document.getElementById('loginError').textContent='PIN = 4 Ziffern';return;}
-  const savedPin=localStorage.getItem('fb_pin_'+emp.id);
+function doLogin() {
+  const emp = EMPLOYEES.find(e => e.id===selectedId);
+  if (!emp) { document.getElementById('loginError').textContent = 'Bitte auswählen.'; return; }
+  const p1 = document.getElementById('pinInput').value;
+  if (p1.length !== 4) { document.getElementById('loginError').textContent = 'PIN = 4 Ziffern'; return; }
 
-  if(isFirstLogin){
-    const pin2=document.getElementById('pinConfirm').value;
-    if(pin!==pin2){document.getElementById('loginError').textContent='PINs stimmen nicht überein.';return;}
-    localStorage.setItem('fb_pin_'+emp.id,pin);
-    currentUser=emp; enterApp();
+  if (isFirst) {
+    const p2 = document.getElementById('pinConfirm').value;
+    if (p1 !== p2) { document.getElementById('loginError').textContent = 'PINs stimmen nicht überein.'; return; }
+    setPin(emp.id, p1);
+    enterApp(emp);
   } else {
-    // Admin-Fallback: 0000 wenn noch kein PIN gesetzt
-    const valid=savedPin||(emp.isAdmin?'0000':null);
-    if(!valid||pin!==valid){document.getElementById('loginError').textContent='Falsche PIN.';return;}
-    currentUser=emp; enterApp();
+    const saved = getPin(emp.id) || (emp.admin ? '0000' : null);
+    if (!saved || p1 !== saved) { document.getElementById('loginError').textContent = 'Falsche PIN.'; return; }
+    enterApp(emp);
   }
 }
 
-function resetPin(){
-  if(!selectedEmpId){showToast('Zuerst Namen auswählen.','error');return;}
-  const emp=EMPLOYEES.find(e=>e.id===selectedEmpId);
-  if(emp.isAdmin){showToast('Admin-PIN: 0000','error');return;}
-  if(!confirm('PIN für '+emp.name+' zurücksetzen? Beim nächsten Login kann ein neuer PIN gewählt werden.')){return;}
-  localStorage.removeItem('fb_pin_'+selectedEmpId);
-  // Neu selectieren damit isFirstLogin gesetzt wird
-  selectEmployee(selectedEmpId);
+function resetPin() {
+  if (!selectedId) { showToast('Zuerst Namen auswählen.','err'); return; }
+  const emp = EMPLOYEES.find(e => e.id===selectedId);
+  if (emp.admin) { showToast('Admin-PIN: 0000','err'); return; }
+  if (!confirm('PIN für '+emp.name+' zurücksetzen?')) return;
+  localStorage.removeItem('pin_'+selectedId);
+  selectEmp(selectedId);
   showToast('PIN zurückgesetzt');
 }
 
-function enterApp(){
-  window.entriesSyncDone=false;
-  showScreen('screenApp');
-  document.getElementById('userBadge').textContent=currentUser.name.split(' ')[0];
-  document.getElementById('tabAdminLink').style.display=currentUser.isAdmin?'flex':'none';
+function enterApp(emp) {
+  user = emp;
+  document.getElementById('screenLogin').classList.remove('active');
+  document.getElementById('screenApp').classList.add('active');
+  document.getElementById('userBadge').textContent = emp.name.split(' ')[0];
+  document.getElementById('tabAdminLink').style.display = emp.admin ? 'flex' : 'none';
   showTab('tabNeu');
-  // Einträge vom Sheet laden (geräteunabhängig)
-  syncEntriesFromSheet().then(()=>renderEntries());
 }
 
-async function syncEntriesFromSheet(){
-  try {
-    showToast('⏳ Lade Daten…');
-    try {
-      const subJson = await fetchFromSheet('getSubmissions');
-      const mySubs=(subJson.submissions||[]).filter(s=>String(s['Mitarbeiter']||'').split('_')[0]===currentUser.id);
-      if(mySubs.length){
-        const latest=mySubs[mySubs.length-1];
-        const status=String(latest['Status']||'').trim();
-        let entries=[];
-        Object.values(latest).forEach(v=>{const sv=String(v||'').trim();if(sv.includes('[{')){try{entries=JSON.parse(sv.substring(sv.indexOf('[')))}catch(e){}}});
-        if(entries.length){
-          const ov=JSON.parse(localStorage.getItem('fb_status_overrides')||'{}')[currentUser.id];
-          localStorage.setItem('fb_pending_'+currentUser.id+'_sync',JSON.stringify({
-            status: ov?ov.status:status,
-            entries,
-            mitarbeiter:currentUser.id,
-            mitarbeiterName:currentUser.name,
-            submittedAt:String(latest['Eingereicht am']||''),
-            approvedAt:ov?ov.approvedAt:String(latest['Genehmigt am']||''),
-            paidAt:String(latest['Ausgezahlt am']||''),
-            comment:ov?ov.comment:String(latest['Kommentar']||'')
-          }));
-        }
-      }
-    } catch(se){console.warn('Sub-Sync:',se);}
-    const json = await fetchFromSheet('getEntries', {mitarbeiter: currentUser.id});
-    const sheetEntries = (json.entries||[]).map(e=>{
-      // Alle möglichen Spaltennamen abfangen
-      const datum = String(e['Datum']||e['datum']||'').substring(0,10);
-      const von = e['Abfahrt']||e['von']||'';
-      const nach = e['Ziel']||e['nach']||'';
-      const kmRaw = e['km']||e['KM']||e['Kilometer']||0;
-      const kostenRaw = e['Kosten (€)']||e['Kosten']||e['kosten']||0;
-      const km = Math.round((parseFloat(String(kmRaw).replace(',','.'))||0)*10)/10;
-      const kosten = km>0 ? Math.round(km*0.30*100)/100 : Math.round((parseFloat(String(kostenRaw).replace(',','.'))||0)*100)/100;
-      return {
-        id: parseInt(e['ID']||e['id'])||Date.now(),
-        datum, von, nach, km, kosten,
-        dauer: e['Fahrzeit']||e['dauer']||'',
-        zweck: e['Zweck']||e['zweck']||'',
-        mitarbeiter: e['Mitarbeiter']||e['mitarbeiter']||currentUser.id,
-        timestamp: String(e['Eingetragen am']||e['timestamp']||''),
-        monat: datum.substring(0,7),
-      };
-    }).filter(e=>e.von&&e.nach&&e.km>0);
-
-    if(sheetEntries.length>0){
-      // Gelöschte IDs aus deletedIds berücksichtigen
-      const deleted=JSON.parse(localStorage.getItem('fb_deleted_'+currentUser.id)||'[]');
-      const filtered=sheetEntries.filter(e=>!deleted.includes(String(e.id)));
-      localStorage.setItem('fb_entries_'+currentUser.id, JSON.stringify(filtered));
-      showToast('✓ '+filtered.length+' Einträge geladen', 'success');
-    } else {
-      showToast('Keine Einträge im Sheet');
-    }
-  } catch(e){
-    showToast('⚠️ Server nicht erreichbar', 'error');
-  }
+function logout() {
+  user = null; selectedId = null;
+  document.getElementById('screenApp').classList.remove('active');
+  document.getElementById('screenLogin').classList.add('active');
+  document.querySelectorAll('.name-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('pinArea').style.display = 'none';
+  document.getElementById('pinInput').value = '';
 }
 
-function logout(){
-  currentUser=null; selectedEmpId=null;
-  document.querySelectorAll('.name-btn').forEach(b=>b.classList.remove('selected'));
-  document.getElementById('pinSection').style.display='none';
-  document.getElementById('pinInput').value='';
-  showScreen('screenLogin');
-}
-
-// ── TABS ──
-function showTab(id){
-  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+// ═══════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  const ids=['tabNeu','tabEintraege','tabAuswertung','tabPin','tabAdmin'];
-  const tabs=document.querySelectorAll('.tab');
-  const i=ids.indexOf(id);
-  if(i>=0&&tabs[i])tabs[i].classList.add('active');
-  if(id==='tabEintraege')renderEntries();
-  if(id==='tabAuswertung'){syncEntriesFromSheet().then(()=>renderAuswertung());}
-  if(id==='tabAdmin') renderAdmin();
+  const ids = ['tabNeu','tabEintraege','tabAbrechnung','tabPin','tabAdmin'];
+  const tabs = document.querySelectorAll('.tab');
+  const i = ids.indexOf(id);
+  if (i >= 0 && tabs[i]) tabs[i].classList.add('active');
+  // Daten laden bei Tab-Wechsel
+  if (id === 'tabEintraege') loadEintraege();
+  if (id === 'tabAbrechnung') loadAbrechnung();
+  if (id === 'tabAdmin') loadAdmin();
 }
 
-// ── GOOGLE MAPS ──
-function loadMapsScript(){
-  if(!GOOGLE_MAPS_API_KEY||GOOGLE_MAPS_API_KEY==='HIER_API_KEY_EINTRAGEN'){
-    document.getElementById('apiKeyBanner').style.display='block';
-    document.getElementById('calcRouteBtn').style.display='none';
-    document.getElementById('manualKmSection').style.display='block';
-    return;
-  }
-  const s=document.createElement('script');
-  s.src='https://maps.googleapis.com/maps/api/js?key='+GOOGLE_MAPS_API_KEY+'&libraries=places&callback=initMaps&loading=async';
-  s.async=true; s.defer=true;
-  s.onerror=()=>{
-    document.getElementById('apiKeyBanner').style.display='block';
-    document.getElementById('calcRouteBtn').style.display='none';
-    document.getElementById('manualKmSection').style.display='block';
-  };
+// ═══════════════════════════════════════════
+// GOOGLE MAPS
+// ═══════════════════════════════════════════
+function loadMaps() {
+  if (!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY==='HIER') return;
+  const s = document.createElement('script');
+  s.src = 'https://maps.googleapis.com/maps/api/js?key='+GOOGLE_MAPS_API_KEY+'&libraries=places&callback=initMaps&loading=async';
+  s.async = true; s.defer = true;
   document.head.appendChild(s);
 }
 
-function initMaps(){
-  mapsReady=true;
-  const opts={componentRestrictions:{country:'de'},fields:['formatted_address','geometry','name']};
-  acVon =new google.maps.places.Autocomplete(document.getElementById('inputVon'), opts);
-  acNach=new google.maps.places.Autocomplete(document.getElementById('inputNach'),opts);
-  acVon.addListener('place_changed', ()=>{
-    const p=acVon.getPlace();
-    if(p&&p.formatted_address) document.getElementById('inputVon').value=p.formatted_address;
-    resetRoute();
-  });
-  acNach.addListener('place_changed',()=>{
-    const p=acNach.getPlace();
-    if(p&&p.formatted_address) document.getElementById('inputNach').value=p.formatted_address;
-    resetRoute();
-  });
+function initMaps() {
+  mapsOk = true;
+  const opts = {componentRestrictions:{country:'de'}, fields:['formatted_address','name']};
+  acVon  = new google.maps.places.Autocomplete(document.getElementById('inputVon'),  opts);
+  acNach = new google.maps.places.Autocomplete(document.getElementById('inputNach'), opts);
+  acVon.addListener('place_changed',  () => { const p=acVon.getPlace();  if(p?.formatted_address) document.getElementById('inputVon').value=p.formatted_address;  resetRoute(); });
+  acNach.addListener('place_changed', () => { const p=acNach.getPlace(); if(p?.formatted_address) document.getElementById('inputNach').value=p.formatted_address; resetRoute(); });
 }
 
-function resetRoute(){
-  calcKm=0; calcDauer='';
-  document.getElementById('routePreview').classList.remove('show');
-}
-
-async function calculateRoute(){
-  if(!mapsReady){showToast('Google Maps lädt…');return;}
-  const von=document.getElementById('inputVon').value.trim();
-  const nach=document.getElementById('inputNach').value.trim();
-  if(!von||!nach){showToast('Start und Ziel eingeben.','error');return;}
-  const btn=document.getElementById('calcRouteBtn');
-  btn.textContent='⏳ Berechne…'; btn.disabled=true;
-  try {
-    // Routes API
-    const resp = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'X-Goog-Api-Key': GOOGLE_MAPS_API_KEY,
-        'X-Goog-FieldMask':'routes.distanceMeters,routes.duration,routes.legs.localizedValues'
-      },
-      body: JSON.stringify({
-        origin:{address:von},
-        destination:{address:nach},
-        travelMode:'DRIVE',
-        routingPreference:'TRAFFIC_UNAWARE',
-        languageCode:'de'
-      })
-    });
-    const data = await resp.json();
-    if(!data.routes||!data.routes.length){
-      showToast('Route nicht gefunden.','error');
-      btn.textContent='🗺️ Strecke berechnen'; btn.disabled=false;
-      return;
-    }
-    const route=data.routes[0];
-    calcKm=Math.round(route.distanceMeters/100)/10;
-    // Dauer aus localizedValues oder selbst berechnen
-    const secs=parseInt(route.duration);
-    const mins=Math.round(secs/60);
-    calcDauer=mins>=60?Math.floor(mins/60)+'h '+(mins%60)+'min':mins+' min';
-    document.getElementById('routeKm').textContent=calcKm+' km';
-    document.getElementById('routeDauer').textContent=calcDauer;
-    document.getElementById('routeKosten').textContent=(calcKm*KM_PAUSCHALE).toFixed(2)+' €';
-    document.getElementById('routeInfo').textContent=von+' → '+nach;
-    document.getElementById('routePreview').classList.add('show');
-  } catch(e){
-    showToast('Fehler bei der Berechnung.','error');
-    console.error(e);
-  }
-  btn.textContent='🗺️ Strecke berechnen'; btn.disabled=false;
-}
-
-function updateManualKm(){
-  calcKm=parseFloat(document.getElementById('inputKmManual').value)||0;
-  document.getElementById('manualKmCost').textContent=calcKm>0?'≙ '+(calcKm*KM_PAUSCHALE).toFixed(2)+' € Erstattung':'';
-}
-
-// ── EINTRAG SPEICHERN ──
-const PRAXIS_ADRESSE = 'Segeberger Straße 1, 23617 Stockelsdorf';
-
-function setPraxis(fieldId){
-  document.getElementById(fieldId).value = PRAXIS_ADRESSE;
+function setPraxis(fieldId) {
+  document.getElementById(fieldId).value = PRAXIS;
   resetRoute();
 }
 
-function setToday(prevNach=null){
-  const t=new Date();
-  document.getElementById('inputDatum').value=t.toISOString().split('T')[0];
-  document.getElementById('todayDate').textContent=t.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  // Abfahrt = vorheriges Ziel, sonst Praxis
-  const vonField = document.getElementById('inputVon');
-  if(prevNach) {
-    vonField.value = prevNach;
-  } else if(!vonField.value) {
-    vonField.value = PRAXIS_ADRESSE;
-  }
-}
-
-function saveEntry(){
-  const datum=document.getElementById('inputDatum').value;
-  const von=document.getElementById('inputVon').value.trim();
-  const nach=document.getElementById('inputNach').value.trim();
-  const zweck=document.getElementById('inputZweck').value.trim();
-  if(!datum||!von||!nach){showToast('Datum, Start und Ziel ausfüllen.','error');return;}
-  if(!calcKm||calcKm<=0){showToast('Bitte zuerst Strecke berechnen.','error');return;}
-  const kosten=+(calcKm*KM_PAUSCHALE).toFixed(2);
-  const entry={
-    id:Date.now(), datum, von, nach, km:calcKm, kosten, zweck,
-    dauer:calcDauer, mitarbeiter:currentUser.id,
-    timestamp:new Date().toISOString(), monat:datum.substring(0,7)
-  };
-  const key='fb_entries_'+currentUser.id;
-  const arr=JSON.parse(localStorage.getItem(key)||'[]');
-  arr.unshift(entry);
-  localStorage.setItem(key,JSON.stringify(arr));
-  sendToSheet(entry);
-  // Reset
-  // Ziel merken für nächste Abfahrt
-  const lastNach = document.getElementById('inputNach').value.trim();
-  document.getElementById('inputVon').value='';
-  document.getElementById('inputNach').value='';
-  document.getElementById('inputZweck').value='';
+function resetRoute() {
+  calcKm = 0; calcDauer = '';
   document.getElementById('routePreview').classList.remove('show');
-  calcKm=0; calcDauer='';
-  setToday(lastNach);
-  showToast('Fahrt gespeichert ✓','success');
 }
 
-// ── EINTRÄGE ──
-function getSubmittedIds(){
-  const ids=new Set();
-  // Override prüfen - wenn genehmigt/überwiesen, keine IDs sperren
-  const ov=JSON.parse(localStorage.getItem('fb_status_overrides')||'{}')[currentUser.id];
-  if(ov&&(ov.status==='approved'||ov.status==='paid')) return ids;
-  Object.keys(localStorage).forEach(k=>{
-    if(k.startsWith('fb_pending_'+currentUser.id)){
-      try{
-        const p=JSON.parse(localStorage.getItem(k)||'null');
-        if(p&&p.entries&&p.status==='pending') p.entries.forEach(e=>ids.add(String(e.id)));
-      }catch(e){}
-    }
-  });
-  return ids;
-}
-
-function renderEntries(){
-  if(!currentUser)return;
-  const allArr=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]');
-  // Wenn leer: einmalig vom Sheet laden versuchen
-  if(!allArr.length && APPS_SCRIPT_URL && !window.entriesSyncDone){
-    window.entriesSyncDone=true;
-    document.getElementById('entriesList').innerHTML='<div class="empty-state">⏳ Lade...</div>';
-    syncEntriesFromSheet().then(()=>{
-      window.entriesSyncDone=false;
-      renderEntries();
+async function calculateRoute() {
+  const von  = document.getElementById('inputVon').value.trim();
+  const nach = document.getElementById('inputNach').value.trim();
+  if (!von || !nach) { showToast('Start und Ziel eingeben.','err'); return; }
+  const btn = document.getElementById('calcBtn');
+  btn.textContent = '⏳ Berechne…'; btn.disabled = true;
+  try {
+    const r = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Goog-Api-Key':GOOGLE_MAPS_API_KEY,'X-Goog-FieldMask':'routes.distanceMeters,routes.duration'},
+      body: JSON.stringify({origin:{address:von},destination:{address:nach},travelMode:'DRIVE',routingPreference:'TRAFFIC_UNAWARE',languageCode:'de'})
     });
-    return;
+    const d = await r.json();
+    if (!d.routes?.length) throw new Error('Route nicht gefunden');
+    const route = d.routes[0];
+    calcKm = Math.round(route.distanceMeters/100)/10;
+    const mins = Math.round(parseInt(route.duration)/60);
+    calcDauer = mins>=60 ? Math.floor(mins/60)+'h '+(mins%60)+'min' : mins+' min';
+    document.getElementById('rKm').textContent    = calcKm+' km';
+    document.getElementById('rDauer').textContent = calcDauer;
+    document.getElementById('rEuro').textContent  = (calcKm*KM_RATE).toFixed(2)+' €';
+    document.getElementById('rInfo').textContent  = von+' → '+nach;
+    document.getElementById('routePreview').classList.add('show');
+  } catch(e) {
+    showToast('Route nicht gefunden: '+e.message,'err');
   }
-  window.entriesSyncDone=false;
-  const submittedIds=getSubmittedIds();
-  // Eingereichte ausfiltern
-  const openArr=allArr.filter(e=>!submittedIds.has(String(e.id)));
-  const submittedCount=allArr.length-openArr.length;
-  const el=document.getElementById('entriesList');
-  let html='';
-  // Info-Banner für eingereichte
-  if(submittedCount>0){
-    html+='<div style="background:#fff3cd;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#856404">'
-      +'⏳ <b>'+submittedCount+' Fahrten eingereicht</b> – wartet auf Genehmigung. '
-      +'<span onclick="showTab(\'tabAuswertung\')" style="text-decoration:underline;cursor:pointer">→ Abrechnung</span>'
-      +'</div>';
-  }
-  if(!openArr.length){
-    html+='<div class="empty-state"><div class="icon">'+(submittedCount?'📬':'🚗')+'</div>'
-      +(submittedCount?'Alle Fahrten eingereicht.':'Noch keine Fahrten.')+'</div>';
-    el.innerHTML=html; return;
-  }
-  html+=openArr.map(e=>{
-    return '<div class="entry-card">'
-      +'<div class="entry-top"><div class="entry-route">'+e.von+' → '+e.nach+'</div><div class="entry-date">'+fmtDate(e.datum)+'</div></div>'
-      +'<div class="entry-meta"><span class="entry-badge km">'+e.km+' km</span><span class="entry-badge cost">'+(parseFloat(e.kosten)||0).toFixed(2)+' €</span>'+(e.dauer?'<span class="entry-badge">🕐 '+e.dauer+'</span>':'')+'</div>'
-      +(e.zweck?'<div class="entry-zweck">'+e.zweck+'</div>':'')
-      +'<div class="entry-actions"><button class="btn-small" onclick="deleteEntry('+e.id+')">🗑 Löschen</button></div>'
-      +'</div>';
-  }).join('');
-  el.innerHTML=html;
+  btn.textContent = '🗺️ Strecke berechnen'; btn.disabled = false;
 }
 
-function deleteEntry(id){
-  if(!confirm('Löschen?'))return;
-  const key='fb_entries_'+currentUser.id;
-  const entries=JSON.parse(localStorage.getItem(key)||'[]');
-  const filtered=entries.filter(e=>String(e.id)!==String(id));
-  localStorage.setItem(key,JSON.stringify(filtered));
-  // Gelöschte ID merken damit sync sie nicht wieder holt
-  const deletedKey='fb_deleted_'+currentUser.id;
-  const deleted=JSON.parse(localStorage.getItem(deletedKey)||'[]');
-  if(!deleted.includes(String(id))) deleted.push(String(id));
-  localStorage.setItem(deletedKey,JSON.stringify(deleted));
-  renderEntries();
+// ═══════════════════════════════════════════
+// FAHRT SPEICHERN (lokal bis Einreichen)
+// ═══════════════════════════════════════════
+function setToday(prevNach='') {
+  const t = new Date();
+  document.getElementById('inputDatum').value = t.toISOString().split('T')[0];
+  document.getElementById('todayLabel').textContent = t.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  if (prevNach) document.getElementById('inputVon').value = prevNach;
+  else if (!document.getElementById('inputVon').value) document.getElementById('inputVon').value = PRAXIS;
+}
+
+function saveFahrt() {
+  const datum = document.getElementById('inputDatum').value;
+  const von   = document.getElementById('inputVon').value.trim();
+  const nach  = document.getElementById('inputNach').value.trim();
+  const zweck = document.getElementById('inputZweck').value.trim();
+  if (!datum||!von||!nach) { showToast('Datum, Start und Ziel ausfüllen.','err'); return; }
+  if (!calcKm||calcKm<=0) { showToast('Bitte zuerst Strecke berechnen.','err'); return; }
+  const entry = {
+    id: Date.now(), datum, von, nach,
+    km: calcKm, kosten: +(calcKm*KM_RATE).toFixed(2),
+    dauer: calcDauer, zweck,
+    ts: new Date().toISOString()
+  };
+  const arr = getLocal();
+  arr.unshift(entry);
+  setLocal(arr);
+  const lastNach = nach;
+  document.getElementById('inputVon').value = '';
+  document.getElementById('inputNach').value = '';
+  document.getElementById('inputZweck').value = '';
+  resetRoute();
+  setToday(lastNach);
+  showToast('Fahrt gespeichert ✓','ok');
+}
+
+// ═══════════════════════════════════════════
+// EINTRÄGE (Tab 2) — vom Sheet + lokal
+// ═══════════════════════════════════════════
+async function loadEintraege() {
+  const el = document.getElementById('entriesList');
+  el.innerHTML = '<div class="loading">⏳ Lade…</div>';
+  try {
+    // Sheet-Einträge laden
+    const j = await apiGet('getEntries', {mitarbeiter: user.id});
+    const sheetEntries = mapSheetEntries(j.entries||[]);
+    // Lokale Einträge (noch nicht eingereicht)
+    const local = getLocal();
+    // Sheet-IDs der lokalen Einträge prüfen (falls schon eingereicht)
+    const sheetIds = new Set(sheetEntries.map(e=>String(e.id)));
+    const localOnly = local.filter(e => !sheetIds.has(String(e.id)));
+    // Alle zusammen, lokal zuerst
+    const all = [...localOnly, ...sheetEntries].sort((a,b)=>b.datum.localeCompare(a.datum));
+    renderEintraege(el, all, sheetIds);
+  } catch(e) {
+    // Fallback: nur lokale
+    const local = getLocal();
+    renderEintraege(el, local, new Set());
+    showToast('Offline: nur lokale Einträge','err');
+  }
+}
+
+function mapSheetEntries(rows) {
+  return rows.map(e => ({
+    id: e['ID']||e['id']||String(Date.now()),
+    datum: String(e['Datum']||'').substring(0,10),
+    von: e['Abfahrt']||'',
+    nach: e['Ziel']||'',
+    km: parseFloat(String(e['km']||0).replace(',','.'))||0,
+    kosten: parseFloat(String(e['Kosten (€)']||e['Kosten']||0).replace(',','.'))||0,
+    dauer: e['Fahrzeit']||'',
+    zweck: e['Zweck']||'',
+    fromSheet: true
+  })).filter(e=>e.von&&e.nach);
+}
+
+function renderEintraege(el, all, submittedIds) {
+  if (!all.length) { el.innerHTML='<div class="empty-state"><div class="icon">🚗</div>Noch keine Fahrten.</div>'; return; }
+  el.innerHTML = all.map(e => {
+    const locked = e.fromSheet; // Sheet-Einträge = eingereicht = gesperrt
+    return '<div class="entry-card">'+
+      '<div class="entry-top"><div class="entry-route">'+e.von+' → '+e.nach+'</div><div class="entry-date">'+fmtDate(e.datum)+'</div></div>'+
+      '<div class="entry-meta"><span class="badge km">'+e.km+' km</span><span class="badge eur">'+parseNum(e.kosten).toFixed(2)+' €</span>'+(e.dauer?'<span class="badge">🕐 '+e.dauer+'</span>':'')+'</div>'+
+      (e.zweck?'<div class="entry-zweck">'+e.zweck+'</div>':'')+
+      (locked ? '<span class="locked-tag">🔒 Im Sheet</span>' : '<button class="del-btn" onclick="delFahrt('+e.id+')">🗑 Löschen</button>')+
+      '</div>';
+  }).join('');
+}
+
+function delFahrt(id) {
+  if (!confirm('Löschen?')) return;
+  const arr = getLocal().filter(e => String(e.id)!==String(id));
+  setLocal(arr);
+  loadEintraege();
   showToast('Gelöscht');
 }
 
-function editEntry(id){
-  const arr=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]');
-  const e=arr.find(x=>x.id===id); if(!e)return;
-  document.getElementById('inputDatum').value=e.datum;
-  document.getElementById('inputVon').value=e.von;
-  document.getElementById('inputNach').value=e.nach;
-  document.getElementById('inputZweck').value=e.zweck||'';
-  calcKm=e.km; calcDauer=e.dauer||'';
-  document.getElementById('routeKm').textContent=e.km+' km';
-  document.getElementById('routeDauer').textContent=e.dauer||'–';
-  document.getElementById('routeKosten').textContent=e.kosten.toFixed(2)+' €';
-  document.getElementById('routeInfo').textContent=e.von+' → '+e.nach;
-  document.getElementById('routePreview').classList.add('show');
-  localStorage.setItem('fb_entries_'+currentUser.id,JSON.stringify(arr.filter(x=>x.id!==id)));
-  showTab('tabNeu');
-}
-
-// ── AUSWERTUNG ──
-function fillMonthSelectors(){ /* nicht mehr genutzt */ }
-
-function parseNum(v){ return parseFloat(String(v).replace(',','.')) || 0; }
-
-function renderAuswertung(){
-  if(!currentUser)return;
-  const allEntries=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]');
-  // km und kosten normalisieren
-  allEntries.forEach(e=>{ e.km=parseNum(e.km); e.kosten=parseNum(e.kosten); });
-  let pending=null;
-  Object.keys(localStorage).forEach(k=>{
-    if(k.startsWith('fb_pending_'+currentUser.id)){
-      try{const p=JSON.parse(localStorage.getItem(k));if(p&&(p.entries||[]).length) pending=p;}catch(e){}
-    }
-  });
-  const pendingStatus=String(pending?.status||'');
-  const submittedIds=new Set((pending?.entries||[]).map(e=>String(e.id)));
-  const approvedSubs=JSON.parse(localStorage.getItem('fb_approved_'+currentUser.id)||'[]');
-  const approvedIds=new Set(approvedSubs.flatMap(s=>(s.entries||[]).map(e=>String(e.id))));
-  const open=allEntries.filter(e=>!submittedIds.has(String(e.id))&&!approvedIds.has(String(e.id)));
-  const tkm=Math.round(open.reduce((s,e)=>s+e.km,0)*10)/10;
-  const tko=open.reduce((s,e)=>s+e.kosten,0);
-
-  let h='<div class="summary-card">';
-  if(pending&&(pending.entries||[]).length){
-    const isPaid=pendingStatus==='paid',isApproved=pendingStatus==='approved';
-    const bg=isPaid||isApproved?'#d1e7dd':pendingStatus==='pending'?'#fff3cd':'#e8f0ea';
-    const tc=isPaid||isApproved?'#0a5c36':pendingStatus==='pending'?'#856404':'#2c2825';
-    const icon=isPaid?'💶 Überwiesen':isApproved?'✓ Genehmigt':'⏳ Eingereicht';
-    const pkm=Math.round((pending.entries||[]).reduce((s,e)=>s+(parseFloat(e.km)||0),0)*10)/10;
-    const pko=(pending.entries||[]).reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
-    h+='<div style="background:'+bg+';border-radius:12px;padding:14px;margin-bottom:14px;font-size:13px;color:'+tc+'">'
-      +'<b>'+icon+'</b> – '+pending.entries.length+' Fahrten · '+pkm+' km · '+pko.toFixed(2)+' €'
-      +(pending.comment?'<br>💬 '+pending.comment:'')
-      +((isApproved||isPaid)&&pending.approvedAt?'<br>Genehmigt: '+fmtDateSafe(pending.approvedAt):'')
-      +(isPaid&&pending.paidAt?'<br>Überwiesen: '+fmtDateSafe(pending.paidAt):'')
-      +'</div>';
-    h+='<div class="summary-stats">'
-      +'<div class="stat-box"><div class="stat-value">'+pending.entries.length+'</div><div class="stat-label">Fahrten</div></div>'
-      +'<div class="stat-box"><div class="stat-value">'+pkm+'</div><div class="stat-label">Kilometer</div></div>'
-      +'<div class="stat-box"><div class="stat-value green">'+pko.toFixed(0)+' €</div><div class="stat-label">Erstattung</div></div>'
-      +'</div></div>';
-    if(pending.comment) h+='<div style="background:#fff3cd;border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;color:#856404">💬 '+pending.comment+'</div>';
-  } else if(open.length){
-    h+='<div class="summary-title">Offene Fahrten</div>'
-      +'<div class="summary-stats">'
-      +'<div class="stat-box"><div class="stat-value">'+open.length+'</div><div class="stat-label">Fahrten</div></div>'
-      +'<div class="stat-box"><div class="stat-value">'+tkm+'</div><div class="stat-label">Kilometer</div></div>'
-      +'<div class="stat-box"><div class="stat-value green">'+tko.toFixed(0)+' €</div><div class="stat-label">Erstattung</div></div>'
-      +'</div></div>'
-      +'<div class="send-section"><h3>Abrechnung einreichen</h3>'
-      +'<p>'+open.length+' Fahrten · '+tkm+' km · '+tko.toFixed(2)+' € werden zur Genehmigung an Hanna gesendet.</p>'
-      +'<button class="send-btn" onclick="submitAll()">Jetzt einreichen →</button>'
-      +'<button class="export-btn" style="width:100%;margin-top:8px" onclick="exportPDFOpen()">🖨️ Drucken / PDF</button>'
-      +'</div>';
-    h+=open.map(e=>'<div class="entry-card">'
-      +'<div class="entry-top"><div class="entry-route">'+e.von+' → '+e.nach+'</div><div class="entry-date">'+fmtDate(e.datum)+'</div></div>'
-      +'<div class="entry-meta"><span class="entry-badge km">'+e.km+' km</span><span class="entry-badge cost">'+e.kosten.toFixed(2)+' €</span>'+(e.dauer?'<span class="entry-badge">🕐 '+e.dauer+'</span>':'')+'</div>'
-      +(e.zweck?'<div class="entry-zweck">'+e.zweck+'</div>':'')+'</div>').join('');
-  } else {
-    h+='<div class="summary-title">Keine offenen Fahrten</div></div>';
-    h+='<div class="empty-state"><div class="icon">✅</div>Alle Fahrten sind abgerechnet.</div>';
-  }
-
-  // Genehmigte Abrechnungen anzeigen
-  if(approvedSubs.length){
-    h+='<div style="margin-top:20px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Genehmigte Abrechnungen</div>';
-    approvedSubs.forEach(sub=>{
-      const akm=sub.entries.reduce((s,e)=>s+e.km,0);
-      const ako=sub.entries.reduce((s,e)=>s+e.kosten,0);
-      h+='<div class="entry-card" style="border-left-color:#0a5c36">'
-        +'<div class="entry-top"><div class="entry-route">'+sub.entries.length+' Fahrten · '+akm+' km · '+ako.toFixed(2)+' €</div>'
-        +'<div class="entry-date">'+fmtDate(sub.submittedAt.substring(0,10))+'</div></div>'
-        +(sub.comment?'<div class="entry-zweck">💬 '+sub.comment+'</div>':'')
-        +'</div>';
-    });
-  }
-  document.getElementById('summaryContent').innerHTML=h;
-}
-
-function submitAll(){
-  const allEntries=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]');
-  const approvedSubs=JSON.parse(localStorage.getItem('fb_approved_'+currentUser.id)||'[]');
-  const approvedIds=new Set(approvedSubs.flatMap(s=>s.entries.map(e=>e.id)));
-  const open=allEntries.filter(e=>!approvedIds.has(e.id));
-  if(!open.length){showToast('Keine offenen Fahrten.','error');return;}
-  const data={
-    status:'pending',
-    submittedAt:new Date().toISOString(),
-    mitarbeiter:currentUser.id,
-    mitarbeiterName:currentUser.name,
-    entries:open
-  };
-  const subKey=currentUser.id+'_'+Date.now();
-  const all=JSON.parse(localStorage.getItem('fb_all_submissions')||'{}');
-  all[subKey]=data;
-  localStorage.setItem('fb_all_submissions',JSON.stringify(all));
-  sendSubmissionToSheet(data);
-  showToast('Eingereicht ✓','success'); renderAuswertung();
-}
-
-// ── SHEET LESEN via Netlify Function Proxy ───────────────────
-async function fetchFromSheet(action, params) {
-  let url = '/api/sheet?action=' + action;
-  if (params) url += '&' + new URLSearchParams(params).toString();
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error('HTTP ' + resp.status);
-  return await resp.json();
-}
-
-
-function renderAdminHTML(pending, approved){
-  window.pendingList=pending;
-  window.approvedList=approved;
-  let h='';
-  if(pending.length){
-    h+='<div class="admin-section-title">'+pending.length+' offene Einreichung(en)</div>';
-    pending.forEach(sub=>{
-      const tkm=sub.entries.reduce((s,e)=>s+e.km,0);
-      const tko=sub.entries.reduce((s,e)=>s+e.kosten,0);
-      const earliest=sub.entries.reduce((a,b)=>a.datum<b.datum?a:b).datum;
-      const latest=sub.entries.reduce((a,b)=>a.datum>b.datum?a:b).datum;
-      h+='<div class="approval-card" data-subid="'+sub.submissionId+'">'
-        +'<div class="approval-top"><div class="approval-name">'+sub.mitarbeiterName+'</div>'
-        +'<span class="status-badge pending">⏳ Offen</span></div>'
-        +'<div class="approval-stats">'+sub.entries.length+' Fahrten · '+tkm+' km · <b>'+tko.toFixed(2)+' €</b><br>'
-        +'<span style="font-size:11px;color:var(--muted)">'+fmtDate(earliest)+' – '+fmtDate(latest)+'</span></div>'
-        +sub.entries.map(e=>'<div style="font-size:12px;padding:5px 0;border-bottom:1px solid var(--border)">'+fmtDate(e.datum)+' · '+e.von+' → '+e.nach+' · <b>'+e.km+' km</b> · '+e.kosten.toFixed(2)+' €'+(e.zweck?' · <i>'+e.zweck+'</i>':'')+'</div>').join('')
-        +'<textarea class="comment-input" id="comment_'+sub.mitarbeiter+'" placeholder="Kommentar (optional)"></textarea>'
-        +'<div class="approval-actions">'
-        +'<button class="approve-btn" onclick="approveEntry(\''+sub.mitarbeiter+'\')">Genehmigen ✓</button>'
-        +'<button class="reject-btn" onclick="rejectEntry(\''+sub.mitarbeiter+'\')">Zurücksenden</button>'
-        +'</div></div>';
-    });
-  } else {
-    h+='<div class="empty-state"><div class="icon">📬</div>Keine offenen Einreichungen.</div>';
-  }
-  if(approved.length){
-    h+='<div class="admin-section-title" style="margin-top:24px">Genehmigte Abrechnungen</div>';
-    approved.forEach((sub,approvedIdx)=>{
-      const tkm=sub.entries.reduce((s,e)=>s+e.km,0);
-      const tko=sub.entries.reduce((s,e)=>s+e.kosten,0);
-      const isPaid=sub.status==='paid';
-      h+='<div class="approval-card approved" data-subid="'+sub.submissionId+'">'
-        +'<div class="approval-top"><div class="approval-name">'+sub.mitarbeiterName+'</div>'
-        +(isPaid
-          ?'<span class="status-badge approved">💶 Ausgezahlt</span>'
-          :'<span class="status-badge" style="background:#e8f0ea;color:var(--green2)">✓ Genehmigt</span>')
-        +'</div>'
-        +'<div class="approval-stats">'+sub.entries.length+' Fahrten · '+tkm+' km · <b>'+tko.toFixed(2)+' €</b>'
-        +'<br><span style="font-size:11px;color:var(--muted)">Eingereicht: '+fmtDate(String(sub.submittedAt).substring(0,10))+'</span>'
-        +(isPaid?'<br><span style="font-size:11px;color:var(--green);font-weight:600">💶 Ausgezahlt am: '+fmtDate(String(sub.paidAt||'').substring(0,10))+'</span>':'')
-        +'</div>'
-        +(sub.comment?'<div style="font-size:12px;color:var(--muted);margin-bottom:8px">💬 '+sub.comment+'</div>':'')
-        +(!isPaid
-          ?'<button onclick="markPaidByIndex('+approvedIdx+')" style="width:100%;background:var(--green);color:white;border:none;border-radius:12px;padding:14px;font-family:DM Sans,sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px">💶 Jetzt als ausgezahlt markieren</button>'
-          :'<div style="background:#d1e7dd;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;font-weight:600;color:#0a5c36;text-align:center">💶 Ausgezahlt am '+fmtDate(String(sub.paidAt||'').substring(0,10))+' ✓</div>')
-        +'<div style="margin-top:8px">'
-        +'<button class="export-btn" style="width:100%" onclick="belegPDF(window.approvedList['+approvedIdx+'])">📄 Beleg PDF</button>'
-        +'</div></div>';
-    });
-  }
-  document.getElementById('adminContent').innerHTML=h||'<div class="empty-state"><div class="icon">📋</div>Noch keine Abrechnungen.</div>';
-}
-
-// ── ADMIN ──
-async function renderAdmin(){
-  const content = document.getElementById('adminContent');
-  const dbg = document.getElementById('adminDebug');
-  content.innerHTML='<div class="empty-state">⏳ Lade Daten…</div>';
-  if(dbg) dbg.style.display='none';
-
+// ═══════════════════════════════════════════
+// ABRECHNUNG (Tab 3)
+// ═══════════════════════════════════════════
+async function loadAbrechnung() {
+  const el = document.getElementById('abrechnungContent');
+  el.innerHTML = '<div class="loading">⏳ Lade…</div>';
   try {
-    const json = await fetchFromSheet('getSubmissions');
-    const subs = json.submissions || [];
-
-    if(dbg){
-      dbg.style.display='block';
-      dbg.textContent = subs.length + ' Zeilen | ' + (subs[0] ? Object.keys(subs[0]).join(' | ') : 'leer');
-    }
-
-    if(!subs.length){ content.innerHTML='<div class="empty-state"><div class="icon">📬</div>Keine Einreichungen.</div>'; return; }
-
-    let html = '';
-    subs.forEach((s, i) => {
-      const status = String(s['Status']||s['status']||'').trim();
-      const name = s['Name'] || s['name'] || s['Mitarbeiter'] || '?';
-      const km = s['km gesamt'] || s['km'] || '?';
-      const kosten = s['Kosten gesamt (€)'] || s['Kosten gesamt'] || s['kosten'] || '?';
-      const fahrten = s['Fahrten'] || '?';
-      const datum = String(s['Eingereicht am'] || s['datum'] || '').substring(0,10);
-      const mitId = String(s['Mitarbeiter']||'').split('_')[0] || String(s['Mitarbeiter']||'');
-
-      // Einträge JSON aus irgendwelcher Spalte
-      let entries = [];
-      Object.values(s).forEach(v => {
-        if(String(v).startsWith('[{')){ try{ entries=JSON.parse(String(v)); }catch(e){} }
-      });
-
-      const isPending = status === 'pending';
-      const isApproved = status === 'approved';
-      const isPaid = status === 'paid';
-
-      html += '<div class="approval-card' + (isApproved||isPaid?' approved':'') + '" data-subid="sub_'+i+'">';
-      html += '<div class="approval-top"><div class="approval-name">'+name+'</div>';
-      html += isPending ? '<span class="status-badge pending">⏳ Offen</span>' :
-              isPaid ? '<span class="status-badge approved">💶 Ausgezahlt</span>' :
-              '<span class="status-badge" style="background:#e8f0ea;color:var(--green2)">✓ Genehmigt</span>';
-      html += '</div>';
-      html += '<div class="approval-stats">'+fahrten+' Fahrten · '+km+' km · <b>'+kosten+' €</b>';
-      if(datum) html += '<br><span style="font-size:11px;color:var(--muted)">Eingereicht: '+fmtDate(datum)+'</span>';
-      html += '</div>';
-
-      if(entries.length){
-        entries.forEach(e => {
-          html += '<div style="font-size:12px;padding:5px 0;border-bottom:1px solid var(--border)">'+
-            fmtDate(String(e.datum||'').substring(0,10))+' · '+(e.von||'?')+' → '+(e.nach||'?')+
-            ' · <b>'+(e.km||0)+' km</b> · '+(parseFloat(e.kosten||0)).toFixed(2)+' €'+
-            (e.zweck?' · <i>'+e.zweck+'</i>':'')+'</div>';
-        });
-      }
-
-      if(isPending){
-        html += '<textarea class="comment-input" id="comment_'+mitId+'" placeholder="Kommentar (optional)"></textarea>';
-        html += '<div class="approval-actions">';
-        html += '<button class="approve-btn" onclick="approveEntry(\''+mitId+'\')">Genehmigen ✓</button>';
-        html += '<button class="reject-btn" onclick="rejectEntry(\''+mitId+'\')">Zurücksenden</button>';
-        html += '</div>';
-        // Daten für approve merken
-        window['subData_'+mitId] = {mitarbeiter:mitId, mitarbeiterName:name, status, entries, submittedAt:datum, submissionId:'sub_'+i};
-        if(!window.currentAdminSubs) window.currentAdminSubs={};
-        window.currentAdminSubs[mitId] = window['subData_'+mitId];
-      } else {
-        if(s['Kommentar']) html += '<div style="font-size:12px;color:var(--muted);margin-top:4px">💬 '+s['Kommentar']+'</div>';
-        if(!isPaid){
-          html += '<button onclick="markPaidByIndex('+i+', \'sub_'+i+'\')" style="width:100%;background:var(--green);color:white;border:none;border-radius:12px;padding:14px;font-family:DM Sans,sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px">💶 Als überwiesen markieren</button>';
-        } else {
-          html += '<div style="background:#d1e7dd;border-radius:10px;padding:10px 14px;margin-top:6px;font-size:13px;font-weight:600;color:#0a5c36;text-align:center">💶 Überwiesen ✓</div>';
-        }
-        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">';
-        html += '<button class="export-btn" onclick="belegPDFDirect('+i+')">📄 Beleg PDF</button>';
-        html += '<button class="export-btn" style="border-color:var(--green);color:var(--green)" onclick="sendBelegEmail('+i+')">📧 An Buchhaltung</button>';
-        html += '</div>';
-      }
-      html += '</div>';
-    });
-
-    // Lokale Overrides anwenden (falls Sheet noch nicht aktualisiert)
-    const overrides=JSON.parse(localStorage.getItem('fb_status_overrides')||'{}');
-    subs.forEach(s=>{
-      const mitId=String(s['Mitarbeiter']||'').split('_')[0];
-      if(overrides[mitId]){
-        s['Status']=overrides[mitId].status;
-        if(overrides[mitId].comment) s['Kommentar']=overrides[mitId].comment;
-        if(overrides[mitId].approvedAt) s['Genehmigt am']=overrides[mitId].approvedAt;
-      }
-    });
-    // Daten global speichern für belegPDF
-    // Neueste zuerst (nach Eingereicht-Datum sortieren)
-    subs.sort((a,b)=>String(b["Eingereicht am"]||"").localeCompare(String(a["Eingereicht am"]||"")));
-    window.adminSubsRaw = subs;
-    content.innerHTML = html || '<div class="empty-state"><div class="icon">📬</div>Keine Einreichungen.</div>';
-
+    // Submission-Status vom Sheet laden
+    const j = await apiGet('getSubmissions');
+    const mySubs = (j.submissions||[])
+      .filter(s => String(s['Mitarbeiter']||'').split('_')[0]===user.id)
+      .map(mapSheetSub)
+      .sort((a,b)=>b.submittedAt.localeCompare(a.submittedAt));
+    // Lokale offene Fahrten
+    const local = getLocal();
+    renderAbrechnung(el, local, mySubs);
   } catch(e) {
-    if(dbg){dbg.style.display='block'; dbg.textContent='FEHLER: '+e.message;}
-    content.innerHTML='<div class="empty-state">⚠️ Fehler beim Laden: '+e.message+'</div>';
+    el.innerHTML = '<div class="empty-state">⚠️ Fehler beim Laden: '+e.message+'</div>';
   }
 }
 
-async function sendBelegEmail(idx){
-  const s = window.adminSubsRaw[idx];
-  if(!s) return;
-  let entries = [];
-  Object.values(s).forEach(v => { if(String(v).startsWith('[{')){ try{entries=JSON.parse(String(v));}catch(e){} } });
-  const name = s['Name']||s['Mitarbeiter']||'';
-  const tkm = Math.round(entries.reduce((sum,e)=>sum+(parseFloat(e.km)||0),0)*10)/10;
-  const tko = entries.reduce((sum,e)=>sum+(parseFloat(e.kosten)||0),0);
-  const datum = String(s['Eingereicht am']||'').substring(0,10);
+function mapSheetSub(s) {
+  let entries=[];
+  Object.values(s).forEach(v=>{const sv=String(v||'').trim();if(sv.includes('[{')){try{entries=JSON.parse(sv.substring(sv.indexOf('[')));}catch(e){}}});
+  return {
+    status: String(s['Status']||'').trim(),
+    mitarbeiter: String(s['Mitarbeiter']||'').split('_')[0],
+    name: s['Name']||'',
+    fahrten: s['Fahrten']||0,
+    km: s['km gesamt']||0,
+    kosten: s['Kosten gesamt']||0,
+    submittedAt: String(s['Eingereicht am']||'').substring(0,10),
+    approvedAt: String(s['Genehmigt am']||'').substring(0,10),
+    paidAt: String(s['Ausgezahlt am']||'').substring(0,10),
+    comment: s['Kommentar']||'',
+    entries,
+    rowId: s['ID']||String(s['Mitarbeiter']||'')
+  };
+}
+
+function renderAbrechnung(el, local, subs) {
+  let html = '';
+  // Offene lokale Fahrten
+  if (local.length) {
+    const tkm = Math.round(local.reduce((s,e)=>s+e.km,0)*10)/10;
+    const tko = local.reduce((s,e)=>s+e.kosten,0);
+    html += '<div class="summary-card">'+
+      '<div class="sum-title">Offene Fahrten</div>'+
+      '<div class="sum-stats">'+
+      '<div><div class="stat-val">'+local.length+'</div><div class="stat-lbl">Fahrten</div></div>'+
+      '<div><div class="stat-val">'+tkm+'</div><div class="stat-lbl">Kilometer</div></div>'+
+      '<div><div class="stat-val g">'+tko.toFixed(0)+' €</div><div class="stat-lbl">Erstattung</div></div>'+
+      '</div></div>'+
+      '<button class="submit-btn" onclick="submitAll()">Jetzt einreichen →</button>'+
+      '<button class="export-btn" onclick="printOpen()">🖨️ Drucken / PDF</button>';
+  } else {
+    html += '<div class="empty-state"><div class="icon">✅</div>Keine offenen Fahrten.</div>';
+  }
+  // Eingereichte Abrechnungen
+  if (subs.length) {
+    html += '<div style="margin-top:20px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Eingereichte Abrechnungen</div>';
+    subs.forEach(sub => {
+      const s = sub.status;
+      const bg = s==='paid'||s==='approved' ? 'approved' : 'pending';
+      const icon = s==='paid'?'💶 Überwiesen':s==='approved'?'✓ Genehmigt':'⏳ Eingereicht';
+      html += '<div class="status-box '+bg+'">'+
+        '<b>'+icon+'</b> – '+sub.fahrten+' Fahrten · '+sub.km+' km · '+parseNum(sub.kosten).toFixed(2)+' €'+
+        (sub.submittedAt?'<br><small>Eingereicht: '+fmtDate(sub.submittedAt)+'</small>':'')+
+        (sub.approvedAt&&(s==='approved'||s==='paid')?'<br><small>Genehmigt: '+fmtDate(sub.approvedAt)+'</small>':'')+
+        (sub.paidAt&&s==='paid'?'<br><small>Überwiesen: '+fmtDate(sub.paidAt)+'</small>':'')+
+        (sub.comment?'<br>💬 '+sub.comment:'')+'</div>';
+    });
+  }
+  el.innerHTML = html;
+}
+
+async function submitAll() {
+  const local = getLocal();
+  if (!local.length) { showToast('Keine Fahrten.','err'); return; }
+  showToast('⏳ Einreichen…');
+  try {
+    // Alle Fahrten ins Sheet schreiben
+    for (const e of local) {
+      await apiPost({action:'addEntry', mitarbeiter:user.id, mitarbeiterName:user.name,
+        datum:e.datum, von:e.von, nach:e.nach, km:e.km, kosten:e.kosten, dauer:e.dauer||'', zweck:e.zweck||'', id:String(e.id), ts:e.ts});
+    }
+    // Submission erstellen
+    const tkm = Math.round(local.reduce((s,e)=>s+e.km,0)*10)/10;
+    const tko = local.reduce((s,e)=>s+e.kosten,0);
+    await apiPost({action:'addSubmission', mitarbeiter:user.id, mitarbeiterName:user.name,
+      fahrten:local.length, km:tkm, kosten:tko.toFixed(2), entries:local, submittedAt:new Date().toISOString()});
+    // Lokale Fahrten leeren
+    setLocal([]);
+    showToast('Eingereicht ✓','ok');
+    loadAbrechnung();
+  } catch(e) {
+    showToast('Fehler: '+e.message,'err');
+  }
+}
+
+function printOpen() {
+  const local = getLocal();
+  if (!local.length) { showToast('Keine Fahrten.','err'); return; }
+  belegPrint({mitarbeiterName:user.name, entries:local, submittedAt:new Date().toISOString(), status:'draft'});
+}
+
+// ═══════════════════════════════════════════
+// ADMIN (Tab 5)
+// ═══════════════════════════════════════════
+async function loadAdmin() {
+  const el = document.getElementById('adminList');
+  el.innerHTML = '<div class="loading">⏳ Lade…</div>';
+  try {
+    const j = await apiGet('getSubmissions');
+    const subs = (j.submissions||[]).map(mapSheetSub).sort((a,b)=>b.submittedAt.localeCompare(a.submittedAt));
+    renderAdmin(el, subs);
+  } catch(e) {
+    el.innerHTML = '<div class="empty-state">⚠️ '+e.message+'</div>';
+  }
+}
+
+function renderAdmin(el, subs) {
+  if (!subs.length) { el.innerHTML='<div class="empty-state"><div class="icon">📬</div>Keine Einreichungen.</div>'; return; }
+  el.innerHTML = subs.map((sub,i) => {
+    const s = sub.status;
+    const done = s==='approved'||s==='paid';
+    const icon = s==='paid'?'💶 Überwiesen':s==='approved'?'✓ Genehmigt':'⏳ Offen';
+    let html = '<div class="approval-card'+(done?' done':'')+'" id="sub_'+i+'">';
+    html += '<div class="appr-top"><div class="appr-name">'+sub.name+'</div><span style="font-size:12px;font-weight:600;color:'+(done?'var(--green)':'#856404')+'">'+icon+'</span></div>';
+    html += '<div class="appr-stats">'+sub.fahrten+' Fahrten · '+sub.km+' km · <b>'+parseNum(sub.kosten).toFixed(2)+' €</b><br><span style="font-size:11px">Eingereicht: '+fmtDate(sub.submittedAt)+'</span>';
+    if (sub.approvedAt&&(s==='approved'||s==='paid')) html += ' · Genehmigt: '+fmtDate(sub.approvedAt);
+    if (sub.paidAt&&s==='paid') html += ' · Überwiesen: '+fmtDate(sub.paidAt);
+    html += '</div>';
+    // Fahrten-Details
+    if (sub.entries.length) {
+      html += sub.entries.map(e=>'<div class="appr-entry">'+fmtDate(String(e.datum||'').substring(0,10))+' · '+(e.von||'')+'→'+(e.nach||'')+' · <b>'+(e.km||0)+' km</b> · '+(parseFloat(e.kosten||0)).toFixed(2)+' €'+(e.zweck?' · '+e.zweck:'')+'</div>').join('');
+    }
+    if (sub.comment) html += '<div style="font-size:12px;color:var(--muted);margin-top:6px">💬 '+sub.comment+'</div>';
+    if (!done) {
+      html += '<textarea class="comment-input" id="com_'+i+'" placeholder="Kommentar (optional)"></textarea>';
+      html += '<div class="action-row"><button class="approve-btn" onclick="doApprove('+i+')">Genehmigen ✓</button><button class="reject-btn" onclick="doReject('+i+')">Zurücksenden</button></div>';
+    } else if (s==='approved') {
+      html += '<button class="paid-btn" onclick="doPaid('+i+')">💶 Als überwiesen markieren</button>';
+      html += '<div class="two-btn"><button class="export-btn" onclick="belegPrint(adminSubs['+i+'])">📄 Beleg PDF</button><button class="export-btn" style="border-color:var(--green);color:var(--green)" onclick="sendMail('+i+')">📧 An Buchhaltung</button></div>';
+    } else {
+      html += '<div class="two-btn"><button class="export-btn" onclick="belegPrint(adminSubs['+i+'])">📄 Beleg PDF</button><button class="export-btn" style="border-color:var(--green);color:var(--green)" onclick="sendMail('+i+')">📧 An Buchhaltung</button></div>';
+    }
+    html += '</div>';
+    return html;
+  }).join('');
+  window.adminSubs = subs;
+}
+
+async function doApprove(i) {
+  const sub = window.adminSubs[i];
+  const comment = document.getElementById('com_'+i)?.value||'';
+  const btn = document.querySelector('#sub_'+i+' .approve-btn');
+  if(btn){btn.disabled=true;btn.textContent='⏳';}
+  try {
+    await apiPost({action:'updateStatus', rowId:sub.rowId, mitarbeiter:sub.mitarbeiter, status:'approved', comment, approvedAt:new Date().toISOString()});
+    showToast('Genehmigt ✓','ok');
+    loadAdmin();
+  } catch(e) { showToast('Fehler: '+e.message,'err'); if(btn){btn.disabled=false;btn.textContent='Genehmigen ✓';} }
+}
+
+async function doReject(i) {
+  const sub = window.adminSubs[i];
+  const comment = document.getElementById('com_'+i)?.value||'';
+  if (!comment) { showToast('Bitte Kommentar eingeben.','err'); return; }
+  try {
+    await apiPost({action:'updateStatus', rowId:sub.rowId, mitarbeiter:sub.mitarbeiter, status:'rejected', comment});
+    showToast('Zurückgesendet');
+    loadAdmin();
+  } catch(e) { showToast('Fehler: '+e.message,'err'); }
+}
+
+async function doPaid(i) {
+  const sub = window.adminSubs[i];
+  const btn = document.querySelector('#sub_'+i+' .paid-btn');
+  if(btn){btn.disabled=true;btn.textContent='⏳';}
+  try {
+    await apiPost({action:'updateStatus', rowId:sub.rowId, mitarbeiter:sub.mitarbeiter, status:'paid', paidAt:new Date().toISOString()});
+    showToast('Als überwiesen markiert 💶','ok');
+    loadAdmin();
+  } catch(e) { showToast('Fehler: '+e.message,'err'); if(btn){btn.disabled=false;btn.textContent='💶 Als überwiesen markieren';} }
+}
+
+async function sendMail(i) {
+  const sub = window.adminSubs[i];
+  const tkm = sub.entries.reduce((s,e)=>s+(parseFloat(e.km)||0),0);
+  const tko = sub.entries.reduce((s,e)=>s+(parseFloat(e.kosten)||0),0);
   showToast('⏳ Sende E-Mail…');
   try {
-    const resp = await fetch('/.netlify/functions/sendmail', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        name, fahrten: entries.length,
-        km: tkm, kosten: tko.toFixed(2),
-        datum, entries
-      })
+    const r = await fetch('/.netlify/functions/sendmail', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({name:sub.name, fahrten:sub.entries.length, km:tkm, kosten:tko.toFixed(2), datum:sub.submittedAt, entries:sub.entries})
     });
-    const result = await resp.json();
-    if(result.ok){
-      showToast('✓ E-Mail gesendet an Buchhaltung','success');
-    } else {
-      showToast('Fehler: '+result.error,'error');
-    }
-  } catch(e) {
-    showToast('Fehler beim Senden: '+e.message,'error');
-  }
+    const j = await r.json();
+    if (j.ok) showToast('✓ E-Mail gesendet','ok');
+    else showToast('Fehler: '+j.error,'err');
+  } catch(e) { showToast('Fehler: '+e.message,'err'); }
 }
 
-function belegPDFDirect(idx){
-  const s = window.adminSubsRaw[idx];
-  if(!s){ showToast('Keine Daten.','error'); return; }
-  let entries = [];
-  // JSON-String suchen - auch mit Whitespace oder anderen Zeichen davor
-  Object.values(s).forEach(v => {
-    const sv = String(v||'').trim();
-    if(sv.includes('[{') || sv.startsWith('[')){
-      try{
-        const start = sv.indexOf('[');
-        entries = JSON.parse(sv.substring(start));
-      }catch(e){}
-    }
-  });
-  // Datum robust parsen
-  const rawDate = String(s['Eingereicht am']||'');
-  const submittedAt = rawDate.match(/\d{2}\.\d{2}\.\d{4}/) ? rawDate.substring(0,10) : rawDate;
-  belegPDF({
-    mitarbeiterName: s['Name']||String(s['Mitarbeiter']||'').split('_')[0]||'?',
-    entries,
-    submittedAt,
-    approvedAt: String(s['Genehmigt am']||''),
-    paidAt: String(s['Ausgezahlt am']||''),
-    status: s['Status']||''
-  });
-}
-
-
-
-function renderAdminFromRaw(){
-  if(!window.adminSubsRaw){ renderAdmin(); return; }
-  const content = document.getElementById('adminContent');
-  // Overrides immer anwenden
-  const overrides=JSON.parse(localStorage.getItem('fb_status_overrides')||'{}');
-  const subs = window.adminSubsRaw.map(s=>{
-    const mitId=String(s['Mitarbeiter']||'').split('_')[0];
-    if(overrides[mitId]){
-      return {...s, 'Status':overrides[mitId].status,
-        'Genehmigt am':overrides[mitId].approvedAt||s['Genehmigt am'],
-        'Ausgezahlt am':overrides[mitId].paidAt||s['Ausgezahlt am'],
-        'Kommentar':overrides[mitId].comment||s['Kommentar']};
-    }
-    return s;
-  });
-  let h = '';
-  subs.forEach((s, i) => {
-    const status = String(s['Status']||'').trim();
-    const name = s['Name']||s['Mitarbeiter']||'?';
-    const km = s['km gesamt']||s['km']||'?';
-    const kosten = s['Kosten gesamt (€)']||s['Kosten gesamt']||'?';
-    const fahrten = s['Fahrten']||'?';
-    const datum = String(s['Eingereicht am']||'').substring(0,10);
-    const mitId = String(s['Mitarbeiter']||'').split('_')[0]||String(s['Mitarbeiter']||'');
-    let entries=[];
-    Object.values(s).forEach(v=>{ if(String(v).startsWith('[{')){ try{entries=JSON.parse(String(v));}catch(e){} } });
-    const isPending=status==='pending', isPaid=status==='paid', isApproved=status==='approved';
-    h+='<div class="approval-card'+(status!=='pending'?' approved':'')+'" data-subid="sub_'+i+'">';
-    h+='<div class="approval-top"><div class="approval-name">'+name+'</div>';
-    h+=isPending?'<span class="status-badge pending">⏳ Offen</span>':
-       isPaid?'<span class="status-badge approved">💶 Ausgezahlt</span>':
-       '<span class="status-badge" style="background:#e8f0ea;color:var(--green2)">✓ Genehmigt</span>';
-    h+='</div>';
-    h+='<div class="approval-stats">'+fahrten+' Fahrten · '+km+' km · <b>'+kosten+' €</b>';
-    if(datum) h+='<br><span style="font-size:11px;color:var(--muted)">Eingereicht: '+fmtDate(datum)+'</span>';
-    h+='</div>';
-    if(entries.length) entries.forEach(e=>{
-      h+='<div style="font-size:12px;padding:5px 0;border-bottom:1px solid var(--border)">'+
-        fmtDate(String(e.datum||'').substring(0,10))+' · '+(e.von||'?')+' → '+(e.nach||'?')+
-        ' · <b>'+(e.km||0)+' km</b> · '+(parseFloat(e.kosten||0)).toFixed(2)+' €'+
-        (e.zweck?' · <i>'+e.zweck+'</i>':'')+'</div>';
-    });
-    if(isPending){
-      h+='<textarea class="comment-input" id="comment_'+mitId+'" placeholder="Kommentar (optional)"></textarea>';
-      h+='<div class="approval-actions">';
-      h+='<button class="approve-btn" onclick="approveEntry(\''+mitId+'\')">Genehmigen ✓</button>';
-      h+='<button class="reject-btn" onclick="rejectEntry(\''+mitId+'\')">Zurücksenden</button>';
-      h+='</div>';
-      window['subData_'+mitId]={mitarbeiter:mitId,mitarbeiterName:name,status,entries,submittedAt:datum,submissionId:'sub_'+i};
-      if(!window.currentAdminSubs) window.currentAdminSubs={};
-      window.currentAdminSubs[mitId]=window['subData_'+mitId];
-    } else {
-      if(s['Kommentar']) h+='<div style="font-size:12px;color:var(--muted);margin-top:4px">💬 '+s['Kommentar']+'</div>';
-      if(!isPaid){
-        h+='<button onclick="markPaidByIndex('+i+', \'sub_'+i+'\')" style="width:100%;background:var(--green);color:white;border:none;border-radius:12px;padding:14px;font-family:DM Sans,sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px">💶 Als überwiesen markieren</button>';
-      } else {
-        h+='<div style="background:#d1e7dd;border-radius:10px;padding:10px 14px;margin-top:6px;font-size:13px;font-weight:600;color:#0a5c36;text-align:center">💶 Überwiesen ✓</div>';
-      }
-      h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">';
-      h+='<button class="export-btn" onclick="belegPDFDirect('+i+')">📄 Beleg PDF</button>';
-      h+='<button class="export-btn" style="border-color:var(--green);color:var(--green)" onclick="sendBelegEmail('+i+')">📧 An Buchhaltung</button>';
-      h+='</div>';
-    }
-    h+='</div>';
-  });
-  content.innerHTML=h||'<div class="empty-state"><div class="icon">📬</div>Keine Einreichungen.</div>';
-}
-async function approveEntry(id){
-  const btn=event.target; btn.disabled=true; btn.textContent='⏳';
-  const comment=document.getElementById('comment_'+id)?.value||'';
-  const subData=window['subData_'+id]||{};
-  const subId=subData.submissionId||id;
-  // Cache sofort aktualisieren
-  if(window.adminSubsRaw){
-    window.adminSubsRaw.forEach(s=>{
-      if((s['Mitarbeiter']||'').split('_')[0]===id||(s['Mitarbeiter']||'')===id){
-        s['Status']='approved';
-        s['Genehmigt am']=new Date().toLocaleDateString('de-DE');
-        if(comment) s['Kommentar']=comment;
-      }
-    });
-  }
-  // Netlify Function für zuverlässiges Sheet-Update
-  fetch('/.netlify/functions/sheet',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({action:'updateStatus',submissionId:subId,mitarbeiter:id,status:'approved',comment})
-  }).catch(()=>{});
-  // Status lokal speichern damit Refresh ihn nicht überschreibt
-  const overrides=JSON.parse(localStorage.getItem('fb_status_overrides')||'{}');
-  overrides[id]={status:'approved',comment,approvedAt:new Date().toISOString()};
-  localStorage.setItem('fb_status_overrides',JSON.stringify(overrides));
-  showToast('Genehmigt ✓','success');
-  window.adminJustUpdated=Date.now();
-  btn.disabled=false;
-  renderAdminFromRaw();
-}
-
-async function rejectEntry(id){
-  const comment=document.getElementById('comment_'+id)?.value||'';
-  if(!comment){showToast('Bitte Kommentar eingeben.','error');return;}
-  const subData=window['subData_'+id]||{};
-  const subId=subData.submissionId||id;
-  try {
-    await fetch('/.netlify/functions/sheet',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({action:'updateStatus',submissionId:subId,status:'rejected',comment})
-    });
-  } catch(e){}
-  // Override löschen damit Status vom Sheet kommt
-  const ov2=JSON.parse(localStorage.getItem('fb_status_overrides')||'{}');
-  delete ov2[id];
-  localStorage.setItem('fb_status_overrides',JSON.stringify(ov2));
-  showToast('Zurückgesendet');
-  setTimeout(()=>renderAdmin(), 1000);
-}
-
-async function markPaid(subId){ markPaidByIndex(-1, subId); }
-
-async function markPaidByIndex(idx, subId){
-  const paidAt=new Date().toISOString();
-  fetch('/.netlify/functions/sheet',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({action:'updateStatus',submissionId:subId,status:'paid',paidAt})
-  }).catch(()=>{});
-  if(window.adminSubsRaw && window.adminSubsRaw[idx]){
-    window.adminSubsRaw[idx]['Status']='paid';
-    window.adminSubsRaw[idx]['Ausgezahlt am']=paidAt;
-    const mitId=String(window.adminSubsRaw[idx]['Mitarbeiter']||'').split('_')[0];
-    const ov=JSON.parse(localStorage.getItem('fb_status_overrides')||'{}')
-    ov[mitId]={status:'paid',paidAt,approvedAt:String(window.adminSubsRaw[idx]['Genehmigt am']||'')};
-    localStorage.setItem('fb_status_overrides',JSON.stringify(ov));
-  }
-  showToast('Als überwiesen markiert 💶','success');
-  renderAdminFromRaw();
-}
-
-function clearOverrides(){
-  if(!confirm("Alle lokalen Status-Overrides löschen? Das Sheet bleibt unverändert.")) return;
-  Object.keys(localStorage).forEach(k=>{
-    if(k.startsWith("fb_status_overrides")||k.startsWith("fb_pending_")||k.startsWith("fb_approved_")) localStorage.removeItem(k);
-  });
-  window.adminSubsRaw=null;
-  showToast("Overrides gelöscht","success");
-  renderAdmin();
-}
-
-function renderAdminFromCache(){
-  if(!window.currentAdminSubs||Object.keys(window.currentAdminSubs).length===0) return renderAdmin();
-  const subs=Object.values(window.currentAdminSubs);
-  const pending=subs.filter(s=>s.status==='pending');
-  const approved=subs.filter(s=>s.status==='approved'||s.status==='paid');
-  if(pending.length===0&&approved.length===0) return renderAdmin();
-  renderAdminHTML(pending, approved);
-}
-
-function fmtDateSafe(s){
-  if(!s) return '–';
-  const str=String(s).trim();
-  // DD.MM.YYYY HH:MM:SS
-  if(str.match(/^\d{2}\.\d{2}\.\d{4}/)){
-    const p=str.substring(0,10).split('.');
-    return p[0]+'.'+p[1]+'.'+p[2];
-  }
-  // YYYY-MM-DD
-  if(str.match(/^\d{4}-\d{2}-\d{2}/)){
-    const d=new Date(str.substring(0,10)+'T12:00:00');
-    return isNaN(d)?str.substring(0,10):d.toLocaleDateString('de-DE');
-  }
-  // Timestamp
-  const d=new Date(str);
-  return isNaN(d)?str:d.toLocaleDateString('de-DE');
-}
-
-function belegPDF(sub){
-  if(!sub||!sub.entries){showToast('Kein Beleg gefunden.','error');return;}
-  const tkm=Math.round(sub.entries.reduce((s,e)=>s+(parseFloat(e.km)||0),0)*10)/10;
-  const tko=sub.entries.reduce((s,e)=>s+(parseFloat(e.kosten)||(parseFloat(e.km)||0)*0.30),0);
-  const isPaid=sub.status==='paid';
-  const rows=sub.entries.map(e=>
-    '<tr><td>'+fmtDate(e.datum)+'</td><td>'+e.von+'</td><td>'+e.nach+'</td>'
-    +'<td style="text-align:center">'+e.km+'</td>'
-    +'<td style="text-align:right">'+(parseFloat(e.kosten)||(parseFloat(e.km)||0)*0.30).toFixed(2)+' €</td>'
-    +'<td>'+(e.zweck||'–')+'</td></tr>'
-  ).join('');
-  const w=window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
-  <style>
+// ═══════════════════════════════════════════
+// BELEG PDF
+// ═══════════════════════════════════════════
+function belegPrint(sub) {
+  if (!sub?.entries?.length) { showToast('Keine Fahrten.','err'); return; }
+  const tkm = Math.round(sub.entries.reduce((s,e)=>s+(parseFloat(e.km)||0),0)*10)/10;
+  const tko = sub.entries.reduce((s,e)=>s+(parseFloat(e.kosten)||(parseFloat(e.km)||0)*KM_RATE),0);
+  const isPaid = sub.status==='paid';
+  const rows = sub.entries.map(e=>'<tr><td>'+fmtDateSafe(e.datum)+'</td><td>'+(e.von||'')+'</td><td>'+(e.nach||'')+'</td><td style="text-align:center">'+(e.km||0)+'</td><td style="text-align:right">'+(parseFloat(e.kosten)||0).toFixed(2)+' €</td><td>'+(e.zweck||'–')+'</td></tr>').join('');
+  const w = window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
     body{font-family:Arial,sans-serif;font-size:12px;padding:32px;color:#2c2825;max-width:800px;margin:0 auto}
-    .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;border-bottom:2px solid #2c2825;padding-bottom:16px}
-    .logo{font-size:22px;font-weight:bold;color:#2c2825}
-    .logo span{color:#55725e}
+    .hdr{display:flex;justify-content:space-between;border-bottom:2px solid #2c2825;padding-bottom:16px;margin-bottom:20px}
+    .logo{font-size:22px;font-weight:bold}.logo span{color:#55725e}
     .meta{text-align:right;font-size:11px;color:#666}
-    h2{font-size:16px;margin:0 0 4px}
-    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;background:#f5f5f0;padding:14px;border-radius:6px}
-    .info-item label{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#888;display:block;margin-bottom:2px}
-    .info-item span{font-weight:600;font-size:13px}
+    .info{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:#f5f5f0;padding:14px;border-radius:6px;margin-bottom:20px}
+    .info label{font-size:10px;text-transform:uppercase;color:#888;display:block;margin-bottom:2px}
+    .info span{font-weight:600}
     table{width:100%;border-collapse:collapse;margin-bottom:16px}
     th{background:#2c2825;color:#faf8f4;padding:7px 10px;text-align:left;font-size:11px}
-    th.num{text-align:center} th.amt{text-align:right}
-    td{border-bottom:1px solid #e5e5e0;padding:6px 10px;font-size:12px}
-    .total-row{background:#e8f0ea;font-weight:700}
-    .total-row td{border:none;padding:8px 10px}
-    .paid-stamp{display:inline-block;border:3px solid #0a5c36;color:#0a5c36;font-size:18px;font-weight:900;padding:6px 18px;border-radius:4px;transform:rotate(-8deg);letter-spacing:.1em;margin-top:8px}
-    .sig-section{margin-top:40px;display:grid;grid-template-columns:1fr 1fr;gap:40px}
+    td{border-bottom:1px solid #e5e5e0;padding:6px 10px}
+    .tot{background:#e8f0ea;font-weight:700}.tot td{border:none;padding:8px 10px}
+    .sig{margin-top:40px;display:grid;grid-template-columns:1fr 1fr;gap:40px}
     .sig-box{border-top:1px solid #ccc;padding-top:8px;font-size:11px;color:#888}
     .footer{margin-top:30px;font-size:10px;color:#aaa;text-align:center;border-top:1px solid #eee;padding-top:10px}
     @media print{body{padding:16px}}
   </style></head><body>
-  <div class="header">
+  <div class="hdr">
     <div><div class="logo">Physio<span>Pro</span> Lübeck</div><div style="font-size:11px;color:#888;margin-top:4px">Segeberger Str. 1 · 23617 Stockelsdorf</div></div>
-    <div class="meta"><b>BELEG BUCHHALTUNG</b><br>Erstellt: ${new Date().toLocaleDateString('de-DE')}<br>${isPaid?'<span style="color:#0a5c36;font-weight:bold">AUSGEZAHLT</span>':''}</div>
+    <div class="meta"><b>BELEG BUCHHALTUNG</b><br>Erstellt: ${new Date().toLocaleDateString('de-DE')}<br>${isPaid?'<span style="color:#0a5c36;font-weight:bold">ÜBERWIESEN</span>':''}</div>
   </div>
-  <div class="info-grid">
-    <div class="info-item"><label>Mitarbeiter:in</label><span>${sub.mitarbeiterName}</span></div>
-    <div class="info-item"><label>Eingereicht am</label><span>${fmtDateSafe(sub.submittedAt)}</span></div>
-    <div class="info-item"><label>Genehmigt am</label><span>${sub.approvedAt?fmtDateSafe(sub.approvedAt):' '}</span></div>
-    <div class="info-item"><label>Km-Pauschale</label><span>0,30 € / km</span></div>
+  <div class="info">
+    <div><label>Mitarbeiter:in</label><span>${sub.mitarbeiterName||sub.name||''}</span></div>
+    <div><label>Eingereicht am</label><span>${fmtDateSafe(sub.submittedAt)}</span></div>
+    <div><label>Genehmigt am</label><span>${sub.approvedAt?fmtDateSafe(sub.approvedAt):'–'}</span></div>
+    <div><label>Km-Pauschale</label><span>0,30 € / km</span></div>
   </div>
-  <table>
-    <thead><tr><th>Datum</th><th>Abfahrt</th><th>Ziel</th><th class="num">km</th><th class="amt">Betrag</th><th>Zweck</th></tr></thead>
-    <tbody>${rows}
-    <tr class="total-row"><td colspan="3"><b>Gesamt (${sub.entries.length} Fahrten)</b></td><td style="text-align:center"><b>${tkm} km</b></td><td style="text-align:right"><b>${tko.toFixed(2)} €</b></td><td></td></tr>
-    </tbody>
-  </table>
-  ${isPaid?'<div class="paid-stamp">AUSGEZAHLT '+new Date(sub.paidAt).toLocaleDateString('de-DE')+'</div>':''}
-  <div class="sig-section">
-    <div class="sig-box">Genehmigt von<br><br><br>________________________</div>
-    <div class="sig-box">Datum der Überweisung<br><br><br>________________________</div>
-  </div>
+  <table><thead><tr><th>Datum</th><th>Abfahrt</th><th>Ziel</th><th style="text-align:center">km</th><th style="text-align:right">Betrag</th><th>Zweck</th></tr></thead>
+  <tbody>${rows}<tr class="tot"><td colspan="3"><b>Gesamt (${sub.entries.length} Fahrten)</b></td><td style="text-align:center"><b>${tkm} km</b></td><td style="text-align:right"><b>${tko.toFixed(2)} €</b></td><td></td></tr></tbody></table>
+  <div class="sig"><div class="sig-box">Genehmigt von<br><br><br>________________________</div><div class="sig-box">Datum der Überweisung<br><br><br>________________________</div></div>
   <div class="footer">PhysioPro Lübeck · Hanna Wrobel · Segeberger Str. 1 · 23617 Stockelsdorf</div>
   </body></html>`);
   w.document.close(); w.print();
 }
 
-// ── PIN ──
-function changePin(){
-  const p1=document.getElementById('newPin1').value;
-  const p2=document.getElementById('newPin2').value;
-  if(p1.length!==4){showToast('PIN = 4 Ziffern','error');return;}
-  if(p1!==p2){showToast('PINs stimmen nicht überein.','error');return;}
-  localStorage.setItem('fb_pin_'+currentUser.id,p1);
+// ═══════════════════════════════════════════
+// PIN
+// ═══════════════════════════════════════════
+function changePin() {
+  const p1 = document.getElementById('newPin1').value;
+  const p2 = document.getElementById('newPin2').value;
+  if (p1.length!==4) { showToast('PIN = 4 Ziffern','err'); return; }
+  if (p1!==p2) { showToast('PINs stimmen nicht überein.','err'); return; }
+  setPin(user.id, p1);
   document.getElementById('newPin1').value='';
   document.getElementById('newPin2').value='';
-  showToast('PIN gespeichert ✓','success');
+  showToast('PIN gespeichert ✓','ok');
 }
 
-// ── EXPORT ──
-function exportCSVOpen(){
-  const monat='offen';
-  const allE=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]');
-  const approvedSubs2=JSON.parse(localStorage.getItem('fb_approved_'+currentUser.id)||'[]');
-  const approvedIds2=new Set(approvedSubs2.flatMap(s=>s.entries.map(e=>e.id)));
-  const pending2=JSON.parse(localStorage.getItem('fb_pending_'+currentUser.id)||'null');
-  const pendingIds2=new Set((pending2?.entries||[]).map(e=>e.id));
-  const arr=allE.filter(e=>!approvedIds2.has(e.id)&&!pendingIds2.has(e.id));
-  if(!arr.length){showToast('Keine Daten.','error');return;}
-  const rows=arr.map(e=>[e.datum,e.von,e.nach,e.km,e.dauer||'',e.kosten.toFixed(2),e.zweck||''].join(';'));
-  dlFile('\uFEFFDatum;Abfahrt;Ziel;km;Fahrzeit;Kosten€;Zweck\n'+rows.join('\n'),
-    'Fahrtenbuch_'+currentUser.name.replace(' ','_')+'_'+monat+'.csv','text/csv');
-}
-function exportPDFOpen(){
-  const allEntries=JSON.parse(localStorage.getItem('fb_entries_'+currentUser.id)||'[]');
-  const approvedSubs=JSON.parse(localStorage.getItem('fb_approved_'+currentUser.id)||'[]');
-  const approvedIds=new Set(approvedSubs.flatMap(s=>(s.entries||[]).map(e=>e.id)));
-  const arr=allEntries.filter(e=>!approvedIds.has(e.id));
-  if(!arr.length){showToast('Keine Daten.','error');return;}
-  const tkm=arr.reduce((s,e)=>s+e.km,0);
-  const tko=arr.reduce((s,e)=>s+e.kosten,0);
-  const label='Aktuelle Abrechnung – '+new Date().toLocaleDateString('de-DE');
-  const rows=arr.map(e=>{
-    const datum = e.datum && String(e.datum).match(/^\d{4}-\d{2}-\d{2}/) ? fmtDate(e.datum) : '–';
-    const km = parseFloat(e.km)||0;
-    const kosten = parseFloat(e.kosten)||Math.round(km*0.30*100)/100;
-    const zweck = (e.zweck && !String(e.zweck).match(/^\d{2}\.\d{2}\.\d{4}/) && !String(e.zweck).match(/^\d{4}-\d{2}-\d{2}/)) ? e.zweck : '–';
-    return '<tr><td>'+datum+'</td><td>'+(e.von||'–')+'</td><td>'+(e.nach||'–')+'</td><td>'+km+'</td><td>'+(e.dauer||'–')+'</td><td>'+kosten.toFixed(2)+' € </td><td>'+zweck+'</td></tr>';
-  }).join('');
-  const w=window.open('','_blank');
-  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Arial;font-size:12px;padding:24px}h1{font-size:18px}table{width:100%;border-collapse:collapse;margin-top:16px}th{background:#2c2825;color:#faf8f4;padding:6px 8px;text-align:left;font-size:11px}td{border-bottom:1px solid #ddd;padding:5px 8px}.total{margin-top:14px;font-weight:bold;color:#55725e}.sig{margin-top:40px;font-size:11px;color:#aaa;border-top:1px solid #ddd;padding-top:10px}</style></head><body>'
-    +'<h1>Fahrtenbuch – '+currentUser.name+'</h1><p style="color:#888">'+label+' · PhysioPro Lübeck · '+new Date().toLocaleDateString('de-DE')+'</p>'
-    +'<table><thead><tr><th>Datum</th><th>Abfahrt</th><th>Ziel</th><th>km</th><th>Fahrzeit</th><th>Kosten</th><th>Zweck</th></tr></thead><tbody>'+rows+'</tbody></table>'
-    +'<div class="total">Gesamt: '+arr.length+' Fahrten · '+Math.round(tkm*10)/10+' km · '+tko.toFixed(2)+' €</div>'
-    +'<div class="sig">Unterschrift MA: ___________________________ &nbsp;&nbsp; Unterschrift Leitung: ___________________________</div>'
-    +'</body></html>');
-  w.document.close(); w.print();
-}
-function dlFile(c,n,m){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:m}));a.download=n;a.click();}
-
-// ── SHEETS ──
-async function sendToSheet(e){
-  if(!APPS_SCRIPT_URL)return;
-  try{await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'entry',...e})});}catch(e){console.warn(e);}
-}
-async function sendSubmissionToSheet(s){
-  if(!APPS_SCRIPT_URL)return;
-  try{await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'submission',...s})});}catch(e){console.warn(e);}
+function clearAllLocalData() {
+  if (!confirm('Alle lokalen Daten löschen? (Sheet-Daten bleiben erhalten)')) return;
+  const keys = Object.keys(localStorage).filter(k=>k.startsWith('local_'));
+  keys.forEach(k=>localStorage.removeItem(k));
+  showToast('Lokale Daten gelöscht','ok');
+  loadEintraege();
 }
 
-// ── UTILS ──
-function fmtDate(s){
-  if(!s) return '–';
-  // Verschiedene Formate abfangen: YYYY-MM-DD, DD.MM.YYYY, timestamp
-  let d;
-  const str = String(s).trim();
-  if(str.match(/^\d{4}-\d{2}-\d{2}/)){
-    d = new Date(str.substring(0,10)+'T12:00:00');
-  } else if(str.match(/^\d{1,2}\.\d{1,2}\.\d{4}/)){
-    const p=str.split('.');
-    d = new Date(p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0')+'T12:00:00');
-  } else if(str.match(/^\d{4}\/\d{2}\/\d{2}/)){
-    d = new Date(str.substring(0,10).replace(/\//g,'-')+'T12:00:00');
-  } else {
-    d = new Date(str);
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+function parseNum(v){ return parseFloat(String(v||0).replace(',','.'))||0; }
+
+function fmtDate(s) {
+  if (!s) return '–';
+  const str = String(s).trim().substring(0,10);
+  if (str.match(/^\d{4}-\d{2}-\d{2}/)) {
+    const d = new Date(str+'T12:00:00');
+    return isNaN(d)?str:d.toLocaleDateString('de-DE',{day:'2-digit',month:'short',year:'2-digit'});
   }
-  if(isNaN(d)) return str.substring(0,10)||'–';
-  return d.toLocaleDateString('de-DE',{day:'2-digit',month:'short',year:'2-digit'});
+  return str;
 }
-function showToast(msg,type=''){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.className='toast show'+(type?' '+type:'');
-  setTimeout(()=>t.className='toast',2800);
+
+function fmtDateSafe(s) {
+  if (!s) return '–';
+  const str = String(s).trim();
+  if (str.match(/^\d{2}\.\d{2}\.\d{4}/)) return str.substring(0,10);
+  return fmtDate(str);
 }
+
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type?' '+type:'');
+  setTimeout(()=>t.className='toast', 2800);
+}
+
+document.addEventListener('keydown', e => { if(e.key==='Enter'&&!user) doLogin(); });
 </script>
 </body>
 </html>
