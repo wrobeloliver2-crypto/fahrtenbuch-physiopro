@@ -650,6 +650,17 @@ async function submitAll() {
       fahrten:local.length, km:tkm, kosten:tko.toFixed(2), entries:local, submittedAt:new Date().toISOString()});
     // Lokale Fahrten leeren
     setLocal([]);
+    // Benachrichtigung an Hanna
+    fetch('/.netlify/functions/sendmail', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        type:'notification',
+        name: user.name,
+        fahrten: local.length,
+        km: tkm,
+        kosten: tko.toFixed(2)
+      })
+    }).catch(()=>{});
     showToast('Eingereicht ✓','ok');
     loadAbrechnung();
   } catch(e) {
