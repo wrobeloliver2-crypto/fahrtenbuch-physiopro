@@ -64,7 +64,25 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
 
   try {
-    const { name, fahrten, km, kosten, datum, entries } = JSON.parse(event.body || '{}');
+    const body = JSON.parse(event.body || '{}');
+    const { name, fahrten, km, kosten, datum, entries, type } = body;
+
+    // Benachrichtigung an Hanna bei neuer Einreichung
+    if (type === 'notification') {
+      const token = await getAccessToken();
+      const subject = 'Neue Abrechnung: ' + name;
+      const htmlBody = '<div style="font-family:Arial,sans-serif;padding:20px">'+
+        '<h2 style="color:#2c2825">Neue Abrechnung eingereicht</h2>'+
+        '<p><b>'+name+'</b> hat eine neue Abrechnung eingereicht:</p>'+
+        '<ul><li>Fahrten: '+fahrten+'</li>'+
+        '<li>Kilometer: '+km+' km</li>'+
+        '<li>Betrag: '+kosten+' €</li></ul>'+
+        '<p>Bitte in der Fahrtenbuch-App unter <b>Admin</b> prüfen und genehmigen.</p>'+
+        '<p style="color:#888;font-size:12px">physiofahrtenbuch.netlify.app</p></div>';
+      const result = await sendEmail(token, 'hanna.wrobel@pilatescompany.de', subject, htmlBody);
+      if (result.status === 202) return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
+      else return { statusCode: 500, headers, body: JSON.stringify({ ok: false, error: result.body }) };
+    }
 
     const rows = (entries || []).map(e => `
       <tr>
