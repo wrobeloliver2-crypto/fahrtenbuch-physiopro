@@ -1,0 +1,10 @@
+{
+  "name": "fahrtenbuch-physiopro",
+  "version": "2.0.0",
+  "description": "Fahrtenbuch für Physio Pro Lübeck – Dienstfahrten erfassen und abrechnen (Neon, zentraler Mitarbeiter-Dienst).",
+  "private": true,
+  "type": "commonjs",
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4"
+  }
+}
