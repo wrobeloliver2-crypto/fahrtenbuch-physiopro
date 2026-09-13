@@ -70,7 +70,7 @@ const de = (d) => (d ? new Date(d).toLocaleDateString('de-DE', { day: '2-digit',
 
 function fahrtRaus(f) {
   return {
-    id: f.id, mfId: String(f.mitarbeiter_firma_id), datum: iso(f.datum), von: f.von, nach: f.nach,
+    id: Number(f.id), mfId: String(f.mitarbeiter_firma_id), datum: iso(f.datum), von: f.von, nach: f.nach,
     km: Number(f.km), kosten: Number(f.kosten), fahrzeit: f.fahrzeit || '', zweck: f.zweck || '',
     abrechnungId: f.abrechnung_id, erstelltAm: ms(f.erstellt_am),
   };
