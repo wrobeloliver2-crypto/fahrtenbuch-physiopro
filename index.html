@@ -89,7 +89,8 @@ button,input,select,textarea{font-family:inherit;}
 .maps-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;opacity:.45;}
 .pac-container{border-radius:12px!important;border:1.5px solid var(--border)!important;font-family:var(--pp-font)!important;font-size:15px!important;}
 .pac-item{padding:10px 12px!important;cursor:pointer;}
-.praxis-btn{width:100%;background:transparent;border:1.5px solid var(--border);border-radius:var(--pp-r-pill);min-height:40px;padding:0 14px;font-size:13px;font-weight:600;color:var(--green);cursor:pointer;text-align:left;margin-top:8px;}
+.praxis-row{display:flex;gap:8px;}
+.praxis-btn{flex:1;min-width:0;background:transparent;border:1.5px solid var(--border);border-radius:var(--pp-r-pill);min-height:40px;padding:0 14px;font-size:13px;font-weight:600;color:var(--green);cursor:pointer;text-align:center;white-space:nowrap;margin-top:8px;}
 .praxis-btn:hover{border-color:var(--green);background:var(--green-fl);}
 .route-preview{background:var(--green-fl);border-left:4px solid var(--green);border-radius:0 12px 12px 0;padding:14px 16px;margin-bottom:14px;display:none;}
 .route-preview.show{display:block;}
@@ -217,7 +218,10 @@ button,input,select,textarea{font-family:inherit;}
         <input type="text" class="form-input" id="inputVon" placeholder="Adresse…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         <span class="maps-icon">🔍</span>
       </div>
-      <button class="praxis-btn" onclick="setPraxis('inputVon')">🏥 Praxis – Segeberger Str. 1, Stockelsdorf</button>
+      <div class="praxis-row">
+        <button class="praxis-btn" onclick="setPraxis('inputVon','stockelsdorf')">🏥 Stockelsdorf</button>
+        <button class="praxis-btn" onclick="setPraxis('inputVon','badschwartau')">🏥 Bad Schwartau</button>
+      </div>
     </div>
     <div class="form-group">
       <label class="form-label">🏁 Ziel</label>
@@ -225,7 +229,10 @@ button,input,select,textarea{font-family:inherit;}
         <input type="text" class="form-input" id="inputNach" placeholder="Adresse…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         <span class="maps-icon">🔍</span>
       </div>
-      <button class="praxis-btn" onclick="setPraxis('inputNach')">🏥 Praxis – Segeberger Str. 1, Stockelsdorf</button>
+      <div class="praxis-row">
+        <button class="praxis-btn" onclick="setPraxis('inputNach','stockelsdorf')">🏥 Stockelsdorf</button>
+        <button class="praxis-btn" onclick="setPraxis('inputNach','badschwartau')">🏥 Bad Schwartau</button>
+      </div>
     </div>
     <button class="calc-btn" id="calcBtn" onclick="calculateRoute()">🗺️ Strecke berechnen</button>
     <div class="route-preview" id="routePreview">
@@ -287,7 +294,12 @@ button,input,select,textarea{font-family:inherit;}
 // ═══════════════════════════════════════════
 const KM_RATE = 0.30;
 const FIRMA_ID = 1; // Physio Pro Lübeck
-const PRAXIS = 'Segeberger Straße 1, 23617 Stockelsdorf';
+// Zwei Praxis-Standorte als Schnellauswahl für Abfahrt und Ziel
+const PRAXEN = {
+  stockelsdorf: 'Segeberger Straße 1, 23617 Stockelsdorf',
+  badschwartau: 'Eutiner Ring 4a, 23611 Bad Schwartau',
+};
+const PRAXIS = PRAXEN.stockelsdorf; // Vorbelegung der Abfahrt, wenn nichts anderes bekannt ist
 const API = '/.netlify/functions/fahrten';
 
 // Direkteinstieg aus dem Portal: Token kommt im URL-Fragment (#ma=…), wird in die
@@ -463,8 +475,8 @@ function initMaps() {
   acNach.addListener('place_changed', () => { const p=acNach.getPlace(); if(p?.formatted_address) document.getElementById('inputNach').value=p.formatted_address; resetRoute(); });
 }
 
-function setPraxis(fieldId) {
-  document.getElementById(fieldId).value = PRAXIS;
+function setPraxis(fieldId, ort) {
+  document.getElementById(fieldId).value = PRAXEN[ort] || PRAXIS;
   resetRoute();
 }
 
