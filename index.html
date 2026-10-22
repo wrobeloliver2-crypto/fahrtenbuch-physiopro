@@ -429,10 +429,13 @@ async function enterApp(u) {
   document.getElementById('tabAdminLink').style.display = D.verwaltung ? 'flex' : 'none';
   document.getElementById('importBox').style.display = (u.rolle==='admin') ? 'block' : 'none';
   showTab(D.verwaltung ? 'tabAdmin' : 'tabNeu');
+  // Hilfe-Knopf aus dem Mitarbeiter-Client (erscheint nur für die Verwaltung)
+  if (MA && MA.hilfe) MA.hilfe({ ausweichen: '.tab-bar', ansicht: () => { const t = document.querySelector('.tab.active'); return t ? t.textContent.trim() : ''; } });
 }
 
 function askLogout() { if (confirm('Abmelden? Du kannst dich jederzeit wieder mit deiner PIN anmelden.')) logout(); }
 function logout() {
+  if (MA && MA._hilfe && MA._hilfe.entfernen) MA._hilfe.entfernen();
   if (MA) MA.logout();
   try { sessionStorage.removeItem('ma_portal'); } catch(e) {}
   user = null; selectedId = null; D = {offen:[], meine:[], alle:[], verwaltung:false};
